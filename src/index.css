@@ -1,0 +1,88 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700;800&family=Space+Grotesk:wght@500;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", "Space Grotesk", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  
+  /* Apple Colors */
+  --color-apple-blue: #0A84FF;
+  --color-apple-glass: rgba(255, 255, 255, 0.08);
+  --color-apple-glass-hover: rgba(255, 255, 255, 0.12);
+  --color-apple-border: rgba(255, 255, 255, 0.15);
+  --color-apple-bg: #000000;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #000;
+}
+
+/* Beautiful Animated Ambient Mesh Gradient for Glassmorphism */
+.apple-mesh-bg {
+  background: 
+    radial-gradient(circle at 10% 20%, rgba(10, 132, 255, 0.3) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(94, 92, 230, 0.25) 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(255, 55, 95, 0.15) 0%, transparent 50%);
+  background-size: 150% 150%;
+  animation: mesh-movement 15s ease infinite alternate;
+}
+
+@keyframes mesh-movement {
+  0% {
+    background-position: 0% 0%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 50% 100%;
+  }
+}
+
+.apple-glass {
+  background: rgba(30, 30, 32, 0.6) !important;
+  backdrop-filter: blur(24px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.apple-glass-light {
+  background: rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(16px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(150%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+
+.stroke-dash-animated {
+  stroke-dasharray: 6, 4;
+  animation: dash 1s linear infinite;
+}
+
+/* Custom scrollbar hides */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+.className-spin-slow, .animate-spin-slow {
+  animation: spin-slow 20s linear infinite;
+}

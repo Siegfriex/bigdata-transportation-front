@@ -1,0 +1,6 @@
+{
+  "name": "탈수있나",
+  "description": "수도권 대중교통 탑승가능성, 마감도착, 실패복구 이동 판단 리포트 및 AI 챗봇",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
