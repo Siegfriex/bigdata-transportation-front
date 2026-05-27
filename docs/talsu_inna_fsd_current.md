@@ -43,7 +43,8 @@
 | 파일 | 현재 역할 |
 |---|---|
 | `src/main.tsx` | React 앱 엔트리. `StrictMode`로 `App` 렌더링. |
-| `src/App.tsx` | 앱 전역 상태와 page/widget/feature 조합을 담당하는 임시 host. 현재 420줄. |
+| `src/App.tsx` | 앱 전역 상태와 page props assembly를 담당하는 임시 host. 현재 416줄. |
+| `src/app/router/AppRouter.tsx` | URL router가 아닌 내부 route boundary. `activeTab` 기준으로 map/archive/settings page entry를 선택한다. |
 | `src/pages/*/index.tsx` | map/archive/settings page composition entry. 자체 `ui/model/api/mock/styles` 없이 widget props forwarding만 담당. |
 | `src/app/layouts/*` | `AppShell` 등 앱 레이아웃 기반. |
 | `src/components/InteractiveMap.tsx` | 호환 re-export. 실제 구현은 `widgets/transit-map-panel`로 이동. |
@@ -74,12 +75,12 @@
 
 | ID | 기능명 | Phase | 우선순위 | 주요 코드 | 구현 상태 |
 |---|---|---:|---:|---|---|
-| F0 | 앱 셸, 온보딩, 기본 사용자 상태 | P1 | P0 | `src/App.tsx`, `features/complete-onboarding`, `app/layouts` | 구현됨 |
+| F0 | 앱 셸, 온보딩, 기본 사용자 상태 | P1 | P0 | `src/App.tsx`, `app/router`, `features/complete-onboarding`, `app/layouts` | 구현됨 |
 | F1 | 지도 메인 및 역 선택 | P1 | P0 | `widgets/map-workspace`, `widgets/transit-map-panel` | Mock 구현 |
 | F2 | 교통 레이어/지도 인터랙션 | P1 | P0 | `widgets/transit-map-panel`, `features/toggle-map-layer` | Mock 구현 |
 | F3 | 경로 플랜 계산 및 선택 | P1 | P0 | `entities/route-plan`, `features/generate-route-plan`, `widgets/map-workspace`, `src/App.tsx` | Mock 구현 |
 | F4 | 이동 판단 리포트 4종 | P1 | P0 | `widgets/report-sheet`, `entities/route-plan`, `entities/report` | Mock 구현 |
-| F5 | AI 챗 오버레이 및 추천 반영 | P1 | P0 | `widgets/ai-chat-panel`, `features/send-ai-chat`, `server.ts`, `api/chat.ts` | 부분 구현 |
+| F5 | AI 챗 오버레이 및 추천 반영 | P1 | P0 | `widgets/ai-chat-panel`, `features/send-ai-chat`, `server.ts`, `api/chat.ts` | 부분 구현. 현재 IA 구현은 독립 하단 탭이 아니라 지도 컨텍스트 overlay를 기준으로 한다. |
 | F6 | 리포트 저장/기록/캘린더 | P1 | P1 | `widgets/archive-calendar`, `entities/report`, `src/App.tsx` | Mock 구현 |
 | F7 | 사용자 설정/선호값 | P1 | P1 | `widgets/settings-form`, `entities/user-preferences`, `src/App.tsx` | 부분 구현 |
 | F8 | Express/Vercel 서버 및 `/api/chat` | P1 | P0 | `server.ts`, `api/chat.ts`, `features/send-ai-chat/server` | 부분 구현 |
@@ -126,7 +127,7 @@
 | 최초 진입 | 온보딩 Step 1 → Step 2 또는 비회원 체험 → 지도 화면 |
 | 경로 확인 | 출발/도착 선택 → 경로 후보 재계산 → 지도 경로와 리포트 카드 갱신 |
 | 리포트 확인 | 리포트 상세 진입 → 리포트 타입 선택 → 후보/타임라인/칸별 정보 확인 |
-| AI 추천 | AI 오버레이 열기 → 메시지 전송 → AI 응답 또는 fallback → 지도/리포트/경로 반영 |
+| AI 추천 | 지도 컨텍스트에서 AI 오버레이 열기 → 메시지 전송 → AI 응답 또는 fallback → 지도/리포트/경로 반영 |
 | 기록 재사용 | 리포트 저장 → 기록 탭 → 날짜 선택 → 지도 이동으로 상태 복원 |
 | 설정 변경 | 설정 탭 → 루틴/조건/AI 스타일 변경 → 경로/AI context에 일부 반영 |
 
@@ -135,7 +136,7 @@
 | 상태 | 현재 소유자 | 현재 지속성 | 목표 소유자 |
 |---|---|---|---|
 | `showOnboarding`, `onboardingStep` | `App.tsx` + `features/complete-onboarding/ui` | memory | `features/complete-onboarding/model` |
-| `activeTab`, `mapLayer` | `App.tsx` | memory | router + `features/toggle-map-layer` |
+| `activeTab`, `mapLayer` | `App.tsx` + `app/router/AppRouter.tsx` 선택 경계 | memory | router + `features/toggle-map-layer` |
 | `startStation`, `endStation` | `App.tsx` | memory | `features/select-station` |
 | `plans`, `selectedPlan` | `App.tsx` | memory | `features/generate-route-plan` |
 | `selectedReportType` | `App.tsx` + `widgets/report-sheet` UI props | memory | `widgets/report-sheet` model 또는 route state |
@@ -324,7 +325,7 @@
 
 | 영역 | 현재 위치 | 남은 점 |
 |---|---|---|
-| App shell | `src/app/layouts/AppShell.tsx`, `src/App.tsx` | router/provider host 분리 필요 |
+| App shell/router | `src/app/layouts/AppShell.tsx`, `src/app/router/AppRouter.tsx`, `src/App.tsx` | provider host와 page props assembly 추가 축소 필요 |
 | 온보딩 | `features/complete-onboarding/ui/OnboardingOverlay.tsx` | step state/model 분리 필요 |
 | 지도 | `widgets/transit-map-panel/ui/InteractiveMap.tsx` | 기존 `components` re-export 제거 시점 결정 필요 |
 | 리포트 시트 | `widgets/report-sheet/ui/*` | 리포트 상세 panel/CTA 분리 완료, 상위 sheet shell 정리 필요 |
@@ -337,6 +338,7 @@
 | 항목 | 현 상태 |
 |---|---|
 | `npm run dev` 엔트리 | `tsx server.ts` |
+| 내부 UI 라우팅 | `AppRouter`가 `activeTab` 기준으로 `MapPage`, `ArchivePage`, `SettingsPage`를 선택한다. 실제 URL 라우터는 아직 없다. |
 | 로컬 API 라우팅 | `server.ts`가 `app.post("/api/chat")`를 Vite middleware보다 먼저 등록한다. |
 | SPA fallback | development에서는 Vite middleware, production에서는 `dist/index.html` fallback을 사용한다. |
 | Vercel API 라우팅 | `api/chat.ts`가 같은 `createAiChatResponse` responder를 공유한다. |
@@ -379,7 +381,7 @@
 
 | 항목 | 기존 문서/PRD | 현재 코드 | 조치 문서 |
 |---|---|---|---|
-| 하단 탭 | `지도 / AI 챗 / 리포트 / 설정` | `지도 / 기록 / 설정` | current FSD 최신화 |
+| 하단 탭 | `지도 / AI 챗 / 리포트 / 설정` | `지도 / 기록 / 설정`. AI 챗은 독립 탭 대신 지도 컨텍스트 overlay로 인정 | IA/PRD 후속 정합화 |
 | 실제 공공데이터 | GBIS, 서울 열린데이터, 따릉이 등 | 연동 없음 | refactor plan |
 | 사용자/계정 | 로그인/비회원/설정 저장 | React state only | architecture rules, refactor plan |
 | 저장 리포트 | 아카이브 저장/재사용 | localStorage-backed client state | refactor plan |

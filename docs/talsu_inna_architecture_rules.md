@@ -21,12 +21,12 @@
 
 | 영역 | 현재 상태 | 다음 규칙 |
 |---|---|---|
-| `app` | `AppShell`과 layout public API 생성. `src/App.tsx`는 아직 임시 host로 남아 있다. | 다음 phase에서 provider/router/layout host만 남긴다. |
+| `app` | `AppShell`과 `AppRouter` public API 생성. `src/App.tsx`는 아직 state orchestration과 page props assembly를 가진 임시 host다. | 다음 phase에서 provider/router/layout host만 남긴다. |
 | `pages` | `map-page`, `archive-page`, `settings-page`의 `index.tsx`만 생성됐다. | 계속 `pages/*/ui` 없이 widget composition entry로 유지한다. |
 | `widgets/transit-map-panel` | `InteractiveMap` 실제 구현이 이동했고 `components/InteractiveMap.tsx`는 호환 re-export다. | 신규 import는 반드시 `widgets/transit-map-panel` public API를 사용한다. |
 | `widgets/map-workspace` | map 탭의 프리셋, AI 검색 진입, 리포트 상세 composition이 분리됐다. | page/router 생성 전까지 임시 map tab composition boundary로 사용한다. |
 | `widgets/report-sheet` | 조건 카드, 리포트 탭, 4개 리포트 view, `ReportActionBar`, `ReportDetailPanel`이 분리됐다. | report 문구/수치 mock은 entity/report fixture로 이동한다. |
-| `widgets/ai-chat-panel` | `AiChatLayer`가 분리됐고 추천 질문/welcome message는 feature model로 이동했다. | chat state hook을 feature model로 이동한다. |
+| `widgets/ai-chat-panel` | `AiChatLayer`가 분리됐고 추천 질문/welcome message는 feature model로 이동했다. 현재 구현에서 AI 챗은 하단 독립 탭이 아니라 지도 컨텍스트 overlay다. | chat state hook을 feature model로 이동한다. |
 | `widgets/archive-calendar` | 저장 리포트 달력/목록/복원 UI가 분리됐다. | 월/통계 mock config와 report store를 entity/model로 이동한다. |
 | `widgets/settings-form` | preferences form, 루틴 동기화 UI, 데이터 출처 안내가 분리됐다. | preference store와 settings content config를 분리한다. |
 | `features` | onboarding, route preset carousel, save-report, send-ai-chat, toggle-map-layer가 생성됐다. | 상태 hook/model은 feature 내부로 단계적으로 이동한다. |
@@ -37,8 +37,8 @@
 
 | MiriArt 패턴 | data_insight 적용 |
 |---|---|
-| `app/App.tsx`가 `BrowserRouter`, provider, nav, toast를 조립 | `src/app/App.tsx`는 provider/router/layout/global host만 가진다. |
-| `app/routers/AppRouter.tsx`가 route를 소유 | `src/app/router/AppRouter.tsx`에서 page entry를 연결한다. |
+| `app/App.tsx`가 `BrowserRouter`, provider, nav, toast를 조립 | 현 단계에서는 `src/App.tsx`가 host 역할을 유지하고, 후속 단계에서 provider/router/layout/global host만 남긴다. |
+| `app/routers/AppRouter.tsx`가 route를 소유 | `src/app/router/AppRouter.tsx`에서 page entry를 연결한다. 현재는 URL router가 아닌 `activeTab` 기반 내부 router다. |
 | `MainLayout.tsx`가 hydration/auth gate를 소유 | `AppShell` 또는 route layout이 온보딩/향후 auth gate를 담당한다. |
 | React Query hook과 query key factory | `/api/chat`과 향후 교통 API는 feature/entity hook으로 감싼다. |
 | zustand store 분리 | toast, modal/bottom-sheet, preferences, savedReports 등 역할별 store를 둔다. |
@@ -234,3 +234,4 @@ export default function MapPage() {
 | `archive-calendar` | savedReports는 props/store 경계로만 주입하고 widget 내부에서 storage key를 import하지 않음 |
 | `settings-form` | preferences update handler는 props 또는 feature hook으로 주입하고 widget 내부에서 route 계산을 수행하지 않음 |
 | `pages/*` | `App.tsx`에서 map/archive/settings 탭 body가 widget 단위로 충분히 축소된 뒤 생성 |
+| `app/router` | 완료. `AppRouter`는 URL 상태를 만들지 않고 현재 `activeTab`으로 page entry만 선택한다. |

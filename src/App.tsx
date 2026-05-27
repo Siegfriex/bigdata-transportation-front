@@ -11,7 +11,7 @@ import { STORAGE_KEYS } from "./shared/config";
 import { formatKoreanTime } from "./shared/lib/time";
 import { usePersistentState } from "./shared/model/usePersistentState";
 import { AppShell } from "./app/layouts";
-import { ArchivePage, MapPage, SettingsPage } from "./pages";
+import { AppRouter } from "./app/router";
 import { ToastOverlay } from "./shared/ui/toast";
 import { AiChatLayer } from "./widgets/ai-chat-panel";
 import { BottomNavigation } from "./widgets/bottom-navigation";
@@ -249,6 +249,68 @@ export default function App() {
     showToast("💾 통근 리포트가 보관함에 영구 저장되었습니다.");
   };
 
+  const mapPageProps = {
+    mapLayer,
+    startStation,
+    endStation,
+    deadlineTime,
+    selectedReportType,
+    plans,
+    selectedPlan,
+    carDetails,
+    activeCarNo,
+    onSetMapLayer: setMapLayer,
+    onSelectPreset: triggerPreset,
+    onChangeStartStation: setStartStation,
+    onChangeEndStation: setEndStation,
+    onChangeDeadlineTime: setDeadlineTime,
+    onSelectReport: (reportType: ReportType, label: string) => {
+      setSelectedReportType(reportType);
+      showToast(`📊 '${label}' 분석 보고서가 로딩되었습니다.`);
+    },
+    onSelectCar: (carNo: string) => {
+      setActiveCarNo(carNo);
+      showToast(`🚇 ${carNo}번 칸 상세 분석을 로드했습니다.`);
+    },
+    onSelectPlan: setSelectedPlan,
+    onCopySummary: showToast,
+    onSaveReport: handleSaveReport,
+    onAskAiBriefing: () => {
+      setActiveTab("map");
+      setMapLayer("ai_overlay");
+      handleSendMessage(`${startStation}에서 ${endStation} 가는 지각처방 리포트 요약해줘`);
+      showToast("🤖 리포트 근거 조회를 위해 AI 챗봇이 개입합니다.");
+    },
+  };
+
+  const archivePageProps = {
+    savedReports,
+    selectedCalendarDay,
+    onSelectCalendarDay: setSelectedCalendarDay,
+    onClearReports: () => {
+      setSavedReports([]);
+      showToast("보관함이 완전히 비워졌습니다.");
+    },
+    onRestoreReport: (report: SavedReport) => {
+      setStartStation(report.from);
+      setEndStation(report.to);
+      setSelectedReportType(report.type);
+      setActiveTab("map");
+      showToast("🗺️ 해당 저장 조건으로 메인 지도를 갱신했습니다.");
+    },
+  };
+
+  const settingsPageProps = {
+    preferences,
+    onChangePreferences: setPreferences,
+    onSyncRoutine: () => {
+      setStartStation(preferences.home);
+      setEndStation(preferences.work);
+      showToast("🏡 루틴 경로로 출발-목적지가 재구현 설정되었습니다.");
+    },
+    onShowToast: showToast,
+  };
+
   return (
     <AppShell>
       <ToastOverlay message={toastMessage} />
@@ -303,78 +365,12 @@ export default function App() {
 
         {/* Primary Screen Body Panel */}
         <main className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden min-h-0 relative z-10 pt-[52px] pointer-events-none pb-[64px]">
-          
-          {/* TAB 1: 의사결정 시트 (Main Map Action Sheet) */}
-          {activeTab === "map" && (
-            <MapPage
-              mapLayer={mapLayer}
-              startStation={startStation}
-              endStation={endStation}
-              deadlineTime={deadlineTime}
-              selectedReportType={selectedReportType}
-              plans={plans}
-              selectedPlan={selectedPlan}
-              carDetails={carDetails}
-              activeCarNo={activeCarNo}
-              onSetMapLayer={setMapLayer}
-              onSelectPreset={triggerPreset}
-              onChangeStartStation={setStartStation}
-              onChangeEndStation={setEndStation}
-              onChangeDeadlineTime={setDeadlineTime}
-              onSelectReport={(reportType, label) => {
-                setSelectedReportType(reportType);
-                showToast(`📊 '${label}' 분석 보고서가 로딩되었습니다.`);
-              }}
-              onSelectCar={(carNo) => {
-                setActiveCarNo(carNo);
-                showToast(`🚇 ${carNo}번 칸 상세 분석을 로드했습니다.`);
-              }}
-              onSelectPlan={setSelectedPlan}
-              onCopySummary={showToast}
-              onSaveReport={handleSaveReport}
-              onAskAiBriefing={() => {
-                setActiveTab("map");
-                setMapLayer("ai_overlay");
-                handleSendMessage(`${startStation}에서 ${endStation} 가는 지각처방 리포트 요약해줘`);
-                showToast("🤖 리포트 근거 조회를 위해 AI 챗봇이 개입합니다.");
-              }}
-            />
-          )}
-
-          {/* TAB 3: 통근 기록 보관함 & 아카이브 (Report Archive TAB REP-01) */}
-          {activeTab === "archive" && (
-            <ArchivePage
-              savedReports={savedReports}
-              selectedCalendarDay={selectedCalendarDay}
-              onSelectCalendarDay={setSelectedCalendarDay}
-              onClearReports={() => {
-                setSavedReports([]);
-                showToast("보관함이 완전히 비워졌습니다.");
-              }}
-              onRestoreReport={(report) => {
-                setStartStation(report.from);
-                setEndStation(report.to);
-                setSelectedReportType(report.type);
-                setActiveTab("map");
-                showToast("🗺️ 해당 저장 조건으로 메인 지도를 갱신했습니다.");
-              }}
-            />
-          )}
-
-          {/* TAB 4: 환경설정 & 개인 맞춤 (Settings TAB SET-01) */}
-          {activeTab === "settings" && (
-            <SettingsPage
-              preferences={preferences}
-              onChangePreferences={setPreferences}
-              onSyncRoutine={() => {
-                setStartStation(preferences.home);
-                setEndStation(preferences.work);
-                showToast("🏡 루틴 경로로 출발-목적지가 재구현 설정되었습니다.");
-              }}
-              onShowToast={showToast}
-            />
-          )}
-
+          <AppRouter
+            activeTab={activeTab}
+            mapPageProps={mapPageProps}
+            archivePageProps={archivePageProps}
+            settingsPageProps={settingsPageProps}
+          />
         </main>
 
         <AiChatLayer

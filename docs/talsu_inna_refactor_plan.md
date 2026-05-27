@@ -18,11 +18,12 @@
 
 | 항목 | 현재 상태 |
 |---|---|
-| 현재 phase | `Phase 5. Widget/Page 재조립` 완료 직전 |
+| 현재 phase | `Phase 5. Widget/Page 재조립` 5-8 완료, 5-9 대기 |
 | 마지막 검증 | `npm run lint`, `npm run build` 통과 |
-| 마지막 원격 반영 | `a2cedcc Extract archive and settings widgets` → `publish/main` |
-| 현재 `App.tsx` | 420줄. app host와 전역 상태 orchestration은 남아 있고, tab body는 `pages/*/index.tsx` composition entry를 통과한다. |
-| 다음 진입 준비 | `app/router/AppRouter.tsx` 생성 전, `activeTab` 기반 conditional rendering을 route-like config로 옮길 수 있게 정리한다. |
+| 마지막 원격 반영 | `14b2feb Extract map workspace widget` → `publish/main` |
+| 마지막 로컬 커밋 | `3ba5ea5 Create page composition entries` |
+| 현재 `App.tsx` | 416줄. app host와 전역 상태 orchestration은 남아 있고, tab body 선택은 `app/router/AppRouter.tsx`를 통과한다. |
+| 다음 진입 준비 | `App.tsx`에 남은 page props assembly와 상태 hook을 phase 5-9/6에서 더 작은 host 경계로 이동한다. |
 
 | 남은 턴 | 목표 | 완료 기준 |
 |---|---|---|
@@ -33,7 +34,7 @@
 | T5 | `widgets/settings-form` 생성 | 완료. preferences form과 루틴 동기화 UI가 App에서 제거 |
 | T6 | map workspace/page composition 정리 | 완료. `widgets/map-workspace`가 map tab의 search/report/detail composition을 소유 |
 | T7 | `pages/*/index.tsx` 생성 | 완료. page는 widget prop forwarding만 수행, `pages/*/ui` 미생성 |
-| T8 | `app/router` 및 host 정리 | 다음. `App.tsx`가 provider/router/layout/global host 수준으로 축소 |
+| T8 | `app/router` 및 host 정리 | 완료. 내부 `AppRouter`가 map/archive/settings page entry 선택을 담당 |
 | T9 | entity store/http client/token 보강 | localStorage store, `/api/chat` client, shared token 규칙 추가 |
 
 ## 2. 우선순위
@@ -129,12 +130,12 @@
 | 5-5 | `widgets/settings-form` 생성 | preference entity와 sync-preferences feature만 사용 | 완료 |
 | 5-6 | map workspace/page composition 정리 | map tab의 remaining JSX가 widget/page composition으로 이동 | 완료 |
 | 5-7 | `pages/*/index.tsx` 생성 | page는 widget/feature 배치와 route 이동만 담당. `pages/*/ui` 금지 | 완료 |
-| 5-8 | `app/router/AppRouter.tsx` 생성 | map/archive/settings route 연결 | 다음 |
-| 5-9 | `app/App.tsx` 축소 | provider/router/layout/global host만 남김 | 대기 |
+| 5-8 | `app/router/AppRouter.tsx` 생성 | map/archive/settings route 연결 | 완료 |
+| 5-9 | `app/App.tsx` 축소 | provider/router/layout/global host만 남김 | 다음 |
 
-**현재 반영 상태**: `App.tsx`에서 프리셋, 저장 리포트 생성 규칙, AI fetch/fallback, markdown 렌더링, layer 타입/default를 분리했다. `InteractiveMap`을 `src/widgets/transit-map-panel/ui/InteractiveMap.tsx`로 이동하고 `src/widgets/transit-map-panel/index.ts` public API를 만들었다. 기존 `src/components/InteractiveMap.tsx`는 호환 re-export로 남겼다. `AppShell`, `PageContainer`, `cn` 기반도 추가했다. 이후 `ToastOverlay`, `TopAppBar`, `BottomNavigation`을 각각 `shared/ui/toast`, `widgets/top-app-bar`, `widgets/bottom-navigation`으로 분리했다. `complete-onboarding` feature와 `RoutePresetCarousel`도 분리했다. `widgets/report-sheet`에는 `ReportTypeTabs`, `RouteConditionCard`, `BoardingReportView`, `CarriageReportView`, `DeadlineReportView`, `ReportActionBar`, `ReportDetailPanel`을 추가했고, 역 목록 하드코딩은 `entities/station`의 `stationNames`로 대체했다. `widgets/ai-chat-panel/AiChatLayer`도 추가해 AI result card, chat sheet, 추천 질문 UI를 이동했다. `features/send-ai-chat/model`에는 suggested prompts와 initial messages를 추가했다. `widgets/archive-calendar/ArchiveCalendar`도 추가해 archive tab 달력/목록/복원 UI를 이동했다. `widgets/settings-form/SettingsForm`도 추가해 settings tab과 station select 하드코딩을 이동했다. `widgets/map-workspace/MapWorkspace`도 추가해 map tab의 preset/search/report-detail composition을 이동했다. 현재 `App.tsx`는 422줄이며 `npm run lint`, `npm run build`가 통과했다.
+**현재 반영 상태**: `App.tsx`에서 프리셋, 저장 리포트 생성 규칙, AI fetch/fallback, markdown 렌더링, layer 타입/default를 분리했다. `InteractiveMap`을 `src/widgets/transit-map-panel/ui/InteractiveMap.tsx`로 이동하고 `src/widgets/transit-map-panel/index.ts` public API를 만들었다. 기존 `src/components/InteractiveMap.tsx`는 호환 re-export로 남겼다. `AppShell`, `PageContainer`, `cn` 기반도 추가했다. 이후 `ToastOverlay`, `TopAppBar`, `BottomNavigation`을 각각 `shared/ui/toast`, `widgets/top-app-bar`, `widgets/bottom-navigation`으로 분리했다. `complete-onboarding` feature와 `RoutePresetCarousel`도 분리했다. `widgets/report-sheet`에는 `ReportTypeTabs`, `RouteConditionCard`, `BoardingReportView`, `CarriageReportView`, `DeadlineReportView`, `ReportActionBar`, `ReportDetailPanel`을 추가했고, 역 목록 하드코딩은 `entities/station`의 `stationNames`로 대체했다. `widgets/ai-chat-panel/AiChatLayer`도 추가해 AI result card, chat sheet, 추천 질문 UI를 이동했다. 이 프로젝트의 현재 IA 구현에서는 AI를 하단 탭이 아니라 지도 컨텍스트 위에 뜨는 overlay로 인정한다. `features/send-ai-chat/model`에는 suggested prompts와 initial messages를 추가했다. `widgets/archive-calendar/ArchiveCalendar`도 추가해 archive tab 달력/목록/복원 UI를 이동했다. `widgets/settings-form/SettingsForm`도 추가해 settings tab과 station select 하드코딩을 이동했다. `widgets/map-workspace/MapWorkspace`도 추가해 map tab의 preset/search/report-detail composition을 이동했다. `pages/*/index.tsx`와 `app/router/AppRouter.tsx`를 추가해 tab body 선택을 내부 route boundary로 이동했다. 현재 `App.tsx`는 416줄이며 `npm run lint`, `npm run build`가 통과했다.
 
-**다음 단계 진입 준비**: 5-7까지 완료됐다. `pages/map-page`, `pages/archive-page`, `pages/settings-page`는 `index.tsx`만 가진 얇은 composition entry로 생성했다. 다음은 `app/router/AppRouter.tsx`를 만들고 `activeTab` conditional rendering을 router boundary로 옮길 준비를 한다. 이 단계에서도 `pages/*/ui`는 만들지 않는다.
+**다음 단계 진입 준비**: 5-8까지 완료됐다. `pages/map-page`, `pages/archive-page`, `pages/settings-page`는 `index.tsx`만 가진 얇은 composition entry이고, `app/router/AppRouter.tsx`는 현재 `activeTab` 기반으로 page entry를 선택한다. 다음은 5-9로 `App.tsx`에 남은 state orchestration과 page props assembly를 provider/router/layout/global host 경계로 더 축소한다. 이 단계에서도 `pages/*/ui`는 만들지 않는다.
 
 ## 9-1. 현시점 감사
 
@@ -183,7 +184,7 @@
 |---|---|
 | 워크트리 | `ai-chat-panel` 코드와 문서 변경이 있다. 병렬 변경 파일은 유지한다. |
 | 병렬 작업 충돌 | `.env.example`, `README.md`, `server.ts`, Vercel 코드 파일은 이미 원격 반영되었고 다음 UI refactor에서는 건드리지 않는다. |
-| 다음 코드 터치 범위 | `src/App.tsx`, `src/pages/*/index.tsx`, `src/app/router/**`, `docs/*` |
+| 다음 코드 터치 범위 | `src/App.tsx`, `src/app/**`, `src/features/*/model`, `src/entities/*/model/store`, `docs/*` |
 | 검증 | 다음 분리 이후 `npm run lint`, `npm run build`를 반복한다. |
 
 ## 12. 완료 정의
