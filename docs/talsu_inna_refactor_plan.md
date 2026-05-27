@@ -18,24 +18,24 @@
 
 | 항목 | 현재 상태 |
 |---|---|
-| 현재 phase | `Phase 5. Widget/Page 재조립` 5-8 완료, 5-9 대기 |
+| 현재 phase | `Phase 6. Persistence/API 정리` 완료, `Phase 7. QA와 회귀 방지` 진입 준비 |
 | 마지막 검증 | `npm run lint`, `npm run build` 통과 |
 | 마지막 원격 반영 | `14b2feb Extract map workspace widget` → `publish/main` |
-| 마지막 로컬 커밋 | `3ba5ea5 Create page composition entries` |
-| 현재 `App.tsx` | 416줄. app host와 전역 상태 orchestration은 남아 있고, tab body 선택은 `app/router/AppRouter.tsx`를 통과한다. |
-| 다음 진입 준비 | `App.tsx`에 남은 page props assembly와 상태 hook을 phase 5-9/6에서 더 작은 host 경계로 이동한다. |
+| 마지막 로컬 커밋 | `fefac21 Add internal app router` |
+| 현재 `App.tsx` | 50줄. `useAppController`가 state orchestration과 props assembly를 소유하고, `App.tsx`는 shell/router/overlay/chrome host만 담당한다. |
+| 다음 진입 준비 | Phase 7에서 dev/API smoke, 수동 UI 회귀, 필요 시 Vercel preview smoke script를 추가한다. |
 
 | 남은 턴 | 목표 | 완료 기준 |
 |---|---|---|
 | T1 | `ReportActionBar`, `ReportDetailPanel` 생성 | 완료 |
 | T2 | `widgets/ai-chat-panel` 생성 | 완료. `AiChatLayer`로 result card/chat sheet를 이동 |
-| T3 | AI chat model 정리 | 부분 완료. suggested prompts와 welcome message 이동 완료, chat input/loading state hook은 대기 |
+| T3 | AI chat model 정리 | 완료. suggested prompts, welcome message, chat input/loading/messages hook 이동 |
 | T4 | `widgets/archive-calendar` 생성 | 완료. saved report 달력/목록/복원 UI가 App에서 제거 |
 | T5 | `widgets/settings-form` 생성 | 완료. preferences form과 루틴 동기화 UI가 App에서 제거 |
 | T6 | map workspace/page composition 정리 | 완료. `widgets/map-workspace`가 map tab의 search/report/detail composition을 소유 |
 | T7 | `pages/*/index.tsx` 생성 | 완료. page는 widget prop forwarding만 수행, `pages/*/ui` 미생성 |
 | T8 | `app/router` 및 host 정리 | 완료. 내부 `AppRouter`가 map/archive/settings page entry 선택을 담당 |
-| T9 | entity store/http client/token 보강 | localStorage store, `/api/chat` client, shared token 규칙 추가 |
+| T9 | entity store/http client/token 보강 | 완료. localStorage store, `/api/chat` client/schema, shared safe markdown 경계 추가 |
 
 ## 2. 우선순위
 
@@ -131,11 +131,11 @@
 | 5-6 | map workspace/page composition 정리 | map tab의 remaining JSX가 widget/page composition으로 이동 | 완료 |
 | 5-7 | `pages/*/index.tsx` 생성 | page는 widget/feature 배치와 route 이동만 담당. `pages/*/ui` 금지 | 완료 |
 | 5-8 | `app/router/AppRouter.tsx` 생성 | map/archive/settings route 연결 | 완료 |
-| 5-9 | `app/App.tsx` 축소 | provider/router/layout/global host만 남김 | 다음 |
+| 5-9 | `app/App.tsx` 축소 | provider/router/layout/global host만 남김 | 완료 |
 
-**현재 반영 상태**: `App.tsx`에서 프리셋, 저장 리포트 생성 규칙, AI fetch/fallback, markdown 렌더링, layer 타입/default를 분리했다. `InteractiveMap`을 `src/widgets/transit-map-panel/ui/InteractiveMap.tsx`로 이동하고 `src/widgets/transit-map-panel/index.ts` public API를 만들었다. 기존 `src/components/InteractiveMap.tsx`는 호환 re-export로 남겼다. `AppShell`, `PageContainer`, `cn` 기반도 추가했다. 이후 `ToastOverlay`, `TopAppBar`, `BottomNavigation`을 각각 `shared/ui/toast`, `widgets/top-app-bar`, `widgets/bottom-navigation`으로 분리했다. `complete-onboarding` feature와 `RoutePresetCarousel`도 분리했다. `widgets/report-sheet`에는 `ReportTypeTabs`, `RouteConditionCard`, `BoardingReportView`, `CarriageReportView`, `DeadlineReportView`, `ReportActionBar`, `ReportDetailPanel`을 추가했고, 역 목록 하드코딩은 `entities/station`의 `stationNames`로 대체했다. `widgets/ai-chat-panel/AiChatLayer`도 추가해 AI result card, chat sheet, 추천 질문 UI를 이동했다. 이 프로젝트의 현재 IA 구현에서는 AI를 하단 탭이 아니라 지도 컨텍스트 위에 뜨는 overlay로 인정한다. `features/send-ai-chat/model`에는 suggested prompts와 initial messages를 추가했다. `widgets/archive-calendar/ArchiveCalendar`도 추가해 archive tab 달력/목록/복원 UI를 이동했다. `widgets/settings-form/SettingsForm`도 추가해 settings tab과 station select 하드코딩을 이동했다. `widgets/map-workspace/MapWorkspace`도 추가해 map tab의 preset/search/report-detail composition을 이동했다. `pages/*/index.tsx`와 `app/router/AppRouter.tsx`를 추가해 tab body 선택을 내부 route boundary로 이동했다. 현재 `App.tsx`는 416줄이며 `npm run lint`, `npm run build`가 통과했다.
+**현재 반영 상태**: `App.tsx`에서 프리셋, 저장 리포트 생성 규칙, AI fetch/fallback, markdown 렌더링, layer 타입/default를 분리했다. `InteractiveMap`을 `src/widgets/transit-map-panel/ui/InteractiveMap.tsx`로 이동하고 `src/widgets/transit-map-panel/index.ts` public API를 만들었다. 기존 `src/components/InteractiveMap.tsx`는 호환 re-export로 남겼다. `AppShell`, `PageContainer`, `cn` 기반도 추가했다. 이후 `ToastOverlay`, `TopAppBar`, `BottomNavigation`을 각각 `shared/ui/toast`, `widgets/top-app-bar`, `widgets/bottom-navigation`으로 분리했다. `complete-onboarding` feature와 `RoutePresetCarousel`도 분리했다. `widgets/report-sheet`에는 `ReportTypeTabs`, `RouteConditionCard`, `BoardingReportView`, `CarriageReportView`, `DeadlineReportView`, `ReportActionBar`, `ReportDetailPanel`을 추가했고, 역 목록 하드코딩은 `entities/station`의 `stationNames`로 대체했다. `widgets/ai-chat-panel/AiChatLayer`도 추가해 AI result card, chat sheet, 추천 질문 UI를 이동했다. 이 프로젝트의 현재 IA 구현에서는 AI를 하단 탭이 아니라 지도 컨텍스트 위에 뜨는 overlay로 인정한다. `features/send-ai-chat/model`에는 suggested prompts, initial messages, `useAiChatController`를 추가했다. `features/generate-route-plan/model/useRoutePlanner`가 route state와 route recalculation을 소유한다. `widgets/archive-calendar/ArchiveCalendar`도 추가해 archive tab 달력/목록/복원 UI를 이동했다. `widgets/settings-form/SettingsForm`도 추가해 settings tab과 station select 하드코딩을 이동했다. `widgets/map-workspace/MapWorkspace`도 추가해 map tab의 preset/search/report-detail composition을 이동했다. `pages/*/index.tsx`와 `app/router/AppRouter.tsx`를 추가해 tab body 선택을 내부 route boundary로 이동했다. `app/model/useAppController`가 page props assembly를 소유해 `App.tsx`는 50줄 host로 축소됐다.
 
-**다음 단계 진입 준비**: 5-8까지 완료됐다. `pages/map-page`, `pages/archive-page`, `pages/settings-page`는 `index.tsx`만 가진 얇은 composition entry이고, `app/router/AppRouter.tsx`는 현재 `activeTab` 기반으로 page entry를 선택한다. 다음은 5-9로 `App.tsx`에 남은 state orchestration과 page props assembly를 provider/router/layout/global host 경계로 더 축소한다. 이 단계에서도 `pages/*/ui`는 만들지 않는다.
+**다음 단계 진입 준비**: Phase 5는 5-9까지 완료됐다. `pages/map-page`, `pages/archive-page`, `pages/settings-page`는 `index.tsx`만 가진 얇은 composition entry이고, `app/router/AppRouter.tsx`는 현재 `activeTab` 기반으로 page entry를 선택한다. `App.tsx`는 `AppShell`, global overlay, map background, router, AI overlay, bottom navigation host만 담당한다. 이 단계에서도 `pages/*/ui`는 만들지 않는다.
 
 ## 9-1. 현시점 감사
 
@@ -146,7 +146,7 @@
 | API client | 개선됨 | `shared/api/http-client.ts`와 `postJson`이 추가되어 `sendAiChat`의 raw fetch는 제거됐다. |
 | mock 위치 | 절반 이상 적정 | station/route/report mock은 entity에 있다. route preset은 feature model에 있다. |
 | 남은 UI mock | 존재 | report-sheet의 버스 잔여석, recovery 거점/금액, carriage 제목, archive-calendar의 월/통계 수치, settings-form의 공공데이터 출처 문구가 widget 내부 하드코딩이다. AI 추천 질문은 feature model로 이동했다. |
-| 위험 지점 | markdown renderer | `dangerouslySetInnerHTML` 기반이므로 sanitizer 또는 safe renderer가 필요하다. |
+| 위험 지점 | markdown renderer | `shared/lib/markdown/renderSafeMarkdown.tsx`로 `dangerouslySetInnerHTML` 제거 완료. |
 
 ## 10. Phase 6. Persistence/API 정리
 
@@ -156,12 +156,12 @@
 | AI request/response schema 추가 | `features/send-ai-chat/api/schema.ts` | 요청 400 처리와 응답 parse 경계 생성 | 완료 |
 | Vercel Function 엔트리 추가 | `api/chat.ts`, `vercel.json` | Vercel에서 `/api/chat`이 Express 없이 실행됨 | 완료 |
 | 서버 responder 공용화 | `features/send-ai-chat/server/chatResponder.ts` | 로컬 Express와 Vercel Function이 같은 Gemini/fallback 로직 사용 | 완료 |
-| preferences localStorage | `entities/user-preferences/model/store.ts` | 새로고침 후 설정 유지 | 대기 |
-| report localStorage | `entities/report/model/store.ts` | 새로고침 후 저장 리포트 유지 | 대기 |
-| query key factory | `shared/config/query-keys.ts` | query key 중복 방지 | 부분 완료 |
-| markdown sanitizer | `shared/lib/markdown` | AI 응답 렌더링 보안 경계 생성 | 대기 |
+| preferences localStorage | `entities/user-preferences/model/store.ts` | 새로고침 후 설정 유지 | 완료 |
+| report localStorage | `entities/report/model/store.ts` | 새로고침 후 저장 리포트 유지 | 완료 |
+| query key factory | `shared/config/query-keys.ts` | query key 중복 방지 | 완료 |
+| markdown sanitizer | `shared/lib/markdown` | AI 응답 렌더링 보안 경계 생성 | 완료 |
 
-**현재 반영 상태**: `usePersistentState`로 preferences/savedReports localStorage persistence를 적용했다. 전용 entity store와 sanitizer 강화는 후속 작업이다.
+**현재 반영 상태**: `entities/user-preferences/model/store.ts`와 `entities/report/model/store.ts`가 `usePersistentState`와 `STORAGE_KEYS`를 감싸며 preferences/savedReports localStorage persistence를 소유한다. `features/send-ai-chat/model/useAiChatController.ts`가 chat input/loading/messages와 `/api/chat` 응답 적용 경계를 소유한다. `features/generate-route-plan/model/useRoutePlanner.ts`가 route 후보 계산과 선택 유지 규칙을 소유한다. `shared/lib/markdown/renderSafeMarkdown.tsx`가 AI 응답 markdown을 React node로 안전하게 렌더링하며 `dangerouslySetInnerHTML`는 제거됐다. Phase 6 범위는 완료됐다.
 
 **Vercel/API 반영 상태**: `api/chat.ts` Vercel Function과 `vercel.json`을 추가했고, `server.ts`와 Function이 `src/features/send-ai-chat/server/chatResponder.ts`를 공유하도록 분리했다. `features/send-ai-chat/api/schema.ts`로 request/response runtime validation을 추가해 잘못된 요청은 400, 서버/Gemini 실패는 500으로 분리했다. `shared/api/http-client.ts`를 추가하고 `sendAiChat`이 timeout/error/JSON-text parse 공통 경계를 통과하도록 변경했다. 자세한 환경 변수와 배포 책임은 `docs/talsu_inna_vercel_functions_env.md`에서 관리한다.
 
@@ -182,10 +182,10 @@
 
 | 체크 | 현재 판단 |
 |---|---|
-| 워크트리 | `ai-chat-panel` 코드와 문서 변경이 있다. 병렬 변경 파일은 유지한다. |
+| 워크트리 | `.gitignore`, `.env.local` 변경은 별도 로컬 변경으로 유지한다. Phase 6 변경과 분리한다. |
 | 병렬 작업 충돌 | `.env.example`, `README.md`, `server.ts`, Vercel 코드 파일은 이미 원격 반영되었고 다음 UI refactor에서는 건드리지 않는다. |
-| 다음 코드 터치 범위 | `src/App.tsx`, `src/app/**`, `src/features/*/model`, `src/entities/*/model/store`, `docs/*` |
-| 검증 | 다음 분리 이후 `npm run lint`, `npm run build`를 반복한다. |
+| 다음 코드 터치 범위 | `src/app/**`, `src/features/*/model`, `src/entities/*/model/store`, `src/widgets/**`, `docs/*` |
+| 검증 | Phase 7에서 `npm run lint`, `npm run build`, dev/API smoke, UI smoke를 반복한다. |
 
 ## 12. 완료 정의
 

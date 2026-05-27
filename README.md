@@ -172,7 +172,9 @@ Feature-Sliced Design(FSD) 기준으로 점진 분리 중입니다.
 ├── docs/                               # PRD, FSD, refactor plan, Vercel env docs
 ├── src/
 │   ├── app/
-│   │   └── layouts/                    # AppShell 등 앱 레이아웃
+│   │   ├── layouts/                    # AppShell 등 앱 레이아웃
+│   │   ├── model/                      # useAppController host orchestration
+│   │   └── router/                     # 내부 AppRouter
 │   ├── components/
 │   │   └── InteractiveMap.tsx          # 기존 import 호환 re-export
 │   ├── pages/
@@ -206,7 +208,7 @@ Feature-Sliced Design(FSD) 기준으로 점진 분리 중입니다.
 │   │   ├── settings-form/
 │   │   ├── top-app-bar/
 │   │   └── transit-map-panel/
-│   ├── App.tsx                         # 임시 host, 점진 축소 대상
+│   ├── App.tsx                         # shell/router/overlay/chrome host
 │   └── main.tsx
 ├── server.ts                           # 로컬 Express + Vite middleware
 ├── vercel.json                         # Vercel static/function routing
@@ -254,22 +256,24 @@ Feature-Sliced Design(FSD) 기준으로 점진 분리 중입니다.
 - [x] settings-form widget 생성 및 App host 연결
 - [x] map-workspace widget 생성
 - [x] `pages/*/index.tsx` composition entry 생성
+- [x] `app/router/AppRouter.tsx` 내부 router 생성
+- [x] `App.tsx` host 수준 축소
+- [x] `features/send-ai-chat/model` chat state hook 분리
+- [x] `features/generate-route-plan/model` route planner hook 분리
+- [x] `entities/user-preferences/model/store.ts` 추가
+- [x] `entities/report/model/store.ts` 추가
 - [x] Vercel `/api/chat` Function 추가
 - [x] Express/Vercel 공용 AI responder 추가
 - [x] `/api/chat` request/response runtime validation 추가
 - [x] shared HTTP client 추가
+- [x] `renderMarkdown`의 `dangerouslySetInnerHTML` 제거
 
 ### 진행 중
 
-- [ ] `App.tsx`를 provider/router/layout/global host 수준으로 축소
-- [ ] `features/send-ai-chat/model`로 chat state hook 분리
-- [ ] `app/router` 생성
+- [ ] Phase 7 QA와 회귀 방지
 
 ### 남은 핵심 과제
 
-- [ ] `renderMarkdown`의 `dangerouslySetInnerHTML` 제거 또는 sanitizer 적용
-- [ ] `entities/user-preferences/model/store.ts` 추가
-- [ ] `entities/report/model/store.ts` 추가
 - [ ] archive/report/settings 내부 mock 수치와 fixture 위치 정리
 - [ ] 실제 공공데이터 adapter 설계 및 API proxy 추가
 - [ ] 시각 회귀 또는 smoke test 자동화

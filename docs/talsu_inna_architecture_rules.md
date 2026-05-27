@@ -21,23 +21,23 @@
 
 | 영역 | 현재 상태 | 다음 규칙 |
 |---|---|---|
-| `app` | `AppShell`과 `AppRouter` public API 생성. `src/App.tsx`는 아직 state orchestration과 page props assembly를 가진 임시 host다. | 다음 phase에서 provider/router/layout host만 남긴다. |
+| `app` | `AppShell`, `AppRouter`, `useAppController` public boundary 생성. `src/App.tsx`는 shell/router/overlay/chrome host만 담당한다. | 다음 phase에서 provider 분리와 URL router 도입 여부를 결정한다. |
 | `pages` | `map-page`, `archive-page`, `settings-page`의 `index.tsx`만 생성됐다. | 계속 `pages/*/ui` 없이 widget composition entry로 유지한다. |
 | `widgets/transit-map-panel` | `InteractiveMap` 실제 구현이 이동했고 `components/InteractiveMap.tsx`는 호환 re-export다. | 신규 import는 반드시 `widgets/transit-map-panel` public API를 사용한다. |
 | `widgets/map-workspace` | map 탭의 프리셋, AI 검색 진입, 리포트 상세 composition이 분리됐다. | page/router 생성 전까지 임시 map tab composition boundary로 사용한다. |
 | `widgets/report-sheet` | 조건 카드, 리포트 탭, 4개 리포트 view, `ReportActionBar`, `ReportDetailPanel`이 분리됐다. | report 문구/수치 mock은 entity/report fixture로 이동한다. |
-| `widgets/ai-chat-panel` | `AiChatLayer`가 분리됐고 추천 질문/welcome message는 feature model로 이동했다. 현재 구현에서 AI 챗은 하단 독립 탭이 아니라 지도 컨텍스트 overlay다. | chat state hook을 feature model로 이동한다. |
-| `widgets/archive-calendar` | 저장 리포트 달력/목록/복원 UI가 분리됐다. | 월/통계 mock config와 report store를 entity/model로 이동한다. |
-| `widgets/settings-form` | preferences form, 루틴 동기화 UI, 데이터 출처 안내가 분리됐다. | preference store와 settings content config를 분리한다. |
-| `features` | onboarding, route preset carousel, save-report, send-ai-chat, toggle-map-layer가 생성됐다. | 상태 hook/model은 feature 내부로 단계적으로 이동한다. |
-| `entities` | station/route-plan/report/user-preferences/chat-message 타입과 mock/default가 이동됐다. | persistence store와 schema를 entity에 추가한다. |
-| `shared` | config, `cn`, `usePersistentState`, toast/page-container UI가 생성됐다. | token/style primitive와 http client를 추가한다. |
+| `widgets/ai-chat-panel` | `AiChatLayer`가 분리됐고 추천 질문/welcome message/chat state hook은 feature model로 이동했다. 현재 구현에서 AI 챗은 하단 독립 탭이 아니라 지도 컨텍스트 overlay다. | session/history persistence가 필요해질 때 feature/entity store를 추가한다. |
+| `widgets/archive-calendar` | 저장 리포트 달력/목록/복원 UI가 분리됐고 report localStorage store는 entity/model로 이동했다. | 월/통계 mock config를 entity/report fixture로 이동한다. |
+| `widgets/settings-form` | preferences form, 루틴 동기화 UI, 데이터 출처 안내가 분리됐고 preference store는 entity/model로 이동했다. | settings content config를 분리한다. |
+| `features` | onboarding, route preset carousel, route planner hook, save-report, send-ai-chat controller, toggle-map-layer가 생성됐다. | 남은 feature 상태는 select-station/onboarding model로 단계적으로 이동한다. |
+| `entities` | station/route-plan/report/user-preferences/chat-message 타입과 mock/default/store가 이동됐다. | 추가 schema가 필요해지면 entity/model에 둔다. |
+| `shared` | config, `cn`, markdown safe renderer, `usePersistentState`, toast/page-container UI, http client가 생성됐다. | token/style primitive를 추가한다. |
 
 ## 2. MiriArt 레퍼런스에서 가져올 것
 
 | MiriArt 패턴 | data_insight 적용 |
 |---|---|
-| `app/App.tsx`가 `BrowserRouter`, provider, nav, toast를 조립 | 현 단계에서는 `src/App.tsx`가 host 역할을 유지하고, 후속 단계에서 provider/router/layout/global host만 남긴다. |
+| `app/App.tsx`가 `BrowserRouter`, provider, nav, toast를 조립 | `src/App.tsx`는 host 역할만 유지하고 state orchestration은 `src/app/model/useAppController.ts`가 담당한다. |
 | `app/routers/AppRouter.tsx`가 route를 소유 | `src/app/router/AppRouter.tsx`에서 page entry를 연결한다. 현재는 URL router가 아닌 `activeTab` 기반 내부 router다. |
 | `MainLayout.tsx`가 hydration/auth gate를 소유 | `AppShell` 또는 route layout이 온보딩/향후 auth gate를 담당한다. |
 | React Query hook과 query key factory | `/api/chat`과 향후 교통 API는 feature/entity hook으로 감싼다. |
@@ -198,6 +198,7 @@ export default function MapPage() {
 | response schema | 서버 응답은 zod schema 또는 동등한 runtime parser를 통과한 뒤 UI로 들어온다. |
 | fallback | Gemini key 부재, 서버 실패, schema mismatch fallback은 feature model에 둔다. page/widget에서 분기하지 않는다. |
 | cache key | `queryKeys.routePlans(params)`, `queryKeys.aiChat(sessionId)`, `queryKeys.stationContext(stationId)`처럼 factory로만 만든다. |
+| markdown | AI 응답 markdown은 `shared/lib/markdown/renderSafeMarkdown.tsx`처럼 React node로 렌더링한다. `dangerouslySetInnerHTML`는 사용하지 않는다. |
 | stale policy | 실시간 교통성 데이터는 짧은 stale time, 저장 리포트/설정은 long stale 또는 local persistence를 쓴다. |
 | server reuse | 로컬 Express와 Vercel Function은 `features/send-ai-chat/server/chatResponder.ts` 같은 단일 responder를 공유한다. |
 
@@ -235,3 +236,4 @@ export default function MapPage() {
 | `settings-form` | preferences update handler는 props 또는 feature hook으로 주입하고 widget 내부에서 route 계산을 수행하지 않음 |
 | `pages/*` | `App.tsx`에서 map/archive/settings 탭 body가 widget 단위로 충분히 축소된 뒤 생성 |
 | `app/router` | 완료. `AppRouter`는 URL 상태를 만들지 않고 현재 `activeTab`으로 page entry만 선택한다. |
+| `app/model` | 완료. `useAppController`가 host props assembly와 app-level orchestration을 소유하고 `App.tsx`는 50줄 host로 유지된다. |

@@ -43,7 +43,8 @@
 | 파일 | 현재 역할 |
 |---|---|
 | `src/main.tsx` | React 앱 엔트리. `StrictMode`로 `App` 렌더링. |
-| `src/App.tsx` | 앱 전역 상태와 page props assembly를 담당하는 임시 host. 현재 416줄. |
+| `src/App.tsx` | 앱 shell/router/overlay/chrome host. 현재 50줄. |
+| `src/app/model/useAppController.ts` | app host가 필요한 전역 UI 상태, route/chat controller 연결, page props assembly를 담당한다. |
 | `src/app/router/AppRouter.tsx` | URL router가 아닌 내부 route boundary. `activeTab` 기준으로 map/archive/settings page entry를 선택한다. |
 | `src/pages/*/index.tsx` | map/archive/settings page composition entry. 자체 `ui/model/api/mock/styles` 없이 widget props forwarding만 담당. |
 | `src/app/layouts/*` | `AppShell` 등 앱 레이아웃 기반. |
@@ -75,14 +76,14 @@
 
 | ID | 기능명 | Phase | 우선순위 | 주요 코드 | 구현 상태 |
 |---|---|---:|---:|---|---|
-| F0 | 앱 셸, 온보딩, 기본 사용자 상태 | P1 | P0 | `src/App.tsx`, `app/router`, `features/complete-onboarding`, `app/layouts` | 구현됨 |
+| F0 | 앱 셸, 온보딩, 기본 사용자 상태 | P1 | P0 | `src/App.tsx`, `app/model`, `app/router`, `features/complete-onboarding`, `app/layouts` | 구현됨 |
 | F1 | 지도 메인 및 역 선택 | P1 | P0 | `widgets/map-workspace`, `widgets/transit-map-panel` | Mock 구현 |
 | F2 | 교통 레이어/지도 인터랙션 | P1 | P0 | `widgets/transit-map-panel`, `features/toggle-map-layer` | Mock 구현 |
-| F3 | 경로 플랜 계산 및 선택 | P1 | P0 | `entities/route-plan`, `features/generate-route-plan`, `widgets/map-workspace`, `src/App.tsx` | Mock 구현 |
+| F3 | 경로 플랜 계산 및 선택 | P1 | P0 | `entities/route-plan`, `features/generate-route-plan`, `widgets/map-workspace`, `app/model` | Mock 구현 |
 | F4 | 이동 판단 리포트 4종 | P1 | P0 | `widgets/report-sheet`, `entities/route-plan`, `entities/report` | Mock 구현 |
 | F5 | AI 챗 오버레이 및 추천 반영 | P1 | P0 | `widgets/ai-chat-panel`, `features/send-ai-chat`, `server.ts`, `api/chat.ts` | 부분 구현. 현재 IA 구현은 독립 하단 탭이 아니라 지도 컨텍스트 overlay를 기준으로 한다. |
-| F6 | 리포트 저장/기록/캘린더 | P1 | P1 | `widgets/archive-calendar`, `entities/report`, `src/App.tsx` | Mock 구현 |
-| F7 | 사용자 설정/선호값 | P1 | P1 | `widgets/settings-form`, `entities/user-preferences`, `src/App.tsx` | 부분 구현 |
+| F6 | 리포트 저장/기록/캘린더 | P1 | P1 | `widgets/archive-calendar`, `entities/report`, `app/model` | Mock 구현 |
+| F7 | 사용자 설정/선호값 | P1 | P1 | `widgets/settings-form`, `entities/user-preferences`, `app/model` | 부분 구현 |
 | F8 | Express/Vercel 서버 및 `/api/chat` | P1 | P0 | `server.ts`, `api/chat.ts`, `features/send-ai-chat/server` | 부분 구현 |
 | F9 | 실제 공공데이터/API/계정 영속화 | P2 | P0 | 없음 | 미구현 |
 
@@ -135,26 +136,26 @@
 
 | 상태 | 현재 소유자 | 현재 지속성 | 목표 소유자 |
 |---|---|---|---|
-| `showOnboarding`, `onboardingStep` | `App.tsx` + `features/complete-onboarding/ui` | memory | `features/complete-onboarding/model` |
-| `activeTab`, `mapLayer` | `App.tsx` + `app/router/AppRouter.tsx` 선택 경계 | memory | router + `features/toggle-map-layer` |
-| `startStation`, `endStation` | `App.tsx` | memory | `features/select-station` |
-| `plans`, `selectedPlan` | `App.tsx` | memory | `features/generate-route-plan` |
-| `selectedReportType` | `App.tsx` + `widgets/report-sheet` UI props | memory | `widgets/report-sheet` model 또는 route state |
-| `savedReports` | `App.tsx` + `shared/model/usePersistentState` | localStorage | `entities/report/model/store` |
-| `preferences` | `App.tsx` + `shared/model/usePersistentState` | localStorage | `entities/user-preferences/model/store` |
-| `chatMessages`, `chatInput`, `chatbotLoading` | `App.tsx` + `widgets/ai-chat-panel` props | memory | `features/send-ai-chat/model` |
-| `visibleLayers` | `App.tsx` + `widgets/transit-map-panel` props | memory | `features/toggle-map-layer` |
+| `showOnboarding`, `onboardingStep` | `app/model/useAppController.ts` + `features/complete-onboarding/ui` | memory | `features/complete-onboarding/model` |
+| `activeTab`, `mapLayer` | `app/model/useAppController.ts` + `app/router/AppRouter.tsx` 선택 경계 | memory | router + `features/toggle-map-layer` |
+| `startStation`, `endStation` | `features/generate-route-plan/model/useRoutePlanner.ts` | memory | `features/select-station` 또는 route planner model |
+| `plans`, `selectedPlan` | `features/generate-route-plan/model/useRoutePlanner.ts` | memory | `features/generate-route-plan` |
+| `selectedReportType` | `features/generate-route-plan/model/useRoutePlanner.ts` + `widgets/report-sheet` UI props | memory | `widgets/report-sheet` model 또는 route state |
+| `savedReports` | `entities/report/model/store.ts` | localStorage | `entities/report/model/store` |
+| `preferences` | `entities/user-preferences/model/store.ts` | localStorage | `entities/user-preferences/model/store` |
+| `chatMessages`, `chatInput`, `chatbotLoading` | `features/send-ai-chat/model/useAiChatController.ts` + `widgets/ai-chat-panel` props | memory | `features/send-ai-chat/model` |
+| `visibleLayers` | `app/model/useAppController.ts` + `widgets/transit-map-panel` props | memory | `features/toggle-map-layer` |
 
 ## 9. 타입 정합성 현황
 
 | 타입/용어 | 현재 정의 | 사용 위치 | 이슈 | 목표 SSOT |
 |---|---|---|---|---|
-| `TabId` | `"map" \| "archive" \| "settings"` | `types.ts`, `App.tsx` | 라우터 도입 시 역할 축소 | `shared/config/routes.ts` 또는 router |
-| `MapLayerState` | `features/toggle-map-layer/model/types.ts` | `types.ts`, `App.tsx` | facade 경유 안정화됨 | `features/toggle-map-layer/model/types.ts` |
-| `ReportType` | `"boarding" \| "carriage" \| "deadline" \| "recovery"` | `types.ts`, `App.tsx` | 안정적 | `entities/report/model/types.ts` |
-| `RoutePlan` | 경로명, ETA, 비용, 위험도, 타임라인 | `types.ts`, `data.ts`, `App.tsx` | mock generator와 UI가 결합 | `entities/route-plan/model/types.ts` |
-| `SavedReport` | id/date/type/from/to/status/summary/cost | `types.ts`, `data.ts`, `App.tsx` | localStorage persistence 적용, 전용 entity store는 없음 | `entities/report/model/types.ts` |
-| `UserPreferences` | 루틴/혼잡/택시/도보/따릉이/AI 스타일 | `types.ts`, `data.ts`, `App.tsx` | 일부 값만 실제 계산 반영 | `entities/user-preferences/model/types.ts` |
+| `TabId` | `"map" \| "archive" \| "settings"` | `types.ts`, `app/model`, `AppRouter` | URL router 도입 시 역할 축소 | `shared/config/routes.ts` 또는 router |
+| `MapLayerState` | `features/toggle-map-layer/model/types.ts` | `types.ts`, `app/model` | facade 경유 안정화됨 | `features/toggle-map-layer/model/types.ts` |
+| `ReportType` | `"boarding" \| "carriage" \| "deadline" \| "recovery"` | `types.ts`, route/report/chat model | 안정적 | `entities/report/model/types.ts` |
+| `RoutePlan` | 경로명, ETA, 비용, 위험도, 타임라인 | `types.ts`, `data.ts`, route planner model | mock generator와 UI 결합 축소됨 | `entities/route-plan/model/types.ts` |
+| `SavedReport` | id/date/type/from/to/status/summary/cost | `types.ts`, `data.ts`, report store | localStorage persistence가 entity store로 이동됨 | `entities/report/model/types.ts` |
+| `UserPreferences` | 루틴/혼잡/택시/도보/따릉이/AI 스타일 | `types.ts`, `data.ts`, preferences store | 일부 값만 실제 계산 반영 | `entities/user-preferences/model/types.ts` |
 | `ChatMessage` | sender, text, timestamp, AI 추천 필드 | `entities/chat-message`, `features/send-ai-chat` | client markdown renderer는 유지, API schema는 추가됨 | `entities/chat-message/model/types.ts` |
 
 ## 10. 기능 상세
@@ -325,13 +326,13 @@
 
 | 영역 | 현재 위치 | 남은 점 |
 |---|---|---|
-| App shell/router | `src/app/layouts/AppShell.tsx`, `src/app/router/AppRouter.tsx`, `src/App.tsx` | provider host와 page props assembly 추가 축소 필요 |
+| App shell/router | `src/App.tsx`, `src/app/model/useAppController.ts`, `src/app/layouts/AppShell.tsx`, `src/app/router/AppRouter.tsx` | provider 분리와 URL router 도입 여부 결정 필요 |
 | 온보딩 | `features/complete-onboarding/ui/OnboardingOverlay.tsx` | step state/model 분리 필요 |
 | 지도 | `widgets/transit-map-panel/ui/InteractiveMap.tsx` | 기존 `components` re-export 제거 시점 결정 필요 |
 | 리포트 시트 | `widgets/report-sheet/ui/*` | 리포트 상세 panel/CTA 분리 완료, 상위 sheet shell 정리 필요 |
-| AI API/UI | `features/send-ai-chat/api`, `features/send-ai-chat/model`, `features/send-ai-chat/server`, `widgets/ai-chat-panel`, `api/chat.ts` | chat state hook 분리 필요 |
-| 저장/아카이브 | `usePersistentState` 기반 localStorage, `widgets/archive-calendar` | entity store 분리 필요 |
-| 설정 | `widgets/settings-form` | preference state hook/store 분리 필요 |
+| AI API/UI | `features/send-ai-chat/api`, `features/send-ai-chat/model/useAiChatController.ts`, `features/send-ai-chat/server`, `widgets/ai-chat-panel`, `api/chat.ts` | 후속으로 session/history persistence 검토 |
+| 저장/아카이브 | `entities/report/model/store.ts`, `widgets/archive-calendar` | archive fixture/config 분리 필요 |
+| 설정 | `entities/user-preferences/model/store.ts`, `widgets/settings-form` | settings content config 분리 필요 |
 
 ## 10-2. Dev 라우팅/어댑터 점검
 
@@ -357,8 +358,8 @@
 | `widgets/report-sheet/ui/BoardingReportView.tsx` | UI 안에 버스 잔여석/시간 mock 문구가 남아 있음 | 다음 report model fixture로 이동 후보 |
 | `widgets/report-sheet/ui/RecoveryReportView.tsx` | UI 안에 N버스/거점/금액 mock 문구가 남아 있음 | report recovery fixture로 이동 후보 |
 | `widgets/report-sheet/ui/CarriageReportView.tsx` | 일부 제목에 고정 출발/도착 문구가 남아 있음 | props 또는 route context 기반으로 교체 필요 |
-| `widgets/ai-chat-panel/ui/AiChatLayer.tsx` | 추천 질문 배열은 feature model로 이동됨 | chat state hook 분리 후보 |
-| `App.tsx` | 기본 역/시간과 selected tab/map layer 상태가 남아 있음 | page/router와 feature model로 이동 후보 |
+| `widgets/ai-chat-panel/ui/AiChatLayer.tsx` | 추천 질문 배열과 chat state hook은 feature model로 이동됨 | session/history persistence 후보 |
+| `App.tsx` | host 수준으로 축소됨 | 추가 상태 이동은 `app/model` 또는 feature model에서 진행 |
 | `widgets/settings-form/ui/SettingsForm.tsx` | 공공데이터 출처 문구/옵션 배열이 widget 내부에 있음 | settings config 또는 shared content 분리 후보 |
 | `widgets/archive-calendar/ui/ArchiveCalendar.tsx` | 2026년 5월/31일/92.8% mock 수치가 widget 내부에 있음 | archive fixture/config 분리 후보 |
 
@@ -388,7 +389,7 @@
 | 경로 계산 | 실시간/패턴/복합수단 계산 | mock 분기 | refactor plan |
 | 지도 | 지도 기반 앱 | SVG mock map | architecture rules |
 | 타입 정합성 | `MapLayerState` 단일 정의 | facade 안정화 완료, 사용처 추가 축소 필요 | refactor plan |
-| 보안 | AI 응답 렌더링 | `dangerouslySetInnerHTML` | architecture rules |
+| 보안 | AI 응답 렌더링 | `shared/lib/markdown/renderSafeMarkdown.tsx`로 React node 렌더링 | architecture rules |
 
 ## 13. Out of Scope v1
 
