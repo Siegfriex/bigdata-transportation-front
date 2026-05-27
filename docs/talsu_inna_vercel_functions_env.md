@@ -24,7 +24,9 @@
 | `api/chat.ts` | Vercel `POST /api/chat` Function handler |
 | `server.ts` | 로컬 개발 서버. Vercel 배포용 서버가 아님 |
 | `src/features/send-ai-chat/server/chatResponder.ts` | Gemini 호출, fallback 응답, model/env 선택 |
-| `src/features/send-ai-chat/api/sendAiChat.ts` | 브라우저에서 `/api/chat` 호출 |
+| `src/features/send-ai-chat/api/schema.ts` | `/api/chat` request/response runtime validation |
+| `src/features/send-ai-chat/api/sendAiChat.ts` | 브라우저에서 `/api/chat` 호출, response schema 적용 |
+| `src/shared/api/http-client.ts` | fetch timeout, HTTP error shape, JSON/text parse 공통 처리 |
 | `package.json` | Vercel은 `build:client`, 로컬 production 서버는 `build:server` 사용 |
 
 ## 3. 환경 변수
@@ -73,6 +75,7 @@
 |---|---|---|
 | 타입 | `npm run lint` | TypeScript 오류 없음 |
 | 빌드 | `npm run build` | Vite `dist`와 로컬 `dist/server.cjs` 생성 |
+| 클라이언트 API 경계 | `sendAiChat` 내부 | `shared/api/http-client.ts`와 response schema를 통과 |
 | 로컬 API | `npm run dev` 후 `POST /api/chat` | fallback 또는 Gemini JSON 응답 |
 | Vercel Preview | Vercel 배포 후 `POST /api/chat` | `GEMINI_API_KEY` 유무별 동작 확인 |
 | 환경 | Vercel Project Settings | `GEMINI_API_KEY`가 Preview/Production 모두 설정됨 |
@@ -81,8 +84,6 @@
 
 | 우선순위 | 작업 | 이유 |
 |---|---|---|
-| P0 | `AiChatRequest`/`AiChatResponse` runtime schema 추가 | Function 경계에서 잘못된 body를 방어 |
-| P0 | `shared/api/http-client.ts`에 timeout/error shape 추가 | 브라우저 fetch 실패 처리를 일관화 |
 | P1 | Vercel preview smoke script 추가 | 배포 후 `/api/chat` 회귀를 자동 확인 |
 | P1 | AI streaming 검토 | 긴 응답에서 perceived latency 개선 |
 | P2 | 교통 공공데이터 API proxy를 별도 Function으로 추가 | 프론트에서 공공 API key 노출 방지 |

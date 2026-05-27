@@ -1,12 +1,10 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import {
-  Map,
   MessageSquare,
   ChevronRight,
   Navigation,
   Sparkles,
   Bike,
-  Bookmark,
   Plus,
   BookmarkCheck,
   RotateCw,
@@ -22,15 +20,16 @@ import { getDefaultPreferences, getSavedReportsMock, getRoutePlans, getCarSurviv
 import { OnboardingOverlay } from "./features/complete-onboarding";
 import { RoutePresetCarousel, type RoutePreset } from "./features/generate-route-plan";
 import { createSavedReport, isDuplicateSavedReport } from "./features/save-report";
-import { createFallbackChatMessage, renderMarkdown, sendAiChat } from "./features/send-ai-chat";
+import { createFallbackChatMessage, sendAiChat } from "./features/send-ai-chat";
 import { DEFAULT_VISIBLE_LAYERS, type MapLayerState } from "./features/toggle-map-layer";
 import { STORAGE_KEYS } from "./shared/config";
 import { formatKoreanTime } from "./shared/lib/time";
 import { usePersistentState } from "./shared/model/usePersistentState";
 import { AppShell } from "./app/layouts";
 import { ToastOverlay } from "./shared/ui/toast";
+import { AiChatLayer } from "./widgets/ai-chat-panel";
 import { BottomNavigation } from "./widgets/bottom-navigation";
-import { BoardingReportView, CarriageReportView, DeadlineReportView, RecoveryReportView, ReportTypeTabs, RouteConditionCard } from "./widgets/report-sheet";
+import { ReportDetailPanel, RouteConditionCard } from "./widgets/report-sheet";
 import InteractiveMap from "./widgets/transit-map-panel";
 import { TopAppBar } from "./widgets/top-app-bar";
 
@@ -373,80 +372,33 @@ export default function App() {
                   onChangeDeadlineTime={setDeadlineTime}
                 />
 
-              {/* Tab Selector inside the Sheet for Reports (MAP-05, MAP-06, MAP-07, MAP-08) */}
-              <div className="space-y-2 pointer-events-auto bg-black/40 backdrop-blur-xl rounded-2xl p-2 border border-white/10">
-                <ReportTypeTabs
-                  selectedReportType={selectedReportType}
-                  onSelectReport={(reportType, label) => {
-                    setSelectedReportType(reportType);
-                    showToast(`📊 '${label}' 분석 보고서가 로딩되었습니다.`);
-                  }}
-                />
-
-                {/* ACTIVE REPORT CONTAINER */}
-                <div id="active-report-view" className="apple-glass rounded-2xl border border-white/10 p-3 space-y-3.5">
-                  
-                  {/* F1: 탑승가능성 리포트 (Boarding Possibility Report MAP-05) */}
-                  {selectedReportType === "boarding" && (
-                    <BoardingReportView startStation={startStation} />
-                  )}
-
-                  {/* F2: 지하철 칸별 생존 가이드 (Carriage Survival Guide MAP-06) */}
-                  {selectedReportType === "carriage" && (
-                    <CarriageReportView
-                      carDetails={carDetails}
-                      activeCarNo={activeCarNo}
-                      onSelectCar={(carNo) => {
-                        setActiveCarNo(carNo);
-                        showToast(`🚇 ${carNo}번 칸 상세 분석을 로드했습니다.`);
-                      }}
-                    />
-                  )}
-
-                  {/* F3: 마감도착 리포트 (Deadline Arrival Plan MAP-07) */}
-                  {selectedReportType === "deadline" && (
-                    <DeadlineReportView
-                      deadlineTime={deadlineTime}
-                      startStation={startStation}
-                      endStation={endStation}
-                      plans={plans}
-                      selectedPlan={selectedPlan}
-                      onSelectPlan={setSelectedPlan}
-                      onCopySummary={showToast}
-                    />
-                  )}
-
-                  {/* F4: 실패복구 리포트 (Late Night Failure Recovery MAP-08) */}
-                  {selectedReportType === "recovery" && (
-                    <RecoveryReportView />
-                  )}
-
-                  {/* Operational Bottom CTA Bar for saving on-the-spot reports */}
-                  <div className="grid grid-cols-2 gap-2 pt-1 border-t border-white/10">
-                    <button
-                      id="save-report-action"
-                      onClick={handleSaveReport}
-                      className="py-2.5 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
-                    >
-                      <Bookmark className="w-3.5 h-3.5" />
-                      <span>보관함 저장</span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        setActiveTab("map");
-                        setMapLayer("ai_overlay");
-                        handleSendMessage(`${startStation}에서 ${endStation} 가는 지각처방 리포트 요약해줘`);
-                        showToast("🤖 리포트 근거 조회를 위해 AI 챗봇이 개입합니다.");
-                      }}
-                      className="py-2.5 bg-[#0A84FF] text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all active:scale-95"
-                    >
-                      <Sparkles className="w-3.5 h-3.5" />
-                      <span>AI 원인 브리핑</span>
-                    </button>
-                  </div>
-
-                </div>
-              </div>
+              <ReportDetailPanel
+                selectedReportType={selectedReportType}
+                startStation={startStation}
+                endStation={endStation}
+                deadlineTime={deadlineTime}
+                plans={plans}
+                selectedPlan={selectedPlan}
+                carDetails={carDetails}
+                activeCarNo={activeCarNo}
+                onSelectReport={(reportType, label) => {
+                  setSelectedReportType(reportType);
+                  showToast(`📊 '${label}' 분석 보고서가 로딩되었습니다.`);
+                }}
+                onSelectCar={(carNo) => {
+                  setActiveCarNo(carNo);
+                  showToast(`🚇 ${carNo}번 칸 상세 분석을 로드했습니다.`);
+                }}
+                onSelectPlan={setSelectedPlan}
+                onCopySummary={showToast}
+                onSaveReport={handleSaveReport}
+                onAskAiBriefing={() => {
+                  setActiveTab("map");
+                  setMapLayer("ai_overlay");
+                  handleSendMessage(`${startStation}에서 ${endStation} 가는 지각처방 리포트 요약해줘`);
+                  showToast("🤖 리포트 근거 조회를 위해 AI 챗봇이 개입합니다.");
+                }}
+              />
               </>
               )}
             </div>
@@ -791,231 +743,30 @@ export default function App() {
 
         </main>
 
-        {/* Global AI Chat Layer */}
-        {mapLayer !== "default" && mapLayer !== "report_detail" && (
-          <div className={`absolute z-40 transition-all duration-300 pointer-events-none ${
-            mapLayer === "ai_result"
-              ? "bottom-[76px] inset-x-3"
-              : "inset-x-0 top-0 bottom-[64px] flex flex-col justify-end"
-          }`}>
-             
-             {mapLayer === "ai_result" && (
-                <div className="apple-glass border border-white/20 rounded-2xl p-4 shadow-[0_16px_40px_rgba(0,0,0,0.7)] flex flex-col gap-3 animate-in fade-in slide-in-from-bottom-8 pointer-events-auto">
-                  <div className="flex justify-between items-start">
-                    <div className="flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-[#0A84FF]" />
-                      <span className="text-xs font-bold text-white">AI 전략 브리핑 종료</span>
-                    </div>
-                    <button onClick={() => setMapLayer("default")} className="text-white/50 hover:text-white transition-colors">
-                      <Plus className="w-5 h-5 rotate-45" />
-                    </button>
-                  </div>
-                  <div className="apple-glass-light border border-white/10 p-3 rounded-xl">
-                    <p className="text-[11px] text-white/80 leading-relaxed font-sans line-clamp-3">
-                      {chatMessages[chatMessages.length - 1]?.text?.replace(/[*#]/g, '') || "분석 완료"}
-                    </p>
-                  </div>
-
-                  {plans.length > 0 && (
-                    <div className="flex flex-col gap-1.5">
-                      <span className="text-[10px] text-white/50 font-bold px-1">추천 전술 경로 (터치하여 지도 확인)</span>
-                      <div className="flex gap-2 overflow-x-auto scrollbar-none pb-1">
-                        {plans.map((plan) => (
-                          <button
-                            key={plan.id}
-                            onClick={() => {
-                               setSelectedPlan(plan);
-                               // No need to peek actually, result card leaves map visible!
-                            }}
-                            className={`shrink-0 border px-3 py-2 rounded-xl text-[11px] font-bold transition-all ${
-                              selectedPlan?.id === plan.id
-                                ? "bg-[#0A84FF]/20 border-[#0A84FF] text-white"
-                                : "apple-glass border-white/10 text-white/60 hover:text-white hover:border-white/20"
-                            }`}
-                          >
-                             {plan.name} <span className="text-[#0A84FF] ml-1">{plan.eta}</span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="flex gap-2">
-                    <button 
-                      onClick={() => {
-                        setMapLayer("report_detail");
-                      }}
-                      className="flex-1 apple-glass hover:bg-white/10 border border-[#0A84FF]/50 text-[#0A84FF] py-2 rounded-xl text-xs font-bold transition-colors shadow-[0_0_12px_rgba(10,132,255,0.2)]"
-                    >
-                      상세 경로 확인
-                    </button>
-                    <button 
-                      onClick={() => {
-                         handleSaveReport();
-                         setActiveTab("archive");
-                         setMapLayer("default");
-                      }}
-                      className="flex-1 bg-[#0A84FF] text-white py-2 rounded-xl text-xs font-bold transition-all active:scale-95"
-                    >
-                      전술 리포트 생성
-                    </button>
-                  </div>
-                </div>
-             )}
-
-             {(mapLayer === "ai_overlay" || mapLayer === "ai_peek") && (
-                <>
-                  <div 
-                    className={`absolute inset-0 bg-black/50 transition-opacity duration-300 backdrop-blur-[2px] pointer-events-auto ${
-                      mapLayer === "ai_peek" ? "opacity-0 pointer-events-none" : "opacity-100"
-                    }`}
-                    onClick={() => setMapLayer("default")}
-                  />
-                  <div 
-                    className={`relative apple-glass shadow-[0_-8px_32px_rgba(0,0,0,0.6)] flex flex-col transition-all duration-300 pointer-events-auto cursor-pointer border border-white/10 ${
-                      mapLayer === "ai_peek" ? "h-[70px] rounded-[24px] mx-3 mb-3 opacity-90 hover:opacity-100" : "w-full rounded-t-[32px] h-[75vh]"
-                  }`}
-                    onClick={() => {
-                        if (mapLayer === "ai_peek") setMapLayer("ai_overlay");
-                    }}
-                  >
-                     {/* Drag Handle */}
-                     <div className="w-full flex items-center justify-between px-4 pt-3 pb-2">
-                         <div className="w-6" /> {/* Spacer for centering */}
-                         <div 
-                            className="flex-1 flex justify-center cursor-grab active:cursor-grabbing py-2"
-                            onClick={(e) => {
-                               e.stopPropagation();
-                               setMapLayer(mapLayer === "ai_overlay" ? "ai_peek" : "ai_overlay");
-                            }}
-                         >
-                            <div className="w-12 h-1.5 bg-white/25 rounded-full" />
-                         </div>
-                         <button 
-                            className="w-6 h-6 flex items-center justify-center text-white/50 hover:text-white transition-colors"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setMapLayer("default");
-                            }}
-                         >
-                             <Plus className="w-6 h-6 rotate-45" />
-                         </button>
-                     </div>
-                     <div 
-                       className={`flex-1 flex flex-col overflow-hidden px-4 pb-4 ${mapLayer === "ai_peek" ? "pointer-events-none opacity-40 blur-[1px]" : "opacity-100"}`}
-                     >
-                         {/* Chat screen introductory guidance header */}
-                         <div className="apple-glass rounded-2xl border border-white/10 p-3 text-center mb-2.5 shrink-0">
-                           <span className="text-[10px] bg-[#0A84FF]/10 text-[#0A84FF] px-2.5 py-1 rounded-full font-mono font-bold inline-block mb-1.5">GEMINI 3.5 AI ENGINE</span>
-                           <p className="text-[11px] text-white/70 leading-relaxed max-w-[280px] mx-auto">
-                             지도의 현재 상태를 결합해 복합수단 최적 해법을 브리핑합니다. 질문 시 자동으로 지도 경로가 반응합니다.
-                           </p>
-                         </div>
-           
-                         {/* Chat Message Lists */}
-                         <div className="flex-1 space-y-3 overflow-y-auto pr-1 mb-3 scrollbar-none min-h-[120px]">
-                           {chatMessages.map((msg) => (
-                             <div
-                               key={msg.id}
-                               className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
-                             >
-                               <div
-                                 className={`max-w-[85%] rounded-2xl p-3.5 text-xs shadow-sm ${
-                                   msg.sender === "user"
-                                     ? "bg-[#0A84FF] text-white rounded-tr-none font-sans"
-                                     : "apple-glass text-[#E3E5DD] border border-white/10 rounded-tl-none font-sans leading-relaxed"
-                                 }`}
-                               >
-                                 {msg.sender === "ai" ? renderMarkdown(msg.text) : <p className="font-bold leading-relaxed">{msg.text}</p>}
-                                 <div className="flex items-center justify-between mt-2.5">
-                                   <span
-                                     className={`text-[8.5px] font-mono ${
-                                       msg.sender === "user" ? "text-white/60" : "text-white/50"
-                                     }`}
-                                   >
-                                     {msg.timestamp}
-                                   </span>
-                                   {msg.sender === "ai" && msg.suggestedReportType && (
-                                     <button
-                                       onClick={() => {
-                                         setSelectedReportType(msg.suggestedReportType as ReportType); setMapLayer("report_detail");
-                                         setActiveTab("map");
-                                       }}
-                                       className="text-[#0A84FF] flex items-center gap-0.5 text-[9px] font-bold font-sans bg-[#0A84FF]/10 px-1.5 py-0.5 rounded active:scale-95 transition-transform"
-                                     >
-                                       <span>지도에서 보기</span>
-                                       <Map className="w-2.5 h-2.5" />
-                                     </button>
-                                   )}
-                                 </div>
-                               </div>
-                             </div>
-                           ))}
-                           
-                           {chatbotLoading && (
-                             <div className="flex justify-start">
-                               <div className="apple-glass border border-white/10 rounded-2xl rounded-tl-none p-3.5 max-w-[80%] space-y-2">
-                                 <div className="flex gap-1">
-                                   <span className="w-2 h-2 rounded-full bg-[#0A84FF] animate-bounce" />
-                                   <span className="w-2 h-2 rounded-full bg-[#0A84FF] animate-bounce [animation-delay:0.2s]" />
-                                   <span className="w-2 h-2 rounded-full bg-[#0A84FF] animate-bounce [animation-delay:0.4s]" />
-                                 </div>
-                                 <span className="text-[10px] text-white/50 font-mono block">대중교통 네트워크 분석 및 최안심 경로 역산 중...</span>
-                               </div>
-                             </div>
-                           )}
-                           
-                           <div ref={chatEndRef} />
-                         </div>
-           
-                         {/* Suggested Prompts Grid Row (CHAT-01) */}
-                         <div className="space-y-2 shrink-0">
-                           <span className="text-[9px] font-mono text-white/50 uppercase tracking-wider block">추천 안전 질문</span>
-                           <div className="grid grid-cols-2 gap-1.5 mb-2.5">
-                             {[
-                               "9시까지 갈 수 있는 경로 알려줘",
-                               "대중교통 9호선 어느 칸 탑승?",
-                               "막차 놓쳤을때 복구 플랜 B",
-                               "이번 8100번 버스 탈 수 있어?"
-                             ].map((p, idx) => (
-                               <button
-                                 key={idx}
-                                 onClick={() => handleSendMessage(p)}
-                                 className="text-left apple-glass hover:bg-white/10 border border-white/10 p-2 rounded-xl text-[10px] text-white/70 transition-colors truncate block"
-                               >
-                                 💡 {p}
-                               </button>
-                             ))}
-                           </div>
-           
-                           {/* Input Area Bar */}
-                           <div className="flex gap-2">
-                             <input
-                               id="chat-input-field"
-                               type="text"
-                               value={chatInput}
-                               onChange={(e) => setChatInput(e.target.value)}
-                               onKeyDown={(e) => e.key === "Enter" && handleSendMessage(chatInput)}
-                               className="flex-1 apple-glass border border-white/10 focus:border-[#0A84FF] rounded-xl py-3 px-4 text-xs text-white outline-none font-sans"
-                               placeholder="지각 예방에 관해 무엇이든 물어보세요..."
-                             />
-                             <button
-                               id="chat-send-action"
-                               onClick={() => handleSendMessage(chatInput)}
-                               className="bg-[#0A84FF] text-white px-4 rounded-xl text-xs font-bold transition-transform active:scale-95 shrink-0"
-                             >
-                               전송
-                             </button>
-                           </div>
-                         </div>
-           
-           
-                     </div>
-                  </div>
-                </>
-             )}
-          </div>
-        )}
+        <AiChatLayer
+          mapLayer={mapLayer}
+          chatMessages={chatMessages}
+          chatInput={chatInput}
+          chatbotLoading={chatbotLoading}
+          plans={plans}
+          selectedPlan={selectedPlan}
+          chatEndRef={chatEndRef}
+          onClose={() => setMapLayer("default")}
+          onSetMapLayer={setMapLayer}
+          onSelectPlan={setSelectedPlan}
+          onSaveTacticalReport={() => {
+            handleSaveReport();
+            setActiveTab("archive");
+            setMapLayer("default");
+          }}
+          onShowReport={(reportType) => {
+            setSelectedReportType(reportType);
+            setMapLayer("report_detail");
+            setActiveTab("map");
+          }}
+          onChangeChatInput={setChatInput}
+          onSendMessage={handleSendMessage}
+        />
 
 
         <BottomNavigation

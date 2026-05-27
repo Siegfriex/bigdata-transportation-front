@@ -17,6 +17,19 @@
 | entity는 도메인 명사다 | `station`, `route-plan`, `report`, `user-preferences`, `chat-message`가 타입/schema/mock/model을 소유한다. |
 | shared는 비즈니스 독립 기반이다 | primitive UI, token, API client, config, lib, global UI store만 둔다. |
 
+## 1-1. 현재 적용 상태
+
+| 영역 | 현재 상태 | 다음 규칙 |
+|---|---|---|
+| `app` | `AppShell`과 layout public API 생성. `src/App.tsx`는 아직 임시 host로 남아 있다. | 다음 phase에서 provider/router/layout host만 남긴다. |
+| `pages` | 아직 생성하지 않았다. | 생성 시 `pages/*/index.tsx`만 허용하고 `pages/*/ui`는 만들지 않는다. |
+| `widgets/transit-map-panel` | `InteractiveMap` 실제 구현이 이동했고 `components/InteractiveMap.tsx`는 호환 re-export다. | 신규 import는 반드시 `widgets/transit-map-panel` public API를 사용한다. |
+| `widgets/report-sheet` | 조건 카드, 리포트 탭, 4개 리포트 view, `ReportActionBar`, `ReportDetailPanel`이 분리됐다. | report 문구/수치 mock은 entity/report fixture로 이동한다. |
+| `widgets/ai-chat-panel` | `AiChatLayer`가 분리됐다. | 추천 질문과 chat state model을 feature로 이동한다. |
+| `features` | onboarding, route preset carousel, save-report, send-ai-chat, toggle-map-layer가 생성됐다. | 상태 hook/model은 feature 내부로 단계적으로 이동한다. |
+| `entities` | station/route-plan/report/user-preferences/chat-message 타입과 mock/default가 이동됐다. | persistence store와 schema를 entity에 추가한다. |
+| `shared` | config, `cn`, `usePersistentState`, toast/page-container UI가 생성됐다. | token/style primitive와 http client를 추가한다. |
+
 ## 2. MiriArt 레퍼런스에서 가져올 것
 
 | MiriArt 패턴 | data_insight 적용 |
@@ -59,6 +72,7 @@ src/
 │  ├─ ai-chat-panel/
 │  ├─ archive-calendar/
 │  ├─ settings-form/
+│  ├─ top-app-bar/
 │  └─ bottom-navigation/
 ├─ features/
 │  ├─ complete-onboarding/
@@ -149,6 +163,17 @@ export default function MapPage() {
 | overlay primitive | `shared/ui` | `BottomSheet`, `Modal`, `Toast`, `Tooltip` |
 | form primitive | `shared/ui` | `Button`, `IconButton`, `Input`, `Select`, `Tabs`, `Badge`, `Switch`, `Slider` |
 
+## 8-1. Widget 분리 규칙
+
+| Widget | 허용 책임 | 금지 책임 |
+|---|---|---|
+| `transit-map-panel` | SVG 지도, 지도 조작, 역 노드 UI, 레이어 시각화 | route 계산, saved report 생성, AI fetch |
+| `report-sheet` | route/report/entity를 받아 리포트 시트 UI 조합 | storage 직접 접근, `/api/chat` 직접 fetch, station mock 배열 직접 선언 |
+| `ai-chat-panel` | 채팅 목록, 입력, 추천 질문, loading/empty UI | 서버 schema 정의, Gemini fallback 생성 |
+| `archive-calendar` | saved report 목록/달력/복원 액션 UI | saved report factory, localStorage key 직접 사용 |
+| `settings-form` | preferences 입력 UI, 루틴 동기화 버튼 | route planner 직접 구현, storage key 직접 사용 |
+| `top-app-bar`, `bottom-navigation` | 전역 app chrome UI | 도메인 상태 변경 로직 직접 소유 |
+
 ## 9. 상태관리 기준
 
 | 상태 종류 | 위치 | 원칙 |
@@ -163,12 +188,13 @@ export default function MapPage() {
 
 | 항목 | 지시 |
 |---|---|
-| API client | `shared/api/http-client.ts`에서 timeout, error shape, JSON parse, base URL을 통일한다. |
+| API client | `shared/api/http-client.ts`에서 timeout, error shape, JSON/text parse를 통일한다. base URL이 필요해지면 이 계층에서만 추가한다. |
 | endpoint module | `/api/chat`은 `features/send-ai-chat/api`가 소유한다. 교통/경로 데이터는 `entities/route-plan/api` 또는 `entities/station/api`가 소유한다. |
 | response schema | 서버 응답은 zod schema 또는 동등한 runtime parser를 통과한 뒤 UI로 들어온다. |
 | fallback | Gemini key 부재, 서버 실패, schema mismatch fallback은 feature model에 둔다. page/widget에서 분기하지 않는다. |
 | cache key | `queryKeys.routePlans(params)`, `queryKeys.aiChat(sessionId)`, `queryKeys.stationContext(stationId)`처럼 factory로만 만든다. |
 | stale policy | 실시간 교통성 데이터는 짧은 stale time, 저장 리포트/설정은 long stale 또는 local persistence를 쓴다. |
+| server reuse | 로컬 Express와 Vercel Function은 `features/send-ai-chat/server/chatResponder.ts` 같은 단일 responder를 공유한다. |
 
 ## 11. Public API 규칙
 
@@ -193,3 +219,13 @@ export default function MapPage() {
 | mock 위치 고정 | 전역 mock은 `entities/*/mock`, feature 테스트용 fixture는 `features/*/fixtures`에 둔다. page/widget mock 금지. |
 | CSS token 우선 | 반복되는 class 조합은 primitive variant 또는 CSS token으로 승격한다. |
 | 서버 계약 명시 | `/api/chat`처럼 서버와 맞물리는 기능은 request/response schema와 fallback 정책을 같이 둔다. |
+
+## 13. 다음 Phase 진입 게이트
+
+| 진입 대상 | 진입 전 조건 |
+|---|---|
+| `ReportDetailPanel` | 완료. `ReportActionBar`와 함께 public API로 export되고 `npm run build` 통과 |
+| `ai-chat-panel` | 1차 진입 완료. 다음은 추천 질문 fixture와 chat state model 분리 |
+| `archive-calendar` | savedReports는 props/store 경계로만 주입하고 widget 내부에서 storage key를 import하지 않음 |
+| `settings-form` | preferences update handler는 props 또는 feature hook으로 주입하고 widget 내부에서 route 계산을 수행하지 않음 |
+| `pages/*` | `App.tsx`에서 map/archive/settings 탭 body가 widget 단위로 충분히 축소된 뒤 생성 |

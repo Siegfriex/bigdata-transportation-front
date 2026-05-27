@@ -1,5 +1,6 @@
 import type { AiChatResponse } from "../../../entities/chat-message/model/types";
 import type { UserPreferences } from "../../../entities/user-preferences/model/types";
+import { postJson } from "../../../shared/api";
 import { validateAiChatResponse } from "./schema";
 
 export interface SendAiChatInput {
@@ -13,15 +14,5 @@ export interface SendAiChatInput {
 }
 
 export async function sendAiChat(input: SendAiChatInput): Promise<AiChatResponse> {
-  const response = await fetch("/api/chat", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(input),
-  });
-
-  if (!response.ok) {
-    throw new Error("서버 연동 지연");
-  }
-
-  return validateAiChatResponse(await response.json());
+  return validateAiChatResponse(await postJson("/api/chat", input));
 }

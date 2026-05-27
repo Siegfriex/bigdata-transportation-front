@@ -2,7 +2,7 @@
 
 > 목적: 현재 `data_insight` 프론트엔드가 실제로 무엇을 구현하고 있는지 기능, 입출력, 상태, 비즈니스 규칙, 갭, QA 기준으로 고정한다.  
 > 작성일: 2026-05-27  
-> 기준 커밋: `d928788` (`frontend/main`) + 로컬 안정화 패치  
+> 기준 커밋: `a7e8d56` (`publish/main`)  
 > 관련 문서: `docs/talsu_inna_architecture_rules.md`, `docs/talsu_inna_refactor_plan.md`
 
 ## 1. 문서 범위
@@ -26,7 +26,7 @@
 | 지도/교통 표현 | SVG mock map, local station data |
 | 경로 후보 | `src/data.ts` mock route planner |
 | 리포트 | local state와 mock 수치 |
-| AI 챗 | Express `/api/chat`, Gemini key 없으면 server fallback |
+| AI 챗 | Express/Vercel `/api/chat`, Gemini key 없으면 server fallback |
 | 저장 리포트 | localStorage-backed client state |
 
 | 시스템 밖 | 현재 상태 |
@@ -43,15 +43,19 @@
 | 파일 | 현재 역할 |
 |---|---|
 | `src/main.tsx` | React 앱 엔트리. `StrictMode`로 `App` 렌더링. |
-| `src/App.tsx` | 앱 전체 상태, 온보딩, 탭, 지도 시트, 리포트, AI 챗, 아카이브, 설정을 포함한 단일 컨테이너. |
-| `src/components/InteractiveMap.tsx` | 지도 SVG/레이어/역 노드/줌/팬/역 선택 컨텍스트 메뉴. |
+| `src/App.tsx` | 앱 전역 상태와 탭별 widget/feature 조합을 담당하는 임시 host. 현재 785줄. |
+| `src/app/layouts/*` | `AppShell` 등 앱 레이아웃 기반. |
+| `src/components/InteractiveMap.tsx` | 호환 re-export. 실제 구현은 `widgets/transit-map-panel`로 이동. |
 | `src/data.ts` | FSD entity mock/default public facade. |
 | `src/types.ts` | FSD entity/feature/shared 타입 public facade. |
 | `src/entities/*` | route-plan, report, station, user-preferences, chat-message 도메인 타입/mock/default. |
-| `src/features/*` | route preset, report save rule, AI chat API/fallback/markdown, map layer type. |
-| `src/shared/*` | storage/query/z-index/routes config, time util, persistent state hook. |
+| `src/features/*` | onboarding, route preset carousel, report save rule, AI chat API/schema/fallback/markdown/server responder, map layer type. |
+| `src/widgets/*` | 지도 패널, 리포트 시트 하위 view, AI 채팅 레이어, 상단 앱바, 하단 내비게이션. |
+| `src/shared/*` | storage/query/z-index/routes config, shared HTTP client, time util, persistent state hook, toast/page-container UI. |
 | `src/index.css` | Tailwind import, 글꼴, glass 스타일, 애니메이션, 스크롤바 유틸리티. |
-| `server.ts` | Express 서버, Vite middleware, `/api/chat` Gemini 연동 및 fallback 응답. |
+| `server.ts` | Express 서버, Vite middleware, `/api/chat` 라우팅. AI responder는 `features/send-ai-chat/server`와 공유. |
+| `api/chat.ts` | Vercel Function `/api/chat` 엔트리. |
+| `vercel.json` | Vercel build/function routing 설정. |
 | `vite.config.ts` | React/Tailwind Vite 플러그인, alias, HMR 설정. |
 
 ## 4. 현재 런타임 의존
@@ -59,7 +63,7 @@
 | 영역 | 값/방식 | 비고 |
 |---|---|---|
 | 프론트엔드 | React 19, Vite 6, Tailwind v4, lucide-react, motion | SPA |
-| 서버 | Express + Vite middleware | `npm run dev`는 `tsx server.ts` |
+| 서버 | Express + Vite middleware + Vercel Function | `npm run dev`는 `tsx server.ts`, Vercel은 `api/chat.ts` |
 | 포트 | `3000` | `server.ts`에 하드코딩 |
 | AI API | `GEMINI_API_KEY` | 없으면 서버 mock fallback |
 | DB | 없음 | 저장 리포트와 선호값은 localStorage, 나머지는 React state/mock |
@@ -69,15 +73,15 @@
 
 | ID | 기능명 | Phase | 우선순위 | 주요 코드 | 구현 상태 |
 |---|---|---:|---:|---|---|
-| F0 | 앱 셸, 온보딩, 기본 사용자 상태 | P1 | P0 | `src/App.tsx` | 구현됨 |
-| F1 | 지도 메인 및 역 선택 | P1 | P0 | `src/App.tsx`, `src/components/InteractiveMap.tsx` | Mock 구현 |
-| F2 | 교통 레이어/지도 인터랙션 | P1 | P0 | `src/components/InteractiveMap.tsx` | Mock 구현 |
-| F3 | 경로 플랜 계산 및 선택 | P1 | P0 | `src/data.ts`, `src/App.tsx` | Mock 구현 |
-| F4 | 이동 판단 리포트 4종 | P1 | P0 | `src/App.tsx`, `src/data.ts` | Mock 구현 |
-| F5 | AI 챗 오버레이 및 추천 반영 | P1 | P0 | `src/App.tsx`, `server.ts` | 부분 구현 |
+| F0 | 앱 셸, 온보딩, 기본 사용자 상태 | P1 | P0 | `src/App.tsx`, `features/complete-onboarding`, `app/layouts` | 구현됨 |
+| F1 | 지도 메인 및 역 선택 | P1 | P0 | `src/App.tsx`, `widgets/transit-map-panel` | Mock 구현 |
+| F2 | 교통 레이어/지도 인터랙션 | P1 | P0 | `widgets/transit-map-panel`, `features/toggle-map-layer` | Mock 구현 |
+| F3 | 경로 플랜 계산 및 선택 | P1 | P0 | `entities/route-plan`, `features/generate-route-plan`, `src/App.tsx` | Mock 구현 |
+| F4 | 이동 판단 리포트 4종 | P1 | P0 | `widgets/report-sheet`, `entities/route-plan`, `entities/report` | Mock 구현 |
+| F5 | AI 챗 오버레이 및 추천 반영 | P1 | P0 | `widgets/ai-chat-panel`, `features/send-ai-chat`, `server.ts`, `api/chat.ts` | 부분 구현 |
 | F6 | 리포트 저장/기록/캘린더 | P1 | P1 | `src/App.tsx`, `src/data.ts` | Mock 구현 |
 | F7 | 사용자 설정/선호값 | P1 | P1 | `src/App.tsx`, `src/data.ts` | 부분 구현 |
-| F8 | Express 서버 및 `/api/chat` | P1 | P0 | `server.ts` | 부분 구현 |
+| F8 | Express/Vercel 서버 및 `/api/chat` | P1 | P0 | `server.ts`, `api/chat.ts`, `features/send-ai-chat/server` | 부분 구현 |
 | F9 | 실제 공공데이터/API/계정 영속화 | P2 | P0 | 없음 | 미구현 |
 
 ## 6. 하위 기능 ID
@@ -129,27 +133,27 @@
 
 | 상태 | 현재 소유자 | 현재 지속성 | 목표 소유자 |
 |---|---|---|---|
-| `showOnboarding`, `onboardingStep` | `App.tsx` | memory | `features/complete-onboarding` |
+| `showOnboarding`, `onboardingStep` | `App.tsx` + `features/complete-onboarding/ui` | memory | `features/complete-onboarding/model` |
 | `activeTab`, `mapLayer` | `App.tsx` | memory | router + `features/toggle-map-layer` |
 | `startStation`, `endStation` | `App.tsx` | memory | `features/select-station` |
 | `plans`, `selectedPlan` | `App.tsx` | memory | `features/generate-route-plan` |
-| `selectedReportType` | `App.tsx` | memory | `features/save-report` 또는 `widgets/report-sheet` state |
+| `selectedReportType` | `App.tsx` + `widgets/report-sheet` UI props | memory | `widgets/report-sheet` model 또는 route state |
 | `savedReports` | `App.tsx` + `shared/model/usePersistentState` | localStorage | `entities/report/model/store` |
 | `preferences` | `App.tsx` + `shared/model/usePersistentState` | localStorage | `entities/user-preferences/model/store` |
-| `chatMessages`, `chatInput`, `chatbotLoading` | `App.tsx` | memory | `features/send-ai-chat/model` |
-| `visibleLayers` | `App.tsx`/`InteractiveMap.tsx` | memory | `features/toggle-map-layer` |
+| `chatMessages`, `chatInput`, `chatbotLoading` | `App.tsx` + `widgets/ai-chat-panel` props | memory | `features/send-ai-chat/model` |
+| `visibleLayers` | `App.tsx` + `widgets/transit-map-panel` props | memory | `features/toggle-map-layer` |
 
 ## 9. 타입 정합성 현황
 
 | 타입/용어 | 현재 정의 | 사용 위치 | 이슈 | 목표 SSOT |
 |---|---|---|---|---|
 | `TabId` | `"map" \| "archive" \| "settings"` | `types.ts`, `App.tsx` | 라우터 도입 시 역할 축소 | `shared/config/routes.ts` 또는 router |
-| `MapLayerState` | `types.ts`와 `App.tsx` 내부 정의가 다름 | `types.ts`, `App.tsx` | `ai_peek` 등 불일치 | `features/toggle-map-layer/model/types.ts` |
+| `MapLayerState` | `features/toggle-map-layer/model/types.ts` | `types.ts`, `App.tsx` | facade 경유 안정화됨 | `features/toggle-map-layer/model/types.ts` |
 | `ReportType` | `"boarding" \| "carriage" \| "deadline" \| "recovery"` | `types.ts`, `App.tsx` | 안정적 | `entities/report/model/types.ts` |
 | `RoutePlan` | 경로명, ETA, 비용, 위험도, 타임라인 | `types.ts`, `data.ts`, `App.tsx` | mock generator와 UI가 결합 | `entities/route-plan/model/types.ts` |
-| `SavedReport` | id/date/type/from/to/status/summary/cost | `types.ts`, `data.ts`, `App.tsx` | persistence 없음 | `entities/report/model/types.ts` |
+| `SavedReport` | id/date/type/from/to/status/summary/cost | `types.ts`, `data.ts`, `App.tsx` | localStorage persistence 적용, 전용 entity store는 없음 | `entities/report/model/types.ts` |
 | `UserPreferences` | 루틴/혼잡/택시/도보/따릉이/AI 스타일 | `types.ts`, `data.ts`, `App.tsx` | 일부 값만 실제 계산 반영 | `entities/user-preferences/model/types.ts` |
-| `ChatMessage` | sender, text, timestamp, AI 추천 필드 | `types.ts`, `App.tsx` | markdown 렌더링 보안 경계 없음 | `entities/chat-message/model/types.ts` |
+| `ChatMessage` | sender, text, timestamp, AI 추천 필드 | `entities/chat-message`, `features/send-ai-chat` | client markdown renderer는 유지, API schema는 추가됨 | `entities/chat-message/model/types.ts` |
 
 ## 10. 기능 상세
 
@@ -269,7 +273,7 @@
 | Input | `selectedPlan`, `selectedReportType`, `startStation`, `endStation`, 기존 `savedReports` |
 | Process | 중복 조건 검사 후 새 `SavedReport`를 state 앞에 추가 |
 | Output | 저장 리포트 목록, 월간 캘린더, 선택 날짜 피드백 |
-| Exception | 새로고침 시 저장 내용 소실. 모두 지우기는 confirm 없이 즉시 실행 |
+| Exception | 저장 리포트는 localStorage에 유지된다. 모두 지우기는 confirm 없이 즉시 실행 |
 
 **수용 기준**
 
@@ -297,23 +301,60 @@
 | 설정 탭이 열린 상태 | maxTaxiFee/useBike를 변경한다 | 경로 후보가 재계산된다 |
 | 설정 탭이 열린 상태 | AI 스타일을 클릭한다 | 상태와 toast가 갱신된다 |
 
-### F8. Express 서버 및 `/api/chat`
+### F8. Express/Vercel 서버 및 `/api/chat`
 
 | 구분 | 내용 |
 |---|---|
 | Trigger | 클라이언트 `fetch("/api/chat")` |
 | Input | JSON body: `message`, `context` |
-| Process | `GEMINI_API_KEY`가 있으면 Gemini 호출. 키가 없으면 서버 fallback JSON 반환 |
-| Output | AI 추천 JSON. 개발 모드에서는 Vite middleware로 SPA 제공 |
-| Exception | Gemini 호출 실패 시 500 `{ error }`. 클라이언트가 로컬 fallback으로 복구 |
+| Process | request schema 검증 후 `GEMINI_API_KEY`가 있으면 Gemini 호출. 키가 없으면 서버 fallback JSON 반환 |
+| Output | AI 추천 JSON. 개발 모드에서는 Vite middleware로 SPA 제공, Vercel에서는 `api/chat.ts` Function으로 제공 |
+| Exception | schema 오류는 400, Gemini/서버 실패는 500. 클라이언트가 로컬 fallback으로 복구 |
 
 **수용 기준**
 
 | Given | When | Then |
 |---|---|---|
-| `GEMINI_API_KEY`가 없는 상태 | `/api/chat`을 호출한다 | mock JSON을 반환한다 |
+| `GEMINI_API_KEY`가 없는 상태 | `/api/chat`을 호출한다 | server fallback JSON을 반환한다 |
 | 개발 서버를 실행한 상태 | `http://0.0.0.0:3000`에 접근한다 | 앱이 제공된다 |
 | build를 실행한 상태 | build가 완료된다 | Vite client bundle과 `dist/server.cjs`가 생성된다 |
+
+## 10-1. 현재 FSD 슬라이싱 반영 상태
+
+| 영역 | 현재 위치 | 남은 점 |
+|---|---|---|
+| App shell | `src/app/layouts/AppShell.tsx`, `src/App.tsx` | router/provider host 분리 필요 |
+| 온보딩 | `features/complete-onboarding/ui/OnboardingOverlay.tsx` | step state/model 분리 필요 |
+| 지도 | `widgets/transit-map-panel/ui/InteractiveMap.tsx` | 기존 `components` re-export 제거 시점 결정 필요 |
+| 리포트 시트 | `widgets/report-sheet/ui/*` | 리포트 상세 panel/CTA 분리 완료, 상위 sheet shell 정리 필요 |
+| AI API/UI | `features/send-ai-chat/api`, `features/send-ai-chat/server`, `widgets/ai-chat-panel`, `api/chat.ts` | chat state/model 분리 필요 |
+| 저장/설정 | `usePersistentState` 기반 localStorage | entity store와 settings/archive widget 분리 필요 |
+
+## 10-2. Dev 라우팅/어댑터 점검
+
+| 항목 | 현 상태 |
+|---|---|
+| `npm run dev` 엔트리 | `tsx server.ts` |
+| 로컬 API 라우팅 | `server.ts`가 `app.post("/api/chat")`를 Vite middleware보다 먼저 등록한다. |
+| SPA fallback | development에서는 Vite middleware, production에서는 `dist/index.html` fallback을 사용한다. |
+| Vercel API 라우팅 | `api/chat.ts`가 같은 `createAiChatResponse` responder를 공유한다. |
+| 점검 결과 | 기존 3000번 프로세스 점유로 새 dev 서버 실행은 실패했다. 루트 HTML 응답은 확인됐으나 `/api/chat` POST는 포트 점유/프로세스 불안정으로 재검증 필요. |
+
+## 10-3. Mock/Model 하드코딩 감사
+
+| 위치 | 판정 | 조치 |
+|---|---|---|
+| `entities/station/mock/stations.ts` | 정상 mock 위치 | 유지 |
+| `entities/route-plan/mock/*` | 정상 mock 위치 | 유지 |
+| `entities/report/mock/savedReports.ts` | 정상 mock 위치 | 유지 |
+| `features/generate-route-plan/model/presets.ts` | feature preset fixture로 허용 | 향후 API 연동 시 fixture 명명 검토 |
+| `features/send-ai-chat/model/fallback.ts` | fallback model로 허용 | 문구/시나리오 fixture 분리 가능 |
+| `features/send-ai-chat/server/chatResponder.ts` | 서버 fallback과 prompt에 도메인 문구가 많음 | Gemini mock responder와 prompt template 분리 후보 |
+| `widgets/report-sheet/ui/BoardingReportView.tsx` | UI 안에 버스 잔여석/시간 mock 문구가 남아 있음 | 다음 report model fixture로 이동 후보 |
+| `widgets/report-sheet/ui/RecoveryReportView.tsx` | UI 안에 N버스/거점/금액 mock 문구가 남아 있음 | report recovery fixture로 이동 후보 |
+| `widgets/report-sheet/ui/CarriageReportView.tsx` | 일부 제목에 고정 출발/도착 문구가 남아 있음 | props 또는 route context 기반으로 교체 필요 |
+| `widgets/ai-chat-panel/ui/AiChatLayer.tsx` | 추천 질문 배열이 widget 내부에 있음 | `features/send-ai-chat/model/suggestedPrompts.ts`로 이동 후보 |
+| `App.tsx` | 기본 역/시간/날짜와 archive/settings select 배열이 남아 있음 | archive/settings widget 분리 때 stationNames/default config로 이동 |
 
 ## 11. 비즈니스 규칙
 
@@ -340,7 +381,7 @@
 | 저장 리포트 | 아카이브 저장/재사용 | localStorage-backed client state | refactor plan |
 | 경로 계산 | 실시간/패턴/복합수단 계산 | mock 분기 | refactor plan |
 | 지도 | 지도 기반 앱 | SVG mock map | architecture rules |
-| 타입 정합성 | `MapLayerState` 단일 정의 | 타입 불일치 | refactor plan |
+| 타입 정합성 | `MapLayerState` 단일 정의 | facade 안정화 완료, 사용처 추가 축소 필요 | refactor plan |
 | 보안 | AI 응답 렌더링 | `dangerouslySetInnerHTML` | architecture rules |
 
 ## 13. Out of Scope v1

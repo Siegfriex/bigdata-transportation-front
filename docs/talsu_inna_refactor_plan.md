@@ -14,6 +14,27 @@
 | 하드코딩 확산 금지 | 새 파일에는 token/config/schema/mock 위치 규칙을 적용한다. |
 | 큰 이동 전 SSOT | 타입, key, token, mock 위치를 먼저 정한 뒤 UI를 이동한다. |
 
+## 1-1. 현재 위치와 남은 턴
+
+| 항목 | 현재 상태 |
+|---|---|
+| 현재 phase | `Phase 5. Widget/Page 재조립` 진행 중 |
+| 마지막 검증 | `npm run lint`, `npm run build` 통과 |
+| 마지막 원격 반영 | `a7e8d56 Continue FSD slicing and Vercel API setup` → `publish/main` |
+| 현재 `App.tsx` | 785줄. app host와 map/archive/settings/chat state가 아직 남아 있다. |
+| 다음 진입 준비 | `archive-calendar` 진입 전, AI 추천 질문 fixture와 chat state model 분리 여부를 결정한다. |
+
+| 남은 턴 | 목표 | 완료 기준 |
+|---|---|---|
+| T1 | `ReportActionBar`, `ReportDetailPanel` 생성 | 완료 |
+| T2 | `widgets/ai-chat-panel` 생성 | 완료. `AiChatLayer`로 result card/chat sheet를 이동 |
+| T3 | AI chat model 정리 | 다음 후보. suggested prompts, welcome message, chat input/loading state를 feature model로 이동 |
+| T4 | `widgets/archive-calendar` 생성 | saved report 달력/목록/복원 UI가 App에서 제거 |
+| T5 | `widgets/settings-form` 생성 | preferences form과 루틴 동기화 UI가 App에서 제거 |
+| T6 | `pages/*/index.tsx` 생성 | page는 widget 조합만 수행, `pages/*/ui` 미생성 |
+| T7 | `app/router` 및 host 정리 | `App.tsx`가 provider/router/layout/global host 수준으로 축소 |
+| T8 | entity store/http client/token 보강 | localStorage store, `/api/chat` client, shared token 규칙 추가 |
+
 ## 2. 우선순위
 
 | 우선순위 | 대상 | 이유 |
@@ -68,7 +89,7 @@
 | 스타일 분리 | `shared/styles/tokens.css`, `globals.css`, `motion.css` | `index.css`가 import 허브에 가까워짐 |
 | Toast store/host 추가 | `shared/model/toastStore.ts`, `shared/ui/toast` | toast 피드백이 공통화됨 |
 
-**현재 반영 상태**: `shared/model/usePersistentState.ts`, `shared/config/storage-keys.ts`, `shared/config/query-keys.ts`, `shared/config/z-index.ts`, `shared/config/routes.ts`를 생성했다. Toast store와 UI primitive 추출은 다음 작업으로 남아 있다.
+**현재 반영 상태**: `shared/model/usePersistentState.ts`, `shared/config/storage-keys.ts`, `shared/config/query-keys.ts`, `shared/config/z-index.ts`, `shared/config/routes.ts`, `shared/lib/cn.ts`, `shared/ui/toast`, `shared/ui/page-container`, `app/layouts/AppShell.tsx`를 생성했다. Toast store, tokenized primitive UI, http client는 다음 작업으로 남아 있다.
 
 ## 7. Phase 3. Entity 추출
 
@@ -98,37 +119,48 @@
 
 ## 9. Phase 5. Widget/Page 재조립
 
-| 단계 | 작업 | 완료 기준 |
+| 단계 | 작업 | 완료 기준 | 상태 |
+|---|---|---|---|
+| 5-1 | `widgets/transit-map-panel` 생성 | 지도, 검색, 레이어, selected route 표시가 하나의 widget으로 묶임 | 완료 |
+| 5-2 | `widgets/report-sheet` 생성 | 4종 리포트 탭과 CTA가 feature/entity를 조합 | 완료 |
+| 5-3 | `widgets/ai-chat-panel` 생성 | 채팅 목록/입력/추천 질문이 send-ai-chat feature만 호출 | 1차 완료 |
+| 5-4 | `widgets/archive-calendar` 생성 | saved report 목록과 날짜 필터가 report entity 사용 | 다음 |
+| 5-5 | `widgets/settings-form` 생성 | preference entity와 sync-preferences feature만 사용 | 대기 |
+| 5-6 | `pages/*/index.tsx` 생성 | page는 widget/feature 배치와 route 이동만 담당. `pages/*/ui` 금지 | 대기 |
+| 5-7 | `app/router/AppRouter.tsx` 생성 | map/archive/settings route 연결 | 대기 |
+| 5-8 | `app/App.tsx` 축소 | provider/router/layout/global host만 남김 | 대기 |
+
+**현재 반영 상태**: `App.tsx`에서 프리셋, 저장 리포트 생성 규칙, AI fetch/fallback, markdown 렌더링, layer 타입/default를 분리했다. `InteractiveMap`을 `src/widgets/transit-map-panel/ui/InteractiveMap.tsx`로 이동하고 `src/widgets/transit-map-panel/index.ts` public API를 만들었다. 기존 `src/components/InteractiveMap.tsx`는 호환 re-export로 남겼다. `AppShell`, `PageContainer`, `cn` 기반도 추가했다. 이후 `ToastOverlay`, `TopAppBar`, `BottomNavigation`을 각각 `shared/ui/toast`, `widgets/top-app-bar`, `widgets/bottom-navigation`으로 분리했다. `complete-onboarding` feature와 `RoutePresetCarousel`도 분리했다. `widgets/report-sheet`에는 `ReportTypeTabs`, `RouteConditionCard`, `BoardingReportView`, `CarriageReportView`, `DeadlineReportView`, `RecoveryReportView`, `ReportActionBar`, `ReportDetailPanel`을 추가했고, 역 목록 하드코딩은 `entities/station`의 `stationNames`로 대체했다. `widgets/ai-chat-panel/AiChatLayer`도 추가해 AI result card, chat sheet, 추천 질문 UI를 이동했다. 현재 `App.tsx`는 785줄이며 `npm run lint`, `npm run build`가 통과했다.
+
+**다음 단계 진입 준비**: 5-3은 1차 완료됐다. 다음은 두 갈래 중 하나다. 안정 우선이면 `features/send-ai-chat/model/suggestedPrompts.ts`와 welcome message/model을 추가해 AI mock 문구를 widget 밖으로 이동한다. 구조 축소 우선이면 5-4 `archive-calendar`로 진입해 archive tab UI를 `widgets/archive-calendar`로 이동한다.
+
+## 9-1. 현시점 감사
+
+| 영역 | 판정 | 근거/조치 |
 |---|---|---|
-| 5-1 | `widgets/transit-map-panel` 생성 | 지도, 검색, 레이어, selected route 표시가 하나의 widget으로 묶임 |
-| 5-2 | `widgets/report-sheet` 생성 | 4종 리포트 탭과 CTA가 feature/entity를 조합 |
-| 5-3 | `widgets/ai-chat-panel` 생성 | 채팅 목록/입력/추천 질문이 send-ai-chat feature만 호출 |
-| 5-4 | `widgets/archive-calendar` 생성 | saved report 목록과 날짜 필터가 report entity 사용 |
-| 5-5 | `widgets/settings-form` 생성 | preference entity와 sync-preferences feature만 사용 |
-| 5-6 | `pages/*/index.tsx` 생성 | page는 widget/feature 배치와 route 이동만 담당. `pages/*/ui` 금지 |
-| 5-7 | `app/router/AppRouter.tsx` 생성 | map/archive/settings route 연결 |
-| 5-8 | `app/App.tsx` 축소 | provider/router/layout/global host만 남김 |
-
-**현재 반영 상태**: `App.tsx`에서 프리셋, 저장 리포트 생성 규칙, AI fetch/fallback, markdown 렌더링, layer 타입/default를 분리했다. JSX 화면 분해와 router/page/widget 재조립은 다음 작업이다.
-
-**추가 반영 상태**: `InteractiveMap`을 `src/widgets/transit-map-panel/ui/InteractiveMap.tsx`로 이동하고 `src/widgets/transit-map-panel/index.ts` public API를 만들었다. 기존 `src/components/InteractiveMap.tsx`는 호환 re-export로 남겼다. `AppShell`, `PageContainer`, `cn` 기반도 추가했다. 이후 `ToastOverlay`, `TopAppBar`, `BottomNavigation`을 각각 `shared/ui/toast`, `widgets/top-app-bar`, `widgets/bottom-navigation`으로 분리했다. `complete-onboarding` feature와 `RoutePresetCarousel` 분리 후 `App.tsx`는 1309줄로 축소되었다. `widgets/report-sheet`에는 `ReportTypeTabs`, `RouteConditionCard`, `BoardingReportView`, `CarriageReportView`, `DeadlineReportView`, `RecoveryReportView`를 추가했고, 역 목록 하드코딩은 `entities/station`의 `stationNames`로 대체했다. `npm run lint`, `npm run build`가 통과했다.
+| dev routing | 구조는 정상, 런타임 검증은 부분 실패 | `server.ts`는 `/api/chat`을 Vite middleware보다 먼저 등록한다. 다만 현재 3000번 포트가 다른 프로세스로 점유되어 새 `npm run dev` 실행은 실패했다. |
+| Vercel adapter | 정상 방향 | `api/chat.ts`와 `server.ts`가 같은 `createAiChatResponse`를 공유한다. |
+| API client | 개선됨 | `shared/api/http-client.ts`와 `postJson`이 추가되어 `sendAiChat`의 raw fetch는 제거됐다. |
+| mock 위치 | 절반 이상 적정 | station/route/report mock은 entity에 있다. route preset은 feature model에 있다. |
+| 남은 UI mock | 존재 | report-sheet의 버스 잔여석, recovery 거점/금액, carriage 제목, ai-chat 추천 질문은 widget 내부 하드코딩이다. |
+| 위험 지점 | markdown renderer | `dangerouslySetInnerHTML` 기반이므로 sanitizer 또는 safe renderer가 필요하다. |
 
 ## 10. Phase 6. Persistence/API 정리
 
-| 작업 | 대상 | 완료 기준 |
-|---|---|---|
-| `httpClient` 추가 | `shared/api/http-client.ts` | timeout/error/fallback 계약이 한 곳에서 처리됨 |
-| AI response schema 추가 | `features/send-ai-chat/api/schema.ts` 또는 `entities/chat-message/model/schema.ts` | 응답 parse 경계 생성 |
-| Vercel Function 엔트리 추가 | `api/chat.ts`, `vercel.json` | Vercel에서 `/api/chat`이 Express 없이 실행됨 |
-| 서버 responder 공용화 | `features/send-ai-chat/server/chatResponder.ts` | 로컬 Express와 Vercel Function이 같은 Gemini/fallback 로직 사용 |
-| preferences localStorage | `entities/user-preferences/model/store.ts` | 새로고침 후 설정 유지 |
-| report localStorage | `entities/report/model/store.ts` | 새로고침 후 저장 리포트 유지 |
-| query key factory | `shared/config/query-keys.ts` | query key 중복 방지 |
-| markdown sanitizer | `shared/lib/markdown` | AI 응답 렌더링 보안 경계 생성 |
+| 작업 | 대상 | 완료 기준 | 상태 |
+|---|---|---|---|
+| `httpClient` 추가 | `shared/api/http-client.ts` | timeout/error/fallback 계약이 한 곳에서 처리됨 | 완료 |
+| AI request/response schema 추가 | `features/send-ai-chat/api/schema.ts` | 요청 400 처리와 응답 parse 경계 생성 | 완료 |
+| Vercel Function 엔트리 추가 | `api/chat.ts`, `vercel.json` | Vercel에서 `/api/chat`이 Express 없이 실행됨 | 완료 |
+| 서버 responder 공용화 | `features/send-ai-chat/server/chatResponder.ts` | 로컬 Express와 Vercel Function이 같은 Gemini/fallback 로직 사용 | 완료 |
+| preferences localStorage | `entities/user-preferences/model/store.ts` | 새로고침 후 설정 유지 | 대기 |
+| report localStorage | `entities/report/model/store.ts` | 새로고침 후 저장 리포트 유지 | 대기 |
+| query key factory | `shared/config/query-keys.ts` | query key 중복 방지 | 부분 완료 |
+| markdown sanitizer | `shared/lib/markdown` | AI 응답 렌더링 보안 경계 생성 | 대기 |
 
 **현재 반영 상태**: `usePersistentState`로 preferences/savedReports localStorage persistence를 적용했다. 전용 entity store와 sanitizer 강화는 후속 작업이다.
 
-**Vercel 반영 상태**: `api/chat.ts` Vercel Function과 `vercel.json`을 추가했고, `server.ts`와 Function이 `src/features/send-ai-chat/server/chatResponder.ts`를 공유하도록 분리했다. 자세한 환경 변수와 배포 책임은 `docs/talsu_inna_vercel_functions_env.md`에서 관리한다.
+**Vercel/API 반영 상태**: `api/chat.ts` Vercel Function과 `vercel.json`을 추가했고, `server.ts`와 Function이 `src/features/send-ai-chat/server/chatResponder.ts`를 공유하도록 분리했다. `features/send-ai-chat/api/schema.ts`로 request/response runtime validation을 추가해 잘못된 요청은 400, 서버/Gemini 실패는 500으로 분리했다. `shared/api/http-client.ts`를 추가하고 `sendAiChat`이 timeout/error/JSON-text parse 공통 경계를 통과하도록 변경했다. 자세한 환경 변수와 배포 책임은 `docs/talsu_inna_vercel_functions_env.md`에서 관리한다.
 
 ## 11. Phase 7. QA와 회귀 방지
 
@@ -142,6 +174,15 @@
 | Smoke F5/F8 | AI 질문, 서버 fallback, 로컬 fallback |
 | Smoke F7 | 설정 저장, 루틴 동기화 |
 | 구조 검사 | `App.tsx` 150줄 이하 목표, page 파일 fetch/mock/schema/storage key 직접 선언 금지 |
+
+## 11-1. 다음 작업 전 체크리스트
+
+| 체크 | 현재 판단 |
+|---|---|
+| 워크트리 | `ai-chat-panel` 코드와 문서 변경이 있다. 병렬 변경 파일은 유지한다. |
+| 병렬 작업 충돌 | `.env.example`, `README.md`, `server.ts`, Vercel 코드 파일은 이미 원격 반영되었고 다음 UI refactor에서는 건드리지 않는다. |
+| 다음 코드 터치 범위 | 안정 우선이면 `features/send-ai-chat/model`, `widgets/ai-chat-panel`, `docs/*`. 구조 축소 우선이면 `src/App.tsx`, `src/widgets/archive-calendar/**`, `entities/report` |
+| 검증 | 다음 분리 이후 `npm run lint`, `npm run build`를 반복한다. |
 
 ## 12. 완료 정의
 
