@@ -1,5 +1,6 @@
 import type { AiChatResponse } from "../../../entities/chat-message/model/types";
 import type { UserPreferences } from "../../../entities/user-preferences/model/types";
+import { validateAiChatResponse } from "./schema";
 
 export interface SendAiChatInput {
   message: string;
@@ -22,5 +23,5 @@ export async function sendAiChat(input: SendAiChatInput): Promise<AiChatResponse
     throw new Error("서버 연동 지연");
   }
 
-  return response.json() as Promise<AiChatResponse>;
+  return validateAiChatResponse(await response.json());
 }

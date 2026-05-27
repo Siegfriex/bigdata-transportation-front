@@ -94,7 +94,7 @@
 | `send-ai-chat` | `/api/chat` 호출, fallback, AI 추천 반영 | AI fetch와 response mapping이 `App.tsx`에서 사라짐 |
 | `sync-preferences` | 설정 저장, 루틴 동기화, localStorage 복원 | 설정 page가 form 배치만 담당 |
 
-**현재 반영 상태**: `generate-route-plan` preset, `save-report` 생성/중복 규칙, `send-ai-chat` API/fallback/markdown, `toggle-map-layer` 타입을 feature로 분리했다.
+**현재 반영 상태**: `generate-route-plan` preset, preset carousel UI, `save-report` 생성/중복 규칙, `send-ai-chat` API/fallback/markdown, `toggle-map-layer` 타입을 feature로 분리했다. 추가로 `complete-onboarding` UI를 feature slice로 분리해 온보딩 overlay JSX와 `as any` 타입 캐스팅을 `App.tsx`에서 제거했다.
 
 ## 9. Phase 5. Widget/Page 재조립
 
@@ -111,18 +111,24 @@
 
 **현재 반영 상태**: `App.tsx`에서 프리셋, 저장 리포트 생성 규칙, AI fetch/fallback, markdown 렌더링, layer 타입/default를 분리했다. JSX 화면 분해와 router/page/widget 재조립은 다음 작업이다.
 
+**추가 반영 상태**: `InteractiveMap`을 `src/widgets/transit-map-panel/ui/InteractiveMap.tsx`로 이동하고 `src/widgets/transit-map-panel/index.ts` public API를 만들었다. 기존 `src/components/InteractiveMap.tsx`는 호환 re-export로 남겼다. `AppShell`, `PageContainer`, `cn` 기반도 추가했다. 이후 `ToastOverlay`, `TopAppBar`, `BottomNavigation`을 각각 `shared/ui/toast`, `widgets/top-app-bar`, `widgets/bottom-navigation`으로 분리했다. `complete-onboarding` feature와 `RoutePresetCarousel` 분리 후 `App.tsx`는 1309줄로 축소되었다. `widgets/report-sheet`에는 `ReportTypeTabs`, `RouteConditionCard`, `BoardingReportView`, `CarriageReportView`, `DeadlineReportView`, `RecoveryReportView`를 추가했고, 역 목록 하드코딩은 `entities/station`의 `stationNames`로 대체했다. `npm run lint`, `npm run build`가 통과했다.
+
 ## 10. Phase 6. Persistence/API 정리
 
 | 작업 | 대상 | 완료 기준 |
 |---|---|---|
 | `httpClient` 추가 | `shared/api/http-client.ts` | timeout/error/fallback 계약이 한 곳에서 처리됨 |
 | AI response schema 추가 | `features/send-ai-chat/api/schema.ts` 또는 `entities/chat-message/model/schema.ts` | 응답 parse 경계 생성 |
+| Vercel Function 엔트리 추가 | `api/chat.ts`, `vercel.json` | Vercel에서 `/api/chat`이 Express 없이 실행됨 |
+| 서버 responder 공용화 | `features/send-ai-chat/server/chatResponder.ts` | 로컬 Express와 Vercel Function이 같은 Gemini/fallback 로직 사용 |
 | preferences localStorage | `entities/user-preferences/model/store.ts` | 새로고침 후 설정 유지 |
 | report localStorage | `entities/report/model/store.ts` | 새로고침 후 저장 리포트 유지 |
 | query key factory | `shared/config/query-keys.ts` | query key 중복 방지 |
 | markdown sanitizer | `shared/lib/markdown` | AI 응답 렌더링 보안 경계 생성 |
 
 **현재 반영 상태**: `usePersistentState`로 preferences/savedReports localStorage persistence를 적용했다. 전용 entity store와 sanitizer 강화는 후속 작업이다.
+
+**Vercel 반영 상태**: `api/chat.ts` Vercel Function과 `vercel.json`을 추가했고, `server.ts`와 Function이 `src/features/send-ai-chat/server/chatResponder.ts`를 공유하도록 분리했다. 자세한 환경 변수와 배포 책임은 `docs/talsu_inna_vercel_functions_env.md`에서 관리한다.
 
 ## 11. Phase 7. QA와 회귀 방지
 

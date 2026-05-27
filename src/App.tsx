@@ -2,44 +2,40 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import {
   Map,
   MessageSquare,
-  FileText,
-  Sliders,
   ChevronRight,
-  ArrowRight,
   Navigation,
   Sparkles,
-  Train,
   Bike,
-  AlertTriangle,
   Bookmark,
   Plus,
-  Compass,
-  CheckCircle2,
   BookmarkCheck,
   RotateCw,
   Search,
-  User,
   ExternalLink,
   ShieldCheck,
   Trash2,
   Calendar,
   Layers,
-  Clock,
-  Car,
-  Bus,
-  Footprints,
-  Copy
 } from "lucide-react";
 import { TabId, ReportType, RoutePlan, SavedReport, UserPreferences, ChatMessage } from "./types";
 import { getDefaultPreferences, getSavedReportsMock, getRoutePlans, getCarSurvivalDetails, CarDetail } from "./data";
-import { routePresets, type RoutePreset } from "./features/generate-route-plan";
+import { OnboardingOverlay } from "./features/complete-onboarding";
+import { RoutePresetCarousel, type RoutePreset } from "./features/generate-route-plan";
 import { createSavedReport, isDuplicateSavedReport } from "./features/save-report";
 import { createFallbackChatMessage, renderMarkdown, sendAiChat } from "./features/send-ai-chat";
 import { DEFAULT_VISIBLE_LAYERS, type MapLayerState } from "./features/toggle-map-layer";
 import { STORAGE_KEYS } from "./shared/config";
 import { formatKoreanTime } from "./shared/lib/time";
 import { usePersistentState } from "./shared/model/usePersistentState";
-import InteractiveMap from "./components/InteractiveMap";
+import { AppShell } from "./app/layouts";
+import { ToastOverlay } from "./shared/ui/toast";
+import { BottomNavigation } from "./widgets/bottom-navigation";
+import { BoardingReportView, CarriageReportView, DeadlineReportView, RecoveryReportView, ReportTypeTabs, RouteConditionCard } from "./widgets/report-sheet";
+import InteractiveMap from "./widgets/transit-map-panel";
+import { TopAppBar } from "./widgets/top-app-bar";
+
+const isCrowdSensitivity = (value: string): value is UserPreferences["crowdSensitivity"] =>
+  value === "low" || value === "normal" || value === "high";
 
 export default function App() {
   // Onboarding / Profile State Check
@@ -280,15 +276,8 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-black apple-mesh-bg text-[#FFFFFF] font-sans antialiased flex items-center justify-center p-0 md:p-6 lg:p-12 overflow-x-hidden">
-      
-      {/* Absolute Dynamic Floating Action Alerts / Toast Notification */}
-      {toastMessage && (
-        <div id="toast-overlay" className="fixed top-5 left-1/2 -translate-x-1/2 apple-glass text-white px-4 py-2.5 rounded-full text-xs font-medium shadow-[0_12px_24px_rgba(0,0,0,0.5)] z-[100] flex items-center gap-1.5 animate-in fade-in slide-in-from-top-6 duration-200">
-          <Sparkles className="w-3.5 h-3.5 shrink-0 text-[#0A84FF]" />
-          <span>{toastMessage}</span>
-        </div>
-      )}
+    <AppShell>
+      <ToastOverlay message={toastMessage} />
 
       {/* Screen container: Styled like a high-density, glassmorphic premium physical phone chassis on desktop view! */}
       <div className="w-full max-w-[412px] h-screen md:h-[844px] apple-glass rounded-none md:rounded-[44px] border-none md:border-[8px] md:border-[#1E1E1E]/80 shadow-[0_32px_64px_rgba(0,0,0,0.8)] relative flex flex-col overflow-hidden">
@@ -299,167 +288,25 @@ export default function App() {
           <div className="w-12 h-1.5 bg-[#444] rounded-full" />
         </div>
 
-        {/* AUTH Flow Overlays (Onboarding AUTH-01 & AUTH-02 login) */}
         {showOnboarding && (
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-3xl z-40 flex flex-col p-6 overflow-y-auto">
-            {onboardingStep === 1 ? (
-              <div className="flex-1 flex flex-col justify-between py-8">
-                <div className="space-y-4 text-center mt-12">
-                  <div className="w-20 h-20 apple-glass-light rounded-[28px] border border-white/20 flex items-center justify-center mx-auto text-white shadow-xl">
-                    <Compass className="w-10 h-10 animate-spin-slow" />
-                  </div>
-                  <h1 className="text-[28px] leading-tight font-semibold tracking-tight text-white mt-6">
-                    빠른 길 말고,<br />
-                    <span className="text-[#0A84FF]">실제로 탈 수 있는 안심 길</span>
-                  </h1>
-                  <p className="text-[13px] text-white/60 max-w-[280px] mx-auto leading-relaxed mt-3">
-                    수도권 버스 잔여좌석, 지하철 혼잡도, 따릉이 결합 전술을 계산해 안심 도착을 보장합니다.
-                  </p>
-                </div>
-
-                {/* Styled Low-Saturation Route Preview Graphic */}
-                <div className="my-8 apple-glass p-5 rounded-[24px] shadow-lg space-y-4">
-                  <div className="flex items-center justify-between text-[11px] font-medium text-white/50 tracking-wide uppercase">
-                    <span>Status: Ready</span>
-                    <span>Transit MaaS</span>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="text-[13px] font-semibold flex items-center gap-2 text-white">
-                      <Train className="w-4 h-4 text-[#0A84FF]" />
-                      <span>염창역 → 여의도역 (9호선 급행)</span>
-                    </div>
-                    <div className="text-[11px] text-white/60 pl-6">지하철 계단 몰림 피로 회피 전술 장착</div>
-                  </div>
-                  <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden mt-4">
-                    <div className="h-full w-2/3 bg-[#0A84FF] rounded-full shadow-[0_0_12px_rgba(10,132,255,0.8)]" />
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <button
-                    id="next-onboarding"
-                    onClick={() => setOnboardingStep(2)}
-                    className="w-full py-4 bg-[#0A84FF] hover:bg-[#007AFF] text-white rounded-[20px] text-[15px] font-semibold transition-all active:scale-[0.98] shadow-lg flex items-center justify-center gap-2"
-                  >
-                    <span>조건 설정 시작하기</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
-                  <button
-                    id="bypass-login"
-                    onClick={() => {
-                        setUser({ name: "비회원 체험자", isLoggedIn: false });
-                        setShowOnboarding(false);
-                        showToast("비회원 체험 모드로 진입했습니다.");
-                    }}
-                    className="w-full py-3 bg-transparent text-white/50 hover:text-white rounded-[20px] text-[13px] font-medium transition-colors"
-                  >
-                    비회원으로 바로 둘러보기
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="flex-1 flex flex-col justify-between py-6">
-                <div className="space-y-6">
-                  <div className="flex items-center gap-2 border-b border-white/10 pb-4 mt-8">
-                    <Sliders className="w-5 h-5 text-[#0A84FF]" />
-                    <h2 className="text-sm font-semibold text-white">초기 개인 이동선호 설정 (AUTH-04)</h2>
-                  </div>
-
-                  <div className="space-y-5">
-                    <div>
-                      <label className="block text-[11px] font-medium text-white/50 tracking-wide mb-2">혼잡 민감도 (회피 강도)</label>
-                      <div className="grid grid-cols-3 gap-2">
-                        {["low", "normal", "high"].map((level) => (
-                          <button
-                            key={level}
-                            onClick={() => setPreferences(prev => ({ ...prev, crowdSensitivity: level as any }))}
-                            className={`py-2 px-1 text-center rounded-xl text-[13px] font-medium transition-all duration-200 ${
-                              preferences.crowdSensitivity === level
-                                ? "bg-[#0A84FF] text-white shadow-md shadow-[#0A84FF]/20"
-                                : "apple-glass-light text-white/70 hover:bg-white/10"
-                            }`}
-                          >
-                            {level === "low" ? "낮음" : level === "normal" ? "보통" : "높음"}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-[11px] font-medium text-white/50 tracking-wide mb-2">택시 선탑승 상한 비용</label>
-                      <div className="grid grid-cols-3 gap-2">
-                        {[0, 5000, 10000].map((fee) => (
-                          <button
-                            key={fee}
-                            onClick={() => setPreferences(prev => ({ ...prev, maxTaxiFee: fee }))}
-                            className={`py-2 px-1 text-center rounded-xl text-[13px] font-medium transition-all duration-200 ${
-                              preferences.maxTaxiFee === fee
-                                ? "bg-[#0A84FF] text-white shadow-md shadow-[#0A84FF]/20"
-                                : "apple-glass-light text-white/70 hover:bg-white/10"
-                            }`}
-                          >
-                            {fee === 0 ? "사용 안함" : `${fee.toLocaleString()}원`}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-[11px] font-medium text-white/50 tracking-wide mb-2">따릉이 자전거 연계</label>
-                      <div className="flex items-center justify-between p-3 apple-glass-light rounded-xl">
-                        <div className="flex items-center gap-2">
-                          <Bike className="w-4 h-4 text-[#0A84FF]" />
-                          <span className="text-[13px] text-white">경로에 자전거 조합 포함</span>
-                        </div>
-                        <button
-                          onClick={() => setPreferences(prev => ({ ...prev, useBike: !prev.useBike }))}
-                          className={`w-[46px] h-[28px] rounded-full transition-all duration-300 relative ${
-                            preferences.useBike ? "bg-[#0A84FF]" : "bg-white/10"
-                          }`}
-                        >
-                          <div className={`w-[24px] h-[24px] rounded-full bg-white shadow-sm absolute top-[2px] transition-all duration-300 ${
-                            preferences.useBike ? "left-[20px]" : "left-[2px]"
-                          }`} />
-                        </button>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-[11px] font-medium text-white/50 tracking-wide mb-2">상용 닉네임 설정</label>
-                      <input
-                        type="text"
-                        value={user.name}
-                        onChange={(e) => setUser(prev => ({ ...prev, name: e.target.value }))}
-                        className="w-full apple-glass-light focus:bg-white/10 focus:border-white/30 rounded-xl py-3 px-4 text-[14px] text-white outline-none font-sans transition-all duration-200"
-                        placeholder="이름을 입력하세요"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-2 mt-6">
-                  <button
-                    id="finish-onboarding"
-                    onClick={() => {
-                      setUser(prev => ({ ...prev, isLoggedIn: true }));
-                      setShowOnboarding(false);
-                      showToast(`환영합니다, ${user.name}님! 설정이 성공 탑재되었습니다.`);
-                    }}
-                    className="w-full py-4 bg-[#0A84FF] hover:bg-[#007AFF] transition-colors shadow-lg text-white rounded-[20px] text-[15px] font-semibold flex items-center justify-center gap-2"
-                  >
-                    <CheckCircle2 className="w-5 h-5" />
-                    <span>개인 플랜 분석 시작</span>
-                  </button>
-                </div>
-              </div>
-            )}
-            
-            {/* Onboarding steps paginator dot row */}
-            <div className="flex justify-center gap-1.5 mt-4">
-              <span className={`w-1.5 h-1.5 rounded-full ${onboardingStep === 1 ? "bg-white" : "bg-white/20"}`} />
-              <span className={`w-1.5 h-1.5 rounded-full ${onboardingStep === 2 ? "bg-white" : "bg-white/20"}`} />
-            </div>
-          </div>
+          <OnboardingOverlay
+            step={onboardingStep}
+            user={user}
+            preferences={preferences}
+            onNext={() => setOnboardingStep(2)}
+            onBypass={() => {
+              setUser({ name: "비회원 체험자", isLoggedIn: false });
+              setShowOnboarding(false);
+              showToast("비회원 체험 모드로 진입했습니다.");
+            }}
+            onChangeUser={setUser}
+            onChangePreferences={setPreferences}
+            onFinish={() => {
+              setUser((prev) => ({ ...prev, isLoggedIn: true }));
+              setShowOnboarding(false);
+              showToast(`환영합니다, ${user.name}님! 설정이 성공 탑재되었습니다.`);
+            }}
+          />
         )}
 
         {/* MAP LAYER (Z0) - Always Active & Full Screen */}
@@ -474,31 +321,11 @@ export default function App() {
           />
         </div>
 
-        {/* Global Standard Top App Bar (STATUS & NAVIGATION INFO) */}
-        <header className="absolute top-0 inset-x-0 px-4 py-3 apple-glass border-b border-white/10 flex items-center justify-between z-20 shrink-0 select-none pointer-events-auto">
-          <div className="flex items-center gap-2">
-            <span className="text-[13px] font-mono font-black tracking-widest text-[#0A84FF] uppercase flex items-center gap-1">
-              <span>탈수있나</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-[#0A84FF] animate-pulse" />
-            </span>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1 apple-glass-light border border-white/10 px-2 py-1 rounded-lg text-[9px] text-white/70">
-              <User className="w-3 h-3 text-[#0A84FF]" />
-              <span className="truncate max-w-[50px] font-mono">{user.name}</span>
-            </div>
-            
-            {showOnboarding === false && (
-              <button
-                onClick={() => setShowOnboarding(true)}
-                className="text-[9px] font-mono text-white/50 border border-transparent hover:border-white/10 px-1.5 py-0.5 rounded transition-all"
-              >
-                RESET
-              </button>
-            )}
-          </div>
-        </header>
+        <TopAppBar
+          userName={user.name}
+          showReset={!showOnboarding}
+          onReset={() => setShowOnboarding(true)}
+        />
 
         {/* Primary Screen Body Panel */}
         <main className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden min-h-0 relative z-10 pt-[52px] pointer-events-none pb-[64px]">
@@ -509,49 +336,12 @@ export default function App() {
               
               <div className="flex-1 shrink-0 min-h-[40px]"></div>
 
-              {/* Routing Preset Information Cards Carousel */}
-              <div className="w-full overflow-x-auto scrollbar-none pb-2 flex gap-3 pointer-events-auto snap-x">
-                {routePresets.map((preset, idx) => {
-                  const isActive = startStation === preset.start && endStation === preset.end && selectedReportType === preset.report;
-                  const urgencyColors = preset.urgency === "high" ? "text-[#FF3B30] bg-[#FF3B30]/10 border-[#FF3B30]/30" : preset.urgency === "warn" ? "text-[#FF9500] bg-[#FF9500]/10 border-[#FF9500]/30" : "text-[#A6D600] bg-[#A6D600]/10 border-[#A6D600]/30";
-                  return (
-                    <button
-                      key={idx}
-                      onClick={() => triggerPreset(preset)}
-                      className={`shrink-0 w-[180px] snap-center text-left p-3 rounded-[16px] border transition-all flex flex-col justify-between gap-1.5 relative overflow-hidden group ${
-                        isActive
-                          ? "bg-[#0A84FF]/10 border-[#0A84FF]/50 shadow-[0_4px_16px_rgba(10,132,255,0.2)]"
-                          : "apple-glass border-white/10 hover:border-white/20 hover:bg-white/5 active:scale-[0.98]"
-                      }`}
-                    >
-                      {isActive && <div className="absolute inset-0 bg-gradient-to-br from-[#0A84FF]/10 to-transparent pointer-events-none" />}
-                      <div className="flex items-start justify-between w-full">
-                         <span className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-md flex items-center gap-1 ${isActive ? 'text-white bg-[#0A84FF]' : urgencyColors}`}>
-                           {preset.tag}
-                         </span>
-                         <span className={`text-[10px] font-sans font-bold flex items-center gap-1 ${isActive ? "text-[#0A84FF]" : "text-white/50"}`}>
-                            {preset.start.replace("역", "")} <span className="opacity-50">→</span> {preset.end.replace("역", "")}
-                         </span>
-                      </div>
-                      <div className="flex flex-col gap-0.5 mt-2 relative z-10 w-full">
-                        <span className={`font-sans font-bold text-[14px] leading-tight tracking-tight ${isActive ? "text-white" : "text-white/90"}`}>
-                           {preset.title}
-                        </span>
-                        <span className={`font-sans text-[11px] leading-snug line-clamp-2 ${isActive ? "text-[#0A84FF] font-medium" : "text-white/60"}`}>
-                           {preset.summary}
-                        </span>
-                        <div className="w-full h-1 mt-2.5 bg-black/40 rounded-full overflow-hidden">
-                          <div className={`h-full transition-all duration-1000 ${
-                            preset.urgency === "high" ? "bg-[#FF3B30] w-[92%]" : 
-                            preset.urgency === "warn" ? "bg-[#FF9500] w-[78%]" : 
-                            "bg-[#A6D600] w-[40%]"
-                          }`} />
-                        </div>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
+              <RoutePresetCarousel
+                startStation={startStation}
+                endStation={endStation}
+                selectedReportType={selectedReportType}
+                onSelectPreset={triggerPreset}
+              />
 
               {mapLayer === "default" && (
                 <div 
@@ -574,330 +364,61 @@ export default function App() {
                     <Plus className="w-5 h-5 rotate-45" />
                   </button>
                 </div>
-                {/* Input Station Settings Sheet Card (MAP-02) */}
-                <div className="apple-glass rounded-2xl border border-white/10 p-3 space-y-3 shadow-md relative pointer-events-auto">
-                
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="space-y-1">
-                    <label className="text-[9px] font-mono font-bold text-white/50 uppercase tracking-wider block">출발 정박사</label>
-                    <div className="relative">
-                      <select
-                        id="start-station-select"
-                        value={startStation}
-                        onChange={(e) => setStartStation(e.target.value)}
-                        className="w-full apple-glass-light border border-white/15 focus:border-[#0A84FF] rounded-xl py-2 pl-2 pr-6 text-xs text-white uppercase font-bold outline-none appearance-none"
-                      >
-                        {["염창역", "여의도역", "사당역", "강남역", "구리역", "홍대입구역", "남양주시"].map((name) => (
-                          <option key={name} value={name}>{name}</option>
-                        ))}
-                      </select>
-                      <div className="absolute right-2 top-2.5 w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[4px] border-t-white pointer-events-none" />
-                    </div>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-[9px] font-mono font-bold text-white/50 uppercase tracking-wider block">목적 대피지</label>
-                    <div className="relative">
-                      <select
-                        id="end-station-select"
-                        value={endStation}
-                        onChange={(e) => setEndStation(e.target.value)}
-                        className="w-full apple-glass-light border border-white/15 focus:border-[#0A84FF] rounded-xl py-2 pl-2 pr-6 text-xs text-white uppercase font-bold outline-none appearance-none"
-                      >
-                        {["염창역", "여의도역", "사당역", "강남역", "구리역", "홍대입구역", "남양주시"].map((name) => (
-                          <option key={name} value={name}>{name}</option>
-                        ))}
-                      </select>
-                      <div className="absolute right-2 top-2.5 w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[4px] border-t-white pointer-events-none" />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between border-t border-white/10 pt-2">
-                  <div className="flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-[#0A84FF]" />
-                    <span className="text-[11px] font-medium text-white">도착 마감한계:</span>
-                  </div>
-                  <input
-                    id="deadline-time-input"
-                    type="time"
-                    value={deadlineTime}
-                    onChange={(e) => setDeadlineTime(e.target.value)}
-                    className="apple-glass-light border border-white/10 text-xs font-mono font-bold rounded-lg px-2 py-0.5 text-white outline-none focus:border-[#0A84FF]"
-                  />
-                </div>
-              </div>
+                <RouteConditionCard
+                  startStation={startStation}
+                  endStation={endStation}
+                  deadlineTime={deadlineTime}
+                  onChangeStartStation={setStartStation}
+                  onChangeEndStation={setEndStation}
+                  onChangeDeadlineTime={setDeadlineTime}
+                />
 
               {/* Tab Selector inside the Sheet for Reports (MAP-05, MAP-06, MAP-07, MAP-08) */}
               <div className="space-y-2 pointer-events-auto bg-black/40 backdrop-blur-xl rounded-2xl p-2 border border-white/10">
-                <div className="flex border-b border-white/10 overflow-x-auto scrollbar-none">
-                  {([
-                    { id: "deadline", label: "⏱️ 마감도착" },
-                    { id: "boarding", label: "🚍 탑승가능" },
-                    { id: "carriage", label: "🚇 생존 칸" },
-                    { id: "recovery", label: "🌙 실패복구" }
-                  ] as const).map((rep) => (
-                    <button
-                      key={rep.id}
-                      onClick={() => {
-                        setSelectedReportType(rep.id);
-                        showToast(`📊 '${rep.label.split(" ")[1]}' 분석 보고서가 로딩되었습니다.`);
-                      }}
-                      className={`flex-1 min-w-[70px] py-2 text-center text-xs font-bold transition-all relative shrink-0 ${
-                        selectedReportType === rep.id
-                          ? "text-[#0A84FF]"
-                          : "text-white/50 hover:text-white"
-                      }`}
-                    >
-                      <span>{rep.label}</span>
-                      {selectedReportType === rep.id && (
-                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#0A84FF]" />
-                      )}
-                    </button>
-                  ))}
-                </div>
+                <ReportTypeTabs
+                  selectedReportType={selectedReportType}
+                  onSelectReport={(reportType, label) => {
+                    setSelectedReportType(reportType);
+                    showToast(`📊 '${label}' 분석 보고서가 로딩되었습니다.`);
+                  }}
+                />
 
                 {/* ACTIVE REPORT CONTAINER */}
                 <div id="active-report-view" className="apple-glass rounded-2xl border border-white/10 p-3 space-y-3.5">
                   
                   {/* F1: 탑승가능성 리포트 (Boarding Possibility Report MAP-05) */}
                   {selectedReportType === "boarding" && (
-                    <div className="space-y-3">
-                      <div className="bg-[#FF9500]/10 border border-[#FF9500]/25 rounded-xl p-3 flex gap-2">
-                        <AlertTriangle className="w-4 h-4 text-[#FF9500] shrink-0 mt-0.5" />
-                        <div className="flex-1">
-                          <h4 className="text-xs font-bold text-[#FF9500] mb-0.5">이번 차량은 보내는 편이 안전합니다!</h4>
-                          <p className="text-[10px] text-white/70 leading-relaxed">
-                            {startStation} 부근 광역버스 배차진단 결과, 현재 기점 출발 인원이 만석으로 입점 정체 및 무정차가 예상됩니다.
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="apple-glass border border-white/10 p-2.5 rounded-xl text-center space-y-1">
-                          <span className="text-[10px] text-white/50 font-mono block uppercase">이번 차량 (1st Bus)</span>
-                          <span className="text-sm font-black text-[#FF3B30] tracking-tight">3분 후 진입</span>
-                          <span className="text-[10px] bg-[#FF3B30]/15 text-[#FF3B30] px-1.5 py-0.5 rounded-full inline-block font-mono">만석 (잔여 0석)</span>
-                          <span className="text-[9px] text-white/50 block">차내혼잡: 최고조</span>
-                        </div>
-                        <div className="apple-glass border border-[#0A84FF]/30 p-2.5 rounded-xl text-center space-y-1 shadow-[0_4px_12px_rgba(10,132,255,0.15)]">
-                          <span className="text-[10px] text-[#0A84FF] font-mono block uppercase">다음 차량 (2nd Bus)</span>
-                          <span className="text-sm font-black text-[#0A84FF] tracking-tight">8분 후 진입</span>
-                          <span className="text-[10px] bg-[#0A84FF]/15 text-[#0A84FF] px-1.5 py-0.5 rounded-full inline-block font-mono">원활 (잔여 13석)</span>
-                          <span className="text-[9px] text-white/70 block">좌석착정: 92% 보장</span>
-                        </div>
-                      </div>
-
-                      <div className="border-t border-white/15 pt-2 flex items-center justify-between text-[11px] text-white/70 font-mono">
-                        <span className="flex items-center gap-1">
-                          <ShieldCheck className="w-3.5 h-3.5 text-[#0A84FF]" />
-                          <span>신뢰도: 패턴+실시간 융합</span>
-                        </span>
-                        <span className="text-[#0A84FF]">다음 차량 착석 권고</span>
-                      </div>
-                    </div>
+                    <BoardingReportView startStation={startStation} />
                   )}
 
                   {/* F2: 지하철 칸별 생존 가이드 (Carriage Survival Guide MAP-06) */}
                   {selectedReportType === "carriage" && (
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between text-xs font-bold border-b border-white/15 pb-2 text-white">
-                        <span>🚇 최한산 안심 탑승 칸 추천 (염창역 → 여의도기)</span>
-                        <span className="text-[#FF3B30] text-[11px] font-mono">급행 혼잡도: 극심</span>
-                      </div>
-
-                      {/* Interactive Subway Carriage row mockup */}
-                      <div className="flex justify-between gap-1 py-1">
-                        {carDetails.map((car, idx) => (
-                          <button
-                            key={car.carNo}
-                            onClick={() => {
-                              setActiveCarNo(car.carNo);
-                              showToast(`🚇 ${car.carNo}번 칸 상세 분석을 로드했습니다.`);
-                            }}
-                            className={`flex-1 py-1.5 rounded-lg border text-center transition-all ${
-                              activeCarNo === car.carNo
-                                ? "bg-[#0A84FF]/10 border-[#0A84FF] text-white shadow-[0_2px_10px_rgba(166,214,0,0.2)]"
-                                : car.comfortRating === "안전"
-                                ? "apple-glass border-white/10 text-[#0A84FF]"
-                                : car.comfortRating === "주의"
-                                ? "apple-glass border-white/10 text-[#FF9500]"
-                                : "apple-glass border-white/10 text-[#FF3B30]"
-                            }`}
-                          >
-                            <span className="text-[10px] uppercase font-bold tracking-tight block">{car.carNo}</span>
-                            <span className="text-[7.5px] font-mono block opacity-80">{car.crowdPercent}%</span>
-                          </button>
-                        ))}
-                      </div>
-
-                      {/* Detail information card of active selected carriage */}
-                      {carDetails.find((c) => c.carNo === activeCarNo) && (
-                        <div className="apple-glass border border-white/10 rounded-xl p-3 space-y-2">
-                          <div className="flex justify-between items-center">
-                            <span className="text-xs font-bold text-[#0A84FF]">카 {activeCarNo} 상태분석</span>
-                            <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase ${
-                              carDetails.find(c => c.carNo === activeCarNo)?.comfortRating === "안전"
-                                ? "bg-[#0A84FF]/10 text-[#0A84FF]"
-                                : carDetails.find(c => c.carNo === activeCarNo)?.comfortRating === "주의"
-                                ? "bg-[#FF9500]/10 text-[#FF9500]"
-                                : "bg-[#FF3B30]/10 text-[#FF3B30]"
-                            }`}>
-                              {carDetails.find(c => c.carNo === activeCarNo)?.comfortRating} 보장
-                            </span>
-                          </div>
-                          
-                          <p className="text-[11px] text-white/70 leading-relaxed">
-                            {carDetails.find(c => c.carNo === activeCarNo)?.reason}
-                          </p>
-
-                          <div className="grid grid-cols-2 gap-2 text-[10px] font-mono text-white/50 border-t border-white/15 pt-2">
-                            <span>출구 거리: {carDetails.find(c => c.carNo === activeCarNo)?.transferStatus === "fast" ? "초단거리 (4-2)" : "도보 50m"}</span>
-                            <span className="text-right">체력생존율: {carDetails.find(c => c.carNo === activeCarNo)?.comfortRating === "안전" ? "95%" : "30%"}</span>
-                          </div>
-                        </div>
-                      )}
-                    </div>
+                    <CarriageReportView
+                      carDetails={carDetails}
+                      activeCarNo={activeCarNo}
+                      onSelectCar={(carNo) => {
+                        setActiveCarNo(carNo);
+                        showToast(`🚇 ${carNo}번 칸 상세 분석을 로드했습니다.`);
+                      }}
+                    />
                   )}
 
                   {/* F3: 마감도착 리포트 (Deadline Arrival Plan MAP-07) */}
                   {selectedReportType === "deadline" && (
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-white">마감도착 후보군 비교 ({deadlineTime} 전 도착기준)</span>
-                        <span className="text-[10px] bg-[#0A84FF]/10 text-[#0A84FF] px-2 py-0.5 rounded-full font-mono font-bold">도착확률 95%</span>
-                      </div>
-
-                      {/* Route Candidates comparative list */}
-                      <div className="space-y-2">
-                        {plans.map((plan, idx) => {
-                          const isSelected = selectedPlan?.id === plan.id;
-                          return (
-                            <div
-                              key={plan.id}
-                              onClick={() => setSelectedPlan(plan)}
-                              className={`p-3 rounded-xl border transition-all cursor-pointer ${
-                                isSelected
-                                  ? "apple-glass border-[#0A84FF]"
-                                  : "apple-glass/50 border-white/10 hover:bg-[#202428]"
-                              }`}
-                            >
-                              <div className="flex justify-between items-start mb-1.5">
-                                <div className="flex items-center gap-1.5">
-                                  <span className={`w-2 h-2 rounded-full ${
-                                    plan.risk === "high" ? "bg-[#FF3B30]" : plan.risk === "medium" ? "bg-[#FF9500]" : "bg-[#0A84FF]"
-                                  }`} />
-                                  <span className="text-xs font-bold text-white">{plan.name}</span>
-                                </div>
-                                <span className="text-xs font-mono font-black text-[#0A84FF]">{plan.eta} 도착</span>
-                              </div>
-
-                              <p className="text-[10px] text-white/70 leading-relaxed mb-2">
-                                {plan.description}
-                              </p>
-
-                              <div className="flex justify-between items-center text-[9px] font-mono text-white/50 border-t border-white/15 pt-2">
-                                <div className="flex gap-2">
-                                  <span>추가 요금: {plan.extraCost.toLocaleString()}원</span>
-                                  <span>지연위험: {plan.risk === 'low' ? '낮음' : plan.risk === 'medium' ? '보통' : '높음'}</span>
-                                </div>
-                                <span className={`font-bold ${
-                                  plan.confidence === "realtime" ? "text-[#0A84FF]" : "text-white/50"
-                                }`}>
-                                  {plan.confidence === "realtime" ? "● 실시간 API" : "● 과거패턴"}
-                                </span>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-
-                      {selectedPlan && (
-                        <div className="apple-glass-light border border-white/10 rounded-xl p-3 space-y-2">
-                          <div className="flex justify-between items-center">
-                            <span className="text-[10px] font-bold text-white/50 uppercase">선택 이동 타임라인 (Timeline MAP-04)</span>
-                            <button
-                              onClick={() => {
-                                const summary = `[마감도착 비상 탈출 플랜]\n📍 출발: ${startStation}\n🏁 도착: ${endStation}\n⏱ 목표 시간: ${deadlineTime} 전\n\n[선택된 플랜: ${selectedPlan.name}]\n예상 도착 도착: ${selectedPlan.eta}\n추가 요금: ${selectedPlan.extraCost.toLocaleString()}원\n\n[타임라인 상세]\n${selectedPlan.timeline.map((step, idx) => `${idx + 1}. ${step.detail} (${step.duration}분)`).join('\n')}`;
-                                navigator.clipboard.writeText(summary);
-                                showToast("🔗 경로 요약이 클립보드에 복사되었습니다.");
-                              }}
-                              className="apple-glass border border-white/10 hover:bg-[#202428] text-white/70 hover:text-white px-2 py-1 rounded flex items-center gap-1.5 text-[9px] font-bold transition-all active:scale-95"
-                            >
-                              <Copy className="w-2.5 h-2.5" />
-                              <span>경로 복사</span>
-                            </button>
-                          </div>
-                          <div className="space-y-3 pt-2">
-                            {selectedPlan.timeline.map((step, idx) => (
-                              <div key={idx} className="flex gap-2.5 items-start">
-                                <div className="flex flex-col items-center mt-0.5">
-                                  <div className="w-5 h-5 rounded-full apple-glass border border-white/10 flex items-center justify-center shrink-0 shadow-sm text-white">
-                                    {step.mode === "walk" && <Footprints className="w-2.5 h-2.5 opacity-70" />}
-                                    {step.mode === "subway" && <Train className="w-3 h-3 text-[#0A84FF]" />}
-                                    {step.mode === "bus" && <Bus className="w-3 h-3 text-[#0A84FF]" />}
-                                    {step.mode === "taxi" && <Car className="w-3 h-3 text-[#FF9500]" />}
-                                    {step.mode === "bike" && <Bike className="w-3 h-3 text-[#0A84FF]" />}
-                                  </div>
-                                  {idx < selectedPlan.timeline.length - 1 && (
-                                    <div className="w-[1.5px] h-6 bg-transparent rounded-full my-0.5" />
-                                  )}
-                                </div>
-                                <div className="flex-1 pb-1">
-                                  <div className="flex justify-between items-start">
-                                     <strong className="text-white text-[11px] leading-snug">{step.detail}</strong>
-                                     <span className="text-white/70 font-mono shrink-0 text-[10px]">{step.duration}분</span>
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
+                    <DeadlineReportView
+                      deadlineTime={deadlineTime}
+                      startStation={startStation}
+                      endStation={endStation}
+                      plans={plans}
+                      selectedPlan={selectedPlan}
+                      onSelectPlan={setSelectedPlan}
+                      onCopySummary={showToast}
+                    />
                   )}
 
                   {/* F4: 실패복구 리포트 (Late Night Failure Recovery MAP-08) */}
                   {selectedReportType === "recovery" && (
-                    <div className="space-y-3">
-                      <div className="bg-[#FF3B30]/10 border border-[#FF3B30]/25 rounded-xl p-3 flex gap-2">
-                        <AlertTriangle className="w-4 h-4 text-[#FF3B30] shrink-0 mt-0.5" />
-                        <div className="flex-1">
-                          <h4 className="text-xs font-bold text-[#FF3B30] mb-0.5">대중교통 단독 복구가 종료되었습니다.</h4>
-                          <p className="text-[10px] text-white/70 leading-relaxed">
-                            막차가 소진되었으므로, 불필요한 전구간 콜택시 수수료 낭비를 줄이기 위해 심야 연계 분할 전술(N버스 + 단거리 택시)을 가동합니다.
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="apple-glass border border-white/10 p-3 rounded-xl space-y-2">
-                        <div className="flex items-center justify-between border-b border-white/15 pb-1.5">
-                          <span className="text-xs font-bold text-white">N버스 하이브리드 우회 (Plan A)</span>
-                          <span className="text-xs font-mono font-black text-[#0A84FF]">12,600원 소요</span>
-                        </div>
-                        <p className="text-[11px] text-white/70 leading-relaxed">
-                          홍대에서 중랑구 외곽까지 심야 N62번을 이용해 최대한 기동 후, 마지막 4.2km 구간에 한해서만 최소 택시로 복귀합니다.
-                        </p>
-                        <div className="bg-[#0A84FF]/10 text-[#0A84FF] text-[10px] p-2 rounded-lg font-mono flex justify-between items-center">
-                          <span>전구간 택시 대비 비용보전:</span>
-                          <strong>₩24,000 절약</strong>
-                        </div>
-                      </div>
-
-                      <div className="space-y-1">
-                        <span className="text-[10px] font-mono text-white/50 uppercase tracking-wider block">홍대 부근 24시 안심 대기 거점 (첫차연계)</span>
-                        <div className="grid grid-cols-2 gap-1.5 text-[10px]">
-                          <div className="apple-glass border border-white/10 p-2 rounded-lg flex items-center justify-between">
-                            <span className="text-white">🚨 동교치방 안심쉼터</span>
-                            <span className="text-[#0A84FF] font-mono">150m</span>
-                          </div>
-                          <div className="apple-glass border border-white/10 p-2 rounded-lg flex items-center justify-between">
-                            <span className="text-white">⚡ 24시 무인 충전룸</span>
-                            <span className="text-[#0A84FF] font-mono">320m</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                    <RecoveryReportView />
                   )}
 
                   {/* Operational Bottom CTA Bar for saving on-the-spot reports */}
@@ -1179,7 +700,11 @@ export default function App() {
                       <span>혼잡 회피 민감도</span>
                       <select
                         value={preferences.crowdSensitivity}
-                        onChange={(e) => setPreferences(prev => ({ ...prev, crowdSensitivity: e.target.value as any }))}
+                        onChange={(e) => {
+                          if (isCrowdSensitivity(e.target.value)) {
+                            setPreferences((prev) => ({ ...prev, crowdSensitivity: e.target.value }));
+                          }
+                        }}
                         className="apple-glass-light text-[#0A84FF] text-[11px] px-2 py-1 outline-none rounded border border-white/10"
                       >
                         <option value="low">낮음 (경로 우선)</option>
@@ -1493,37 +1018,17 @@ export default function App() {
         )}
 
 
-        {/* Global Bottom Navigation Tab Bar */}
-        <nav className="absolute inset-x-0 bottom-0 h-[64px] bg-black/40 backdrop-blur-2xl border-t border-white/10 grid grid-cols-3 select-none shrink-0 z-30 p-1 pointer-events-auto rounded-b-[44px]">
-          {([
-            { id: "map", label: "지도", icon: Map },
-            { id: "archive", label: "기록", icon: FileText },
-            { id: "settings", label: "설정", icon: Sliders }
-          ] as const).map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                id={`tab-${tab.id}`}
-                key={tab.id}
-                onClick={() => {
-                  setActiveTab(tab.id as TabId);
-                  if (tab.id === "map") {
-                    setMapLayer("default");
-                  }
-                }}
-                className={`flex flex-col items-center justify-center gap-1 transition-all ${
-                  isActive ? "text-[#0A84FF]" : "text-white/50 hover:text-white"
-                }`}
-              >
-                <Icon className={`w-5 h-5 transition-transform ${isActive ? "scale-110" : ""}`} />
-                <span className="text-[10px] font-bold font-sans tracking-wide">{tab.label}</span>
-              </button>
-            );
-          })}
-        </nav>
+        <BottomNavigation
+          activeTab={activeTab}
+          onTabChange={(tab) => {
+            setActiveTab(tab);
+            if (tab === "map") {
+              setMapLayer("default");
+            }
+          }}
+        />
 
       </div>
-    </div>
+    </AppShell>
   );
 }

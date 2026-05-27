@@ -1,0 +1,15 @@
+{
+  "buildCommand": "npm run build:client",
+  "outputDirectory": "dist",
+  "functions": {
+    "api/chat.ts": {
+      "maxDuration": 300
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/((?!api/.*).*)",
+      "destination": "/index.html"
+    }
+  ]
+}
