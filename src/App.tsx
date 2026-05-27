@@ -32,6 +32,13 @@ import {
 } from "lucide-react";
 import { TabId, ReportType, RoutePlan, SavedReport, UserPreferences, ChatMessage } from "./types";
 import { getDefaultPreferences, getSavedReportsMock, getRoutePlans, getCarSurvivalDetails, CarDetail } from "./data";
+import { routePresets, type RoutePreset } from "./features/generate-route-plan";
+import { createSavedReport, isDuplicateSavedReport } from "./features/save-report";
+import { createFallbackChatMessage, renderMarkdown, sendAiChat } from "./features/send-ai-chat";
+import { DEFAULT_VISIBLE_LAYERS, type MapLayerState } from "./features/toggle-map-layer";
+import { STORAGE_KEYS } from "./shared/config";
+import { formatKoreanTime } from "./shared/lib/time";
+import { usePersistentState } from "./shared/model/usePersistentState";
 import InteractiveMap from "./components/InteractiveMap";
 
 export default function App() {
@@ -45,7 +52,6 @@ export default function App() {
 
   // Global Navigation State
   const [activeTab, setActiveTab] = useState<TabId>("map");
-  type MapLayerState = "default" | "ai_overlay" | "ai_peek" | "ai_result" | "report_mini" | "report_summary" | "report_detail" | "evidence";
   const [mapLayer, setMapLayer] = useState<MapLayerState>("default");
 
   // Routing State Presets (Matching PRD scenarios)
@@ -55,16 +61,17 @@ export default function App() {
   const [selectedReportType, setSelectedReportType] = useState<ReportType>("deadline");
 
   // Route Customizer States
-  const [preferences, setPreferences] = useState<UserPreferences>(getDefaultPreferences());
-  const [savedReports, setSavedReports] = useState<SavedReport[]>(getSavedReportsMock());
+  const [preferences, setPreferences] = usePersistentState<UserPreferences>(
+    STORAGE_KEYS.preferences,
+    getDefaultPreferences()
+  );
+  const [savedReports, setSavedReports] = usePersistentState<SavedReport[]>(
+    STORAGE_KEYS.savedReports,
+    getSavedReportsMock()
+  );
 
   // Layer togglers passed down to InteractiveMap
-  const [visibleLayers, setVisibleLayers] = useState({
-    subway: true,
-    bus: true,
-    bike: false,
-    crowd: true,
-  });
+  const [visibleLayers, setVisibleLayers] = useState(DEFAULT_VISIBLE_LAYERS);
 
   // Derived Route Plans list from data engine
   const [plans, setPlans] = useState<RoutePlan[]>([]);
@@ -76,22 +83,6 @@ export default function App() {
 
   // Active selected Date for calendar commute tracker
   const [selectedCalendarDay, setSelectedCalendarDay] = useState<number>(26);
-
-  // Quick preset destinations for easy demo simulation with actionable insights
-  const presets: Array<{
-    title: string;
-    summary: string;
-    start: string;
-    end: string;
-    report: ReportType;
-    tag: string;
-    urgency: "high" | "warn" | "medium";
-    time?: string;
-  }> = [
-    { title: "9호선 급행 출근", summary: "현재 혼잡도 120% 초과", start: "염창역", end: "여의도역", report: "carriage" as ReportType, tag: "🔴 혼잡 특보", urgency: "high" },
-    { title: "퇴근길 광역 버스", summary: "잔여 2석, 곧 만차 예상", start: "사당역", end: "강남역", report: "boarding" as ReportType, tag: "🟠 만차 임박", urgency: "warn" },
-    { title: "막차 탈출 플랜", summary: "택시 할증구간 진입 전", start: "홍대입구역", end: "남양주시", report: "recovery" as ReportType, tag: "🟡 심야 대안", urgency: "medium" },
-  ];
 
   // AI Chat states
   const [chatInput, setChatInput] = useState<string>("");
@@ -169,7 +160,7 @@ export default function App() {
   }, []);
 
   // Preset trigger helper
-  const triggerPreset = (preset: typeof presets[0]) => {
+  const triggerPreset = (preset: RoutePreset) => {
     setStartStation(preset.start);
     setEndStation(preset.end);
     setSelectedReportType(preset.report);
@@ -186,7 +177,7 @@ export default function App() {
       id: `msg-${Date.now()}`,
       sender: "user",
       text,
-      timestamp: new Date().toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" }),
+      timestamp: formatKoreanTime(),
     };
 
     setChatMessages((prev) => [...prev, userMsg]);
@@ -194,179 +185,95 @@ export default function App() {
     setChatbotLoading(true);
 
     try {
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: text,
-          context: {
-            startStation,
-            endStation,
-            deadlineTime,
-            preferences,
-          },
-        }),
+      const data = await sendAiChat({
+        message: text,
+        context: {
+          startStation,
+          endStation,
+          deadlineTime,
+          preferences,
+        },
       });
 
-      if (res.ok) {
-        const data = await res.json();
-        const aiMsg: ChatMessage = {
-          id: `msg-${Date.now() + 1}`,
-          sender: "ai",
-          text: data.textAnswer,
-          timestamp: new Date().toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" }),
-          suggestedReportType: data.suggestedReportType,
-          startStation: data.startStation,
-          endStation: data.endStation,
-          recommendedCarNo: data.recommendedCarNo,
-          routeIndex: data.routeIndex,
-        };
+      const aiMsg: ChatMessage = {
+        id: `msg-${Date.now() + 1}`,
+        sender: "ai",
+        text: data.textAnswer,
+        timestamp: formatKoreanTime(),
+        suggestedReportType: data.suggestedReportType,
+        startStation: data.startStation,
+        endStation: data.endStation,
+        recommendedCarNo: data.recommendedCarNo,
+        routeIndex: data.routeIndex,
+      };
 
-        setChatMessages((prev) => [...prev, aiMsg]);
+      setChatMessages((prev) => [...prev, aiMsg]);
 
-        // Auto react to AI recommendations inside our responsive UI
-        let newStart = startStation;
-        let newEnd = endStation;
+      let newStart = startStation;
+      let newEnd = endStation;
 
-        if (data.startStation) {
-          newStart = data.startStation;
-          setStartStation(data.startStation);
+      if (data.startStation) {
+        newStart = data.startStation;
+        setStartStation(data.startStation);
+      }
+      if (data.endStation) {
+        newEnd = data.endStation;
+        setEndStation(data.endStation);
+      }
+      if (data.suggestedReportType) {
+        setSelectedReportType(data.suggestedReportType);
+      }
+      if (data.recommendedCarNo) {
+        setActiveCarNo(data.recommendedCarNo);
+      }
+
+      const nextPlans = getRoutePlans(newStart, newEnd, {
+        useBike: preferences.useBike,
+        maxTaxiFee: preferences.maxTaxiFee
+      });
+
+      if (data.routeIndex !== undefined && nextPlans[data.routeIndex]) {
+        setSelectedPlan(nextPlans[data.routeIndex]);
+      }
+
+      showToast("💡 AI가 지도를 분석하여 전술 경로를 업데이트했습니다.");
+      setChatbotLoading(false);
+      setMapLayer("ai_result");
+    } catch (err) {
+      setTimeout(() => {
+        const fallbackMsg = createFallbackChatMessage(text);
+        setChatMessages((prev) => [...prev, fallbackMsg]);
+        if (fallbackMsg.suggestedReportType) {
+          setSelectedReportType(fallbackMsg.suggestedReportType);
         }
-        if (data.endStation) {
-          newEnd = data.endStation;
-          setEndStation(data.endStation);
+        if (fallbackMsg.suggestedReportType === "carriage") {
+          setActiveCarNo("3-3");
         }
-        if (data.suggestedReportType) {
-          setSelectedReportType(data.suggestedReportType);
-        }
-        if (data.recommendedCarNo) {
-          setActiveCarNo(data.recommendedCarNo);
-        }
-        
-        // Eagerly evaluate plans so we set the exact one the AI wanted
-        const nextPlans = getRoutePlans(newStart, newEnd, {
-          useBike: preferences.useBike,
-          maxTaxiFee: preferences.maxTaxiFee
-        });
-        
-        if (data.routeIndex !== undefined && nextPlans[data.routeIndex]) {
-          setSelectedPlan(nextPlans[data.routeIndex]);
-        }
-        
-        showToast("💡 AI가 지도를 분석하여 전술 경로를 업데이트했습니다.");
         setChatbotLoading(false);
         setMapLayer("ai_result");
-      } else {
-        throw new Error("서버 연동 지연");
-      }
-    } catch (err) {
-      // Local fallback in case of connection limits (highly robust rules engine)
-      setTimeout(() => {
-        let textAnswer = "";
-        let suggestedReportType: ReportType | null = null;
-        const query = text.toLowerCase();
-
-        if (query.includes("9시") || query.includes("지각") || query.includes("마감")) {
-          textAnswer = `⏱️ **[마감도착 비상처방]** 현재 염창역에서 여의도역까지 9시 정각 도착 안을 검토했습니다.\n\n대중교통의 예상 대기지연 확률상 **Plan A (택시 연계)**가 가장 안심할 수 있습니다.\n\n- **행동 요령**: 처음에 택시를 택해 당산역 환승 통로로 우선 수송한 뒤 급행 연함으로 환승하세요.\n- **도착 시간 정지**: 08:57 (여유 3분)\n- **택시 예산**: 약 8,000원 수반\n\n조율 플랜이 완료되었습니다!`;
-          suggestedReportType = "deadline";
-        } else if (query.includes("칸") || query.includes("혼잡") || query.includes("몇번") || query.includes("생존")) {
-          textAnswer = `🚇 **[칸별 생존가이드 추천]** 9호선 여의도행 출근 길 전술입니다.\n\n- **혼잡 회피 구역**: **3-3** 및 **6-1** 칸 무조건 대기하십시오.\n- **근거**: 빠른 하차 계단(4-2)은 기형적으로 출근 인파가 뭉쳐 산소 농도가 희박합니다. 1칸 떨어진 3-3번을 노리면 신체 접촉 압박을 42% 방어할 수 있습니다.`;
-          suggestedReportType = "carriage";
-          setActiveCarNo("3-3");
-        } else if (query.includes("막차") || query.includes("놓치") || query.includes("심야")) {
-          textAnswer = `🌙 **[실패복구 심야 어드바이스]** 홍대입구에서 남양주 귀가 전술입니다.\n\n- **플랜 핵심**: 전철 막차가 끊겼으므로 전철 대신 **심야 N62 뻐스**를 승차해 중랑구 방면 최대 종단에 하차 후, 남은 4km만 택시 연계 처리하십시오.\n- **절감 비용**: 전체 택시 소환(3.5만원) 대비 **9,800원 내외**로 요금 보전을 실현합니다.`;
-          suggestedReportType = "recovery";
-        } else {
-          textAnswer = `💡 **'탈수있나' 지능형 시스템 안내**:\n\n무엇을 도와드릴까요? 아래 추천 질문을 탭하세요:\n1. ⏱️ "9시까지 강남역 갈 수 있어?"\n2. 🚇 "9호선 출근 지하철 어느 칸이 한산해?"\n3. 🌙 "막차가 끊겼는데 최소비용 복구 방법은?"`;
-        }
-
-        const fallbackMsg: ChatMessage = {
-          id: `msg-${Date.now() + 2}`,
-          sender: "ai",
-          text: textAnswer,
-          timestamp: new Date().toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" }),
-          suggestedReportType,
-        };
-
-        setChatMessages((prev) => [...prev, fallbackMsg]);
-        if (suggestedReportType) setSelectedReportType(suggestedReportType);
-        setChatbotLoading(false);
-        setMapLayer("ai_result"); // Auto-minimize to peek map result
       }, 700);
     }
-  };
-
-  // Convert AI standard Markdown to beautiful React nodes safely (anti-xss)
-  const renderMarkdown = (text: string) => {
-    return text.split("\n\n").map((para, i) => {
-      // Bold replacements
-      let formatted = para.replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#0A84FF] font-sans font-bold">$1</strong>');
-      formatted = formatted.replace(/`(.*?)`/g, '<code class="bg-white/20 px-1 py-0.5 rounded text-[11px] font-mono text-white">$1</code>');
-
-      // Unordered lists
-      if (formatted.trim().startsWith("- ")) {
-        const items = formatted.split("\n");
-        return (
-          <ul key={i} className="list-disc pl-5 my-2 space-y-1.5 font-sans text-xs text-[#E3E5DD]">
-            {items.map((item, idx) => {
-              const clean = item.replace(/^- /, "").replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#0A84FF] font-bold">$1</strong>');
-              return <li key={idx} dangerouslySetInnerHTML={{ __html: clean }} />;
-            })}
-          </ul>
-        );
-      }
-
-      // Check for numbered steps
-      if (/^\d+\./.test(formatted.trim())) {
-        const items = formatted.split("\n");
-        return (
-          <ol key={i} className="list-decimal pl-5 my-2 space-y-1.5 font-sans text-xs text-[#E3E5DD]">
-            {items.map((item, idx) => {
-              const clean = item.replace(/^\d+\.\s*/, "").replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#0A84FF] font-bold">$1</strong>');
-              return <li key={idx} dangerouslySetInnerHTML={{ __html: clean }} />;
-            })}
-          </ol>
-        );
-      }
-
-      return (
-        <p
-          key={i}
-          className="text-xs leading-relaxed text-white/90 mb-2 font-sans"
-          dangerouslySetInnerHTML={{ __html: formatted.replace(/\n/g, "<br/>") }}
-        />
-      );
-    });
   };
 
   // Save current route plan as report
   const handleSaveReport = () => {
     if (!selectedPlan) return;
-    const isExist = savedReports.some(
-      (r) => r.from === startStation && r.to === endStation && r.type === selectedReportType
-    );
+    const isExist = isDuplicateSavedReport(savedReports, {
+      from: startStation,
+      to: endStation,
+      type: selectedReportType,
+    });
     if (isExist) {
       showToast("이미 보관함에 물리 장착된 리포트입니다.");
       return;
     }
 
-    const reportLabelMap: Record<ReportType, string> = {
-      boarding: "실시간 탑승가능성 진단",
-      carriage: "지하철 최적 생존 칸 추천",
-      deadline: "9시 마감 연담 탈출",
-      recovery: "심야 교통 단축 복구",
-    };
-
-    const newReport: SavedReport = {
-      id: `rep-${Date.now()}`,
-      date: new Date().toISOString().split("T")[0],
-      type: selectedReportType,
-      from: startStation,
-      to: endStation,
-      status: selectedPlan.risk === "high" ? "danger" : selectedPlan.risk === "medium" ? "warning" : "success",
-      summary: `${reportLabelMap[selectedReportType]}: ${startStation} ↔ ${endStation} (${selectedPlan.eta} 예상)`,
-      cost: selectedPlan.extraCost,
-    };
+    const newReport = createSavedReport({
+      selectedPlan,
+      selectedReportType,
+      startStation,
+      endStation,
+    });
 
     setSavedReports((prev) => [newReport, ...prev]);
     showToast("💾 통근 리포트가 보관함에 영구 저장되었습니다.");
@@ -604,7 +511,7 @@ export default function App() {
 
               {/* Routing Preset Information Cards Carousel */}
               <div className="w-full overflow-x-auto scrollbar-none pb-2 flex gap-3 pointer-events-auto snap-x">
-                {presets.map((preset, idx) => {
+                {routePresets.map((preset, idx) => {
                   const isActive = startStation === preset.start && endStation === preset.end && selectedReportType === preset.report;
                   const urgencyColors = preset.urgency === "high" ? "text-[#FF3B30] bg-[#FF3B30]/10 border-[#FF3B30]/30" : preset.urgency === "warn" ? "text-[#FF9500] bg-[#FF9500]/10 border-[#FF9500]/30" : "text-[#A6D600] bg-[#A6D600]/10 border-[#A6D600]/30";
                   return (

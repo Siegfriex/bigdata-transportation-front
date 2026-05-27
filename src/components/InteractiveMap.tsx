@@ -1,43 +1,18 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { MapPin, Navigation, Bike, Compass, Bus, ShieldAlert, Train, Plus, Minus } from "lucide-react";
-import { RoutePlan } from "../types";
+import type { RoutePlan } from "../entities/route-plan";
+import { stations } from "../entities/station";
+import type { TransitLayer, VisibleLayers } from "../features/toggle-map-layer";
 
 interface InteractiveMapProps {
   startStation: string;
   endStation: string;
   onSelectStation: (type: "start" | "end", name: string) => void;
   selectedPlan: RoutePlan | null;
-  visibleLayers: {
-    subway: boolean;
-    bus: boolean;
-    bike: boolean;
-    crowd: boolean;
-  };
-  onToggleLayer: (layer: "subway" | "bus" | "bike" | "crowd") => void;
+  visibleLayers: VisibleLayers;
+  onToggleLayer: (layer: TransitLayer) => void;
 }
-
-interface StationNode {
-  name: string;
-  x: number;
-  y: number;
-  type: "metro" | "bus" | "bike" | "district";
-  id: string;
-  bikesAvailable?: number;
-  busesAvailable?: number;
-  crowdLevel: "empty" | "normal" | "crowded" | "danger";
-}
-
-// Setup coordinates for major Seoul hubs matching the PRD scenarios
-const stations: StationNode[] = [
-  { name: "염창역", x: 60, y: 180, type: "metro", id: "yc", bikesAvailable: 15, busesAvailable: 3, crowdLevel: "danger" },
-  { name: "여의도역", x: 170, y: 210, type: "metro", id: "yd", bikesAvailable: 24, busesAvailable: 5, crowdLevel: "crowded" },
-  { name: "홍대입구역", x: 130, y: 130, type: "metro", id: "hd", bikesAvailable: 19, busesAvailable: 4, crowdLevel: "crowded" },
-  { name: "사당역", x: 220, y: 310, type: "metro", id: "sd", bikesAvailable: 11, busesAvailable: 2, crowdLevel: "crowded" },
-  { name: "강남역", x: 310, y: 300, type: "metro", id: "gn", bikesAvailable: 8, busesAvailable: 6, crowdLevel: "danger" },
-  { name: "구리역", x: 420, y: 110, type: "metro", id: "gr", bikesAvailable: 12, busesAvailable: 1, crowdLevel: "normal" },
-  { name: "남양주시", x: 470, y: 70, type: "district", id: "ny", bikesAvailable: 5, busesAvailable: 1, crowdLevel: "empty" },
-];
 
 const InteractiveMap = React.memo(function InteractiveMap({
   startStation,
@@ -53,12 +28,12 @@ const InteractiveMap = React.memo(function InteractiveMap({
   const [panOffset, setPanOffset] = useState<{ x: number, y: number }>({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState<{ x: number, y: number }>({ x: 0, y: 0 });
-  const [legendTooltip, setLegendTooltip] = useState<"subway" | "bus" | "bike" | "crowd" | null>(null);
+  const [legendTooltip, setLegendTooltip] = useState<TransitLayer | null>(null);
   const legendTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const activeLayerCount = Object.values(visibleLayers).filter(Boolean).length;
 
-  const isLayerDanger = (layer: "subway" | "bus" | "bike" | "crowd") => {
+  const isLayerDanger = (layer: TransitLayer) => {
     if (layer === "crowd") return stations.some((s) => s.crowdLevel === "danger");
     if (layer === "subway") return stations.some((s) => s.type === "metro" && s.crowdLevel === "danger");
     if (layer === "bus") return stations.some((s) => s.type === "bus" && s.crowdLevel === "danger");
@@ -66,7 +41,7 @@ const InteractiveMap = React.memo(function InteractiveMap({
     return false;
   };
 
-  const getLayerDensityScore = (layer: "subway" | "bus" | "bike" | "crowd") => {
+  const getLayerDensityScore = (layer: TransitLayer) => {
     let relevantStations = stations;
     if (layer === "subway") relevantStations = stations.filter(s => s.type === "metro");
     else if (layer === "bus") relevantStations = stations.filter(s => s.type === "bus" || (s.busesAvailable && s.busesAvailable > 0));
@@ -100,7 +75,7 @@ const InteractiveMap = React.memo(function InteractiveMap({
   const handleZoomIn = () => setZoomLevel((prev) => Math.min(prev + 0.25, 2.5));
   const handleZoomOut = () => setZoomLevel((prev) => Math.max(prev - 0.25, 0.5));
 
-  const handleLayerClick = (layer: "subway" | "bus" | "bike" | "crowd") => {
+  const handleLayerClick = (layer: TransitLayer) => {
     onToggleLayer(layer);
     setLegendTooltip(layer);
     if (legendTimeoutRef.current) clearTimeout(legendTimeoutRef.current);
