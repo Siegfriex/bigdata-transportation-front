@@ -25,7 +25,9 @@
 | `pages` | 아직 생성하지 않았다. | 생성 시 `pages/*/index.tsx`만 허용하고 `pages/*/ui`는 만들지 않는다. |
 | `widgets/transit-map-panel` | `InteractiveMap` 실제 구현이 이동했고 `components/InteractiveMap.tsx`는 호환 re-export다. | 신규 import는 반드시 `widgets/transit-map-panel` public API를 사용한다. |
 | `widgets/report-sheet` | 조건 카드, 리포트 탭, 4개 리포트 view, `ReportActionBar`, `ReportDetailPanel`이 분리됐다. | report 문구/수치 mock은 entity/report fixture로 이동한다. |
-| `widgets/ai-chat-panel` | `AiChatLayer`가 분리됐다. | 추천 질문과 chat state model을 feature로 이동한다. |
+| `widgets/ai-chat-panel` | `AiChatLayer`가 분리됐고 추천 질문/welcome message는 feature model로 이동했다. | chat state hook을 feature model로 이동한다. |
+| `widgets/archive-calendar` | 저장 리포트 달력/목록/복원 UI가 분리됐다. | 월/통계 mock config와 report store를 entity/model로 이동한다. |
+| `widgets/settings-form` | preferences form, 루틴 동기화 UI, 데이터 출처 안내가 분리됐다. | preference store와 settings content config를 분리한다. |
 | `features` | onboarding, route preset carousel, save-report, send-ai-chat, toggle-map-layer가 생성됐다. | 상태 hook/model은 feature 내부로 단계적으로 이동한다. |
 | `entities` | station/route-plan/report/user-preferences/chat-message 타입과 mock/default가 이동됐다. | persistence store와 schema를 entity에 추가한다. |
 | `shared` | config, `cn`, `usePersistentState`, toast/page-container UI가 생성됐다. | token/style primitive와 http client를 추가한다. |

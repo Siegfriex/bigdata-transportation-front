@@ -43,14 +43,14 @@
 | 파일 | 현재 역할 |
 |---|---|
 | `src/main.tsx` | React 앱 엔트리. `StrictMode`로 `App` 렌더링. |
-| `src/App.tsx` | 앱 전역 상태와 탭별 widget/feature 조합을 담당하는 임시 host. 현재 785줄. |
+| `src/App.tsx` | 앱 전역 상태와 탭별 widget/feature 조합을 담당하는 임시 host. 현재 469줄. |
 | `src/app/layouts/*` | `AppShell` 등 앱 레이아웃 기반. |
 | `src/components/InteractiveMap.tsx` | 호환 re-export. 실제 구현은 `widgets/transit-map-panel`로 이동. |
 | `src/data.ts` | FSD entity mock/default public facade. |
 | `src/types.ts` | FSD entity/feature/shared 타입 public facade. |
 | `src/entities/*` | route-plan, report, station, user-preferences, chat-message 도메인 타입/mock/default. |
 | `src/features/*` | onboarding, route preset carousel, report save rule, AI chat API/schema/fallback/markdown/server responder, map layer type. |
-| `src/widgets/*` | 지도 패널, 리포트 시트 하위 view, AI 채팅 레이어, 상단 앱바, 하단 내비게이션. |
+| `src/widgets/*` | 지도 패널, 리포트 시트 하위 view, AI 채팅 레이어, 아카이브 캘린더, 설정 폼, 상단 앱바, 하단 내비게이션. |
 | `src/shared/*` | storage/query/z-index/routes config, shared HTTP client, time util, persistent state hook, toast/page-container UI. |
 | `src/index.css` | Tailwind import, 글꼴, glass 스타일, 애니메이션, 스크롤바 유틸리티. |
 | `server.ts` | Express 서버, Vite middleware, `/api/chat` 라우팅. AI responder는 `features/send-ai-chat/server`와 공유. |
@@ -79,8 +79,8 @@
 | F3 | 경로 플랜 계산 및 선택 | P1 | P0 | `entities/route-plan`, `features/generate-route-plan`, `src/App.tsx` | Mock 구현 |
 | F4 | 이동 판단 리포트 4종 | P1 | P0 | `widgets/report-sheet`, `entities/route-plan`, `entities/report` | Mock 구현 |
 | F5 | AI 챗 오버레이 및 추천 반영 | P1 | P0 | `widgets/ai-chat-panel`, `features/send-ai-chat`, `server.ts`, `api/chat.ts` | 부분 구현 |
-| F6 | 리포트 저장/기록/캘린더 | P1 | P1 | `src/App.tsx`, `src/data.ts` | Mock 구현 |
-| F7 | 사용자 설정/선호값 | P1 | P1 | `src/App.tsx`, `src/data.ts` | 부분 구현 |
+| F6 | 리포트 저장/기록/캘린더 | P1 | P1 | `widgets/archive-calendar`, `entities/report`, `src/App.tsx` | Mock 구현 |
+| F7 | 사용자 설정/선호값 | P1 | P1 | `widgets/settings-form`, `entities/user-preferences`, `src/App.tsx` | 부분 구현 |
 | F8 | Express/Vercel 서버 및 `/api/chat` | P1 | P0 | `server.ts`, `api/chat.ts`, `features/send-ai-chat/server` | 부분 구현 |
 | F9 | 실제 공공데이터/API/계정 영속화 | P2 | P0 | 없음 | 미구현 |
 
@@ -327,8 +327,9 @@
 | 온보딩 | `features/complete-onboarding/ui/OnboardingOverlay.tsx` | step state/model 분리 필요 |
 | 지도 | `widgets/transit-map-panel/ui/InteractiveMap.tsx` | 기존 `components` re-export 제거 시점 결정 필요 |
 | 리포트 시트 | `widgets/report-sheet/ui/*` | 리포트 상세 panel/CTA 분리 완료, 상위 sheet shell 정리 필요 |
-| AI API/UI | `features/send-ai-chat/api`, `features/send-ai-chat/server`, `widgets/ai-chat-panel`, `api/chat.ts` | chat state/model 분리 필요 |
-| 저장/설정 | `usePersistentState` 기반 localStorage | entity store와 settings/archive widget 분리 필요 |
+| AI API/UI | `features/send-ai-chat/api`, `features/send-ai-chat/model`, `features/send-ai-chat/server`, `widgets/ai-chat-panel`, `api/chat.ts` | chat state hook 분리 필요 |
+| 저장/아카이브 | `usePersistentState` 기반 localStorage, `widgets/archive-calendar` | entity store 분리 필요 |
+| 설정 | `widgets/settings-form` | preference state hook/store 분리 필요 |
 
 ## 10-2. Dev 라우팅/어댑터 점검
 
@@ -353,8 +354,10 @@
 | `widgets/report-sheet/ui/BoardingReportView.tsx` | UI 안에 버스 잔여석/시간 mock 문구가 남아 있음 | 다음 report model fixture로 이동 후보 |
 | `widgets/report-sheet/ui/RecoveryReportView.tsx` | UI 안에 N버스/거점/금액 mock 문구가 남아 있음 | report recovery fixture로 이동 후보 |
 | `widgets/report-sheet/ui/CarriageReportView.tsx` | 일부 제목에 고정 출발/도착 문구가 남아 있음 | props 또는 route context 기반으로 교체 필요 |
-| `widgets/ai-chat-panel/ui/AiChatLayer.tsx` | 추천 질문 배열이 widget 내부에 있음 | `features/send-ai-chat/model/suggestedPrompts.ts`로 이동 후보 |
-| `App.tsx` | 기본 역/시간/날짜와 archive/settings select 배열이 남아 있음 | archive/settings widget 분리 때 stationNames/default config로 이동 |
+| `widgets/ai-chat-panel/ui/AiChatLayer.tsx` | 추천 질문 배열은 feature model로 이동됨 | chat state hook 분리 후보 |
+| `App.tsx` | 기본 역/시간과 selected tab/map layer 상태가 남아 있음 | page/router와 feature model로 이동 후보 |
+| `widgets/settings-form/ui/SettingsForm.tsx` | 공공데이터 출처 문구/옵션 배열이 widget 내부에 있음 | settings config 또는 shared content 분리 후보 |
+| `widgets/archive-calendar/ui/ArchiveCalendar.tsx` | 2026년 5월/31일/92.8% mock 수치가 widget 내부에 있음 | archive fixture/config 분리 후보 |
 
 ## 11. 비즈니스 규칙
 
