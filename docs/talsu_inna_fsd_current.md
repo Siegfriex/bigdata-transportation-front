@@ -2,7 +2,7 @@
 
 > 목적: 현재 `data_insight` 프론트엔드가 실제로 무엇을 구현하고 있는지 기능, 입출력, 상태, 비즈니스 규칙, 갭, QA 기준으로 고정한다.  
 > 작성일: 2026-05-27  
-> 기준 커밋: `a7e8d56` (`publish/main`)  
+> 기준 커밋: 현 로컬 작업트리 기준. 직전 원격 커밋 `a2cedcc` 이후 `widgets/map-workspace` 추출 반영.
 > 관련 문서: `docs/talsu_inna_architecture_rules.md`, `docs/talsu_inna_refactor_plan.md`
 
 ## 1. 문서 범위
@@ -43,14 +43,14 @@
 | 파일 | 현재 역할 |
 |---|---|
 | `src/main.tsx` | React 앱 엔트리. `StrictMode`로 `App` 렌더링. |
-| `src/App.tsx` | 앱 전역 상태와 탭별 widget/feature 조합을 담당하는 임시 host. 현재 469줄. |
+| `src/App.tsx` | 앱 전역 상태와 탭별 widget/feature 조합을 담당하는 임시 host. 현재 422줄. |
 | `src/app/layouts/*` | `AppShell` 등 앱 레이아웃 기반. |
 | `src/components/InteractiveMap.tsx` | 호환 re-export. 실제 구현은 `widgets/transit-map-panel`로 이동. |
 | `src/data.ts` | FSD entity mock/default public facade. |
 | `src/types.ts` | FSD entity/feature/shared 타입 public facade. |
 | `src/entities/*` | route-plan, report, station, user-preferences, chat-message 도메인 타입/mock/default. |
 | `src/features/*` | onboarding, route preset carousel, report save rule, AI chat API/schema/fallback/markdown/server responder, map layer type. |
-| `src/widgets/*` | 지도 패널, 리포트 시트 하위 view, AI 채팅 레이어, 아카이브 캘린더, 설정 폼, 상단 앱바, 하단 내비게이션. |
+| `src/widgets/*` | 지도 패널, map workspace, 리포트 시트 하위 view, AI 채팅 레이어, 아카이브 캘린더, 설정 폼, 상단 앱바, 하단 내비게이션. |
 | `src/shared/*` | storage/query/z-index/routes config, shared HTTP client, time util, persistent state hook, toast/page-container UI. |
 | `src/index.css` | Tailwind import, 글꼴, glass 스타일, 애니메이션, 스크롤바 유틸리티. |
 | `server.ts` | Express 서버, Vite middleware, `/api/chat` 라우팅. AI responder는 `features/send-ai-chat/server`와 공유. |
@@ -74,9 +74,9 @@
 | ID | 기능명 | Phase | 우선순위 | 주요 코드 | 구현 상태 |
 |---|---|---:|---:|---|---|
 | F0 | 앱 셸, 온보딩, 기본 사용자 상태 | P1 | P0 | `src/App.tsx`, `features/complete-onboarding`, `app/layouts` | 구현됨 |
-| F1 | 지도 메인 및 역 선택 | P1 | P0 | `src/App.tsx`, `widgets/transit-map-panel` | Mock 구현 |
+| F1 | 지도 메인 및 역 선택 | P1 | P0 | `widgets/map-workspace`, `widgets/transit-map-panel` | Mock 구현 |
 | F2 | 교통 레이어/지도 인터랙션 | P1 | P0 | `widgets/transit-map-panel`, `features/toggle-map-layer` | Mock 구현 |
-| F3 | 경로 플랜 계산 및 선택 | P1 | P0 | `entities/route-plan`, `features/generate-route-plan`, `src/App.tsx` | Mock 구현 |
+| F3 | 경로 플랜 계산 및 선택 | P1 | P0 | `entities/route-plan`, `features/generate-route-plan`, `widgets/map-workspace`, `src/App.tsx` | Mock 구현 |
 | F4 | 이동 판단 리포트 4종 | P1 | P0 | `widgets/report-sheet`, `entities/route-plan`, `entities/report` | Mock 구현 |
 | F5 | AI 챗 오버레이 및 추천 반영 | P1 | P0 | `widgets/ai-chat-panel`, `features/send-ai-chat`, `server.ts`, `api/chat.ts` | 부분 구현 |
 | F6 | 리포트 저장/기록/캘린더 | P1 | P1 | `widgets/archive-calendar`, `entities/report`, `src/App.tsx` | Mock 구현 |

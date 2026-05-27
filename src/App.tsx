@@ -1,18 +1,9 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import {
-  MessageSquare,
-  Navigation,
-  Sparkles,
-  Plus,
-  RotateCw,
-  Search,
-  ExternalLink,
-  Layers,
-} from "lucide-react";
+import { MessageSquare, Navigation, RotateCw, ExternalLink, Layers } from "lucide-react";
 import { TabId, ReportType, RoutePlan, SavedReport, UserPreferences, ChatMessage } from "./types";
 import { getDefaultPreferences, getSavedReportsMock, getRoutePlans, getCarSurvivalDetails, CarDetail } from "./data";
 import { OnboardingOverlay } from "./features/complete-onboarding";
-import { RoutePresetCarousel, type RoutePreset } from "./features/generate-route-plan";
+import type { RoutePreset } from "./features/generate-route-plan";
 import { createSavedReport, isDuplicateSavedReport } from "./features/save-report";
 import { createFallbackChatMessage, initialChatMessages, sendAiChat, suggestedChatPrompts } from "./features/send-ai-chat";
 import { DEFAULT_VISIBLE_LAYERS, type MapLayerState } from "./features/toggle-map-layer";
@@ -24,7 +15,7 @@ import { ToastOverlay } from "./shared/ui/toast";
 import { ArchiveCalendar } from "./widgets/archive-calendar";
 import { AiChatLayer } from "./widgets/ai-chat-panel";
 import { BottomNavigation } from "./widgets/bottom-navigation";
-import { ReportDetailPanel, RouteConditionCard } from "./widgets/report-sheet";
+import { MapWorkspace } from "./widgets/map-workspace";
 import { SettingsForm } from "./widgets/settings-form";
 import InteractiveMap from "./widgets/transit-map-panel";
 import { TopAppBar } from "./widgets/top-app-bar";
@@ -317,77 +308,39 @@ export default function App() {
           
           {/* TAB 1: 의사결정 시트 (Main Map Action Sheet) */}
           {activeTab === "map" && (
-            <div className="flex-1 flex flex-col p-3 pt-4 space-y-3 pointer-events-none justify-start">
-              
-              <div className="flex-1 shrink-0 min-h-[40px]"></div>
-
-              <RoutePresetCarousel
-                startStation={startStation}
-                endStation={endStation}
-                selectedReportType={selectedReportType}
-                onSelectPreset={triggerPreset}
-              />
-
-              {mapLayer === "default" && (
-                <div 
-                  className="apple-glass rounded-2xl border border-white/10 p-3 shadow-md relative pointer-events-auto flex items-center justify-between cursor-pointer active:scale-[0.98] transition-transform"
-                  onClick={() => setMapLayer("ai_overlay")}
-                >
-                  <div className="flex items-center gap-2">
-                    <Search className="w-5 h-5 text-white/50" />
-                    <span className="text-white/50 font-medium text-sm">어디까지 가나요? (AI에게 묻기)</span>
-                  </div>
-                  <Sparkles className="w-5 h-5 text-[#0A84FF]" />
-                </div>
-              )}
-
-              {mapLayer === "report_detail" && (
-              <>
-                <div className="flex justify-between items-center px-1 pointer-events-auto">
-                  <span className="font-bold text-white text-sm">리포트 상세</span>
-                  <button onClick={() => setMapLayer("default")} className="text-white/50 hover:text-white p-1">
-                    <Plus className="w-5 h-5 rotate-45" />
-                  </button>
-                </div>
-                <RouteConditionCard
-                  startStation={startStation}
-                  endStation={endStation}
-                  deadlineTime={deadlineTime}
-                  onChangeStartStation={setStartStation}
-                  onChangeEndStation={setEndStation}
-                  onChangeDeadlineTime={setDeadlineTime}
-                />
-
-              <ReportDetailPanel
-                selectedReportType={selectedReportType}
-                startStation={startStation}
-                endStation={endStation}
-                deadlineTime={deadlineTime}
-                plans={plans}
-                selectedPlan={selectedPlan}
-                carDetails={carDetails}
-                activeCarNo={activeCarNo}
-                onSelectReport={(reportType, label) => {
-                  setSelectedReportType(reportType);
-                  showToast(`📊 '${label}' 분석 보고서가 로딩되었습니다.`);
-                }}
-                onSelectCar={(carNo) => {
-                  setActiveCarNo(carNo);
-                  showToast(`🚇 ${carNo}번 칸 상세 분석을 로드했습니다.`);
-                }}
-                onSelectPlan={setSelectedPlan}
-                onCopySummary={showToast}
-                onSaveReport={handleSaveReport}
-                onAskAiBriefing={() => {
-                  setActiveTab("map");
-                  setMapLayer("ai_overlay");
-                  handleSendMessage(`${startStation}에서 ${endStation} 가는 지각처방 리포트 요약해줘`);
-                  showToast("🤖 리포트 근거 조회를 위해 AI 챗봇이 개입합니다.");
-                }}
-              />
-              </>
-              )}
-            </div>
+            <MapWorkspace
+              mapLayer={mapLayer}
+              startStation={startStation}
+              endStation={endStation}
+              deadlineTime={deadlineTime}
+              selectedReportType={selectedReportType}
+              plans={plans}
+              selectedPlan={selectedPlan}
+              carDetails={carDetails}
+              activeCarNo={activeCarNo}
+              onSetMapLayer={setMapLayer}
+              onSelectPreset={triggerPreset}
+              onChangeStartStation={setStartStation}
+              onChangeEndStation={setEndStation}
+              onChangeDeadlineTime={setDeadlineTime}
+              onSelectReport={(reportType, label) => {
+                setSelectedReportType(reportType);
+                showToast(`📊 '${label}' 분석 보고서가 로딩되었습니다.`);
+              }}
+              onSelectCar={(carNo) => {
+                setActiveCarNo(carNo);
+                showToast(`🚇 ${carNo}번 칸 상세 분석을 로드했습니다.`);
+              }}
+              onSelectPlan={setSelectedPlan}
+              onCopySummary={showToast}
+              onSaveReport={handleSaveReport}
+              onAskAiBriefing={() => {
+                setActiveTab("map");
+                setMapLayer("ai_overlay");
+                handleSendMessage(`${startStation}에서 ${endStation} 가는 지각처방 리포트 요약해줘`);
+                showToast("🤖 리포트 근거 조회를 위해 AI 챗봇이 개입합니다.");
+              }}
+            />
           )}
 
           {/* TAB 3: 통근 기록 보관함 & 아카이브 (Report Archive TAB REP-01) */}

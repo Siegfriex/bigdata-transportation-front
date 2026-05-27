@@ -24,6 +24,7 @@
 | `app` | `AppShell`과 layout public API 생성. `src/App.tsx`는 아직 임시 host로 남아 있다. | 다음 phase에서 provider/router/layout host만 남긴다. |
 | `pages` | 아직 생성하지 않았다. | 생성 시 `pages/*/index.tsx`만 허용하고 `pages/*/ui`는 만들지 않는다. |
 | `widgets/transit-map-panel` | `InteractiveMap` 실제 구현이 이동했고 `components/InteractiveMap.tsx`는 호환 re-export다. | 신규 import는 반드시 `widgets/transit-map-panel` public API를 사용한다. |
+| `widgets/map-workspace` | map 탭의 프리셋, AI 검색 진입, 리포트 상세 composition이 분리됐다. | page/router 생성 전까지 임시 map tab composition boundary로 사용한다. |
 | `widgets/report-sheet` | 조건 카드, 리포트 탭, 4개 리포트 view, `ReportActionBar`, `ReportDetailPanel`이 분리됐다. | report 문구/수치 mock은 entity/report fixture로 이동한다. |
 | `widgets/ai-chat-panel` | `AiChatLayer`가 분리됐고 추천 질문/welcome message는 feature model로 이동했다. | chat state hook을 feature model로 이동한다. |
 | `widgets/archive-calendar` | 저장 리포트 달력/목록/복원 UI가 분리됐다. | 월/통계 mock config와 report store를 entity/model로 이동한다. |
@@ -70,6 +71,7 @@ src/
 │  └─ settings-page/index.tsx
 ├─ widgets/
 │  ├─ transit-map-panel/
+│  ├─ map-workspace/
 │  ├─ report-sheet/
 │  ├─ ai-chat-panel/
 │  ├─ archive-calendar/
@@ -170,6 +172,7 @@ export default function MapPage() {
 | Widget | 허용 책임 | 금지 책임 |
 |---|---|---|
 | `transit-map-panel` | SVG 지도, 지도 조작, 역 노드 UI, 레이어 시각화 | route 계산, saved report 생성, AI fetch |
+| `map-workspace` | map 탭의 preset/search/report-detail widget composition | 전역 app state 소유, API 호출, mock 생성, page 전용 라우팅 |
 | `report-sheet` | route/report/entity를 받아 리포트 시트 UI 조합 | storage 직접 접근, `/api/chat` 직접 fetch, station mock 배열 직접 선언 |
 | `ai-chat-panel` | 채팅 목록, 입력, 추천 질문, loading/empty UI | 서버 schema 정의, Gemini fallback 생성 |
 | `archive-calendar` | saved report 목록/달력/복원 액션 UI | saved report factory, localStorage key 직접 사용 |
