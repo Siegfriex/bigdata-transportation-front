@@ -11,12 +11,10 @@ import { STORAGE_KEYS } from "./shared/config";
 import { formatKoreanTime } from "./shared/lib/time";
 import { usePersistentState } from "./shared/model/usePersistentState";
 import { AppShell } from "./app/layouts";
+import { ArchivePage, MapPage, SettingsPage } from "./pages";
 import { ToastOverlay } from "./shared/ui/toast";
-import { ArchiveCalendar } from "./widgets/archive-calendar";
 import { AiChatLayer } from "./widgets/ai-chat-panel";
 import { BottomNavigation } from "./widgets/bottom-navigation";
-import { MapWorkspace } from "./widgets/map-workspace";
-import { SettingsForm } from "./widgets/settings-form";
 import InteractiveMap from "./widgets/transit-map-panel";
 import { TopAppBar } from "./widgets/top-app-bar";
 
@@ -308,7 +306,7 @@ export default function App() {
           
           {/* TAB 1: 의사결정 시트 (Main Map Action Sheet) */}
           {activeTab === "map" && (
-            <MapWorkspace
+            <MapPage
               mapLayer={mapLayer}
               startStation={startStation}
               endStation={endStation}
@@ -345,7 +343,7 @@ export default function App() {
 
           {/* TAB 3: 통근 기록 보관함 & 아카이브 (Report Archive TAB REP-01) */}
           {activeTab === "archive" && (
-            <ArchiveCalendar
+            <ArchivePage
               savedReports={savedReports}
               selectedCalendarDay={selectedCalendarDay}
               onSelectCalendarDay={setSelectedCalendarDay}
@@ -365,7 +363,7 @@ export default function App() {
 
           {/* TAB 4: 환경설정 & 개인 맞춤 (Settings TAB SET-01) */}
           {activeTab === "settings" && (
-            <SettingsForm
+            <SettingsPage
               preferences={preferences}
               onChangePreferences={setPreferences}
               onSyncRoutine={() => {

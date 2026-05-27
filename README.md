@@ -175,6 +175,10 @@ Feature-Sliced Design(FSD) 기준으로 점진 분리 중입니다.
 │   │   └── layouts/                    # AppShell 등 앱 레이아웃
 │   ├── components/
 │   │   └── InteractiveMap.tsx          # 기존 import 호환 re-export
+│   ├── pages/
+│   │   ├── archive-page/
+│   │   ├── map-page/
+│   │   └── settings-page/              # 얇은 page composition entry
 │   ├── entities/
 │   │   ├── chat-message/
 │   │   ├── report/
@@ -249,6 +253,7 @@ Feature-Sliced Design(FSD) 기준으로 점진 분리 중입니다.
 - [x] archive-calendar widget 분리
 - [x] settings-form widget 생성 및 App host 연결
 - [x] map-workspace widget 생성
+- [x] `pages/*/index.tsx` composition entry 생성
 - [x] Vercel `/api/chat` Function 추가
 - [x] Express/Vercel 공용 AI responder 추가
 - [x] `/api/chat` request/response runtime validation 추가
@@ -258,7 +263,6 @@ Feature-Sliced Design(FSD) 기준으로 점진 분리 중입니다.
 
 - [ ] `App.tsx`를 provider/router/layout/global host 수준으로 축소
 - [ ] `features/send-ai-chat/model`로 chat state hook 분리
-- [ ] `pages/*/index.tsx` 생성
 - [ ] `app/router` 생성
 
 ### 남은 핵심 과제

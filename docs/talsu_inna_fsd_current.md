@@ -43,7 +43,8 @@
 | 파일 | 현재 역할 |
 |---|---|
 | `src/main.tsx` | React 앱 엔트리. `StrictMode`로 `App` 렌더링. |
-| `src/App.tsx` | 앱 전역 상태와 탭별 widget/feature 조합을 담당하는 임시 host. 현재 422줄. |
+| `src/App.tsx` | 앱 전역 상태와 page/widget/feature 조합을 담당하는 임시 host. 현재 420줄. |
+| `src/pages/*/index.tsx` | map/archive/settings page composition entry. 자체 `ui/model/api/mock/styles` 없이 widget props forwarding만 담당. |
 | `src/app/layouts/*` | `AppShell` 등 앱 레이아웃 기반. |
 | `src/components/InteractiveMap.tsx` | 호환 re-export. 실제 구현은 `widgets/transit-map-panel`로 이동. |
 | `src/data.ts` | FSD entity mock/default public facade. |

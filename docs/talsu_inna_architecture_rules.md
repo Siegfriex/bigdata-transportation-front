@@ -22,7 +22,7 @@
 | 영역 | 현재 상태 | 다음 규칙 |
 |---|---|---|
 | `app` | `AppShell`과 layout public API 생성. `src/App.tsx`는 아직 임시 host로 남아 있다. | 다음 phase에서 provider/router/layout host만 남긴다. |
-| `pages` | 아직 생성하지 않았다. | 생성 시 `pages/*/index.tsx`만 허용하고 `pages/*/ui`는 만들지 않는다. |
+| `pages` | `map-page`, `archive-page`, `settings-page`의 `index.tsx`만 생성됐다. | 계속 `pages/*/ui` 없이 widget composition entry로 유지한다. |
 | `widgets/transit-map-panel` | `InteractiveMap` 실제 구현이 이동했고 `components/InteractiveMap.tsx`는 호환 re-export다. | 신규 import는 반드시 `widgets/transit-map-panel` public API를 사용한다. |
 | `widgets/map-workspace` | map 탭의 프리셋, AI 검색 진입, 리포트 상세 composition이 분리됐다. | page/router 생성 전까지 임시 map tab composition boundary로 사용한다. |
 | `widgets/report-sheet` | 조건 카드, 리포트 탭, 4개 리포트 view, `ReportActionBar`, `ReportDetailPanel`이 분리됐다. | report 문구/수치 mock은 entity/report fixture로 이동한다. |
