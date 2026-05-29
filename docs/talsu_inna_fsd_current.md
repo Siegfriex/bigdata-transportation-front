@@ -257,7 +257,7 @@
 | Input | 사용자 메시지, 지도 context |
 | Process | `POST /api/chat` 호출. 성공 시 AI 응답 추가 및 추천 필드를 지도 상태에 반영. 실패 시 클라이언트 fallback |
 | Output | AI 메시지, 지도/리포트/경로 선택 자동 갱신, `mapLayer="ai_result"` |
-| Exception | 서버 실패 시 700ms 후 fallback. 현재 markdown 렌더링은 서버 응답 신뢰 전제 |
+| Exception | 서버 실패 시 700ms 후 fallback. AI 응답 markdown은 `renderSafeMarkdown`을 통해 React node로 렌더링 |
 
 **수용 기준**
 

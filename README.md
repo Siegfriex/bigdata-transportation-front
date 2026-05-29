@@ -289,7 +289,7 @@ Feature-Sliced Design(FSD) 기준으로 점진 분리 중입니다.
 | 지도 | 실제 지도 SDK/GPS 없음, SVG mock 기반 |
 | 인증 | 실계정 로그인 없음 |
 | 저장 | 서버 DB 없음, localStorage 기반 |
-| AI 렌더링 | Markdown-like renderer가 아직 안전 렌더링으로 교체되지 않음 |
+| AI 렌더링 | `renderSafeMarkdown` 기반 React node 렌더링으로 HTML 문자열 삽입 제거 |
 | 테스트 | 자동화된 E2E/시각 회귀 없음 |
 
 ---
