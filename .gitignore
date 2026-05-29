@@ -3,6 +3,7 @@ build/
 dist/
 coverage/
 .vite/
+.vercel/
 .DS_Store
 *.log
 .env*
