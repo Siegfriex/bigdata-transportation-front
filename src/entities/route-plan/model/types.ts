@@ -18,9 +18,20 @@ export interface RoutePlan {
   description: string;
   timeline: TimelineStep[];
   confidence: "realtime" | "estimated" | "pattern";
+  geometry?: RouteGeometry;
 }
 
 export interface RoutePlanOptions {
   useBike: boolean;
   maxTaxiFee: number;
+}
+
+export interface RouteGeometry {
+  path?: Array<{ lat: number; lng: number }>;
+  bounds?: {
+    north: number;
+    south: number;
+    east: number;
+    west: number;
+  };
 }
