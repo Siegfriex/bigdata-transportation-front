@@ -12,10 +12,10 @@ type ReportTypeTabsProps = {
 };
 
 const reportTypeOptions: ReportTypeOption[] = [
-  { id: "deadline", label: "⏱️ 마감도착", toastLabel: "마감도착" },
-  { id: "boarding", label: "🚍 탑승가능", toastLabel: "탑승가능" },
-  { id: "carriage", label: "🚇 생존 칸", toastLabel: "생존 칸" },
-  { id: "recovery", label: "🌙 실패복구", toastLabel: "실패복구" },
+  { id: "deadline", label: "마감도착", toastLabel: "마감도착" },
+  { id: "boarding", label: "탑승가능", toastLabel: "탑승가능" },
+  { id: "carriage", label: "생존 칸", toastLabel: "생존 칸" },
+  { id: "recovery", label: "실패복구", toastLabel: "실패복구" },
 ];
 
 export function ReportTypeTabs({ selectedReportType, onSelectReport }: ReportTypeTabsProps) {

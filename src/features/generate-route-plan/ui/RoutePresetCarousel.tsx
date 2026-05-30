@@ -53,6 +53,7 @@ export function RoutePresetCarousel({
     <div
       ref={scrollRef}
       data-testid="route-preset-carousel"
+      data-qa="map-route-carousel"
       className="w-full overflow-x-auto scrollbar-none pb-2 flex gap-3 pointer-events-auto snap-x touch-pan-x overscroll-x-contain cursor-grab active:cursor-grabbing select-none"
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
@@ -69,6 +70,7 @@ export function RoutePresetCarousel({
           <button
             key={`${preset.start}-${preset.end}-${preset.report}`}
             data-testid={`route-preset-${preset.report}`}
+            data-qa={`map-route-card-${preset.report}`}
             aria-pressed={isActive}
             onClick={(event) => {
               if (dragStateRef.current.moved) {

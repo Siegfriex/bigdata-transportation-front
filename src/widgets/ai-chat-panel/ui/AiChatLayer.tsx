@@ -1,10 +1,11 @@
-import type { RefObject } from "react";
+import { useRef, type PointerEvent, type RefObject } from "react";
 import { AlertTriangle, Lightbulb, Map, Plus, SendHorizontal, Sparkles } from "lucide-react";
 import type { ChatMessage } from "../../../entities/chat-message";
 import type { ReportType } from "../../../entities/report";
 import type { RoutePlan } from "../../../entities/route-plan";
 import type { MapLayerState } from "../../../features/toggle-map-layer";
 import { renderMarkdown } from "../../../features/send-ai-chat";
+import { TalsuLogo } from "../../../shared/ui/brand/TalsuLogo";
 
 type AiChatLayerProps = {
   mapLayer: MapLayerState;
@@ -15,6 +16,12 @@ type AiChatLayerProps = {
   suggestedPrompts: string[];
   plans: RoutePlan[];
   selectedPlan: RoutePlan | null;
+  startStation: string;
+  endStation: string;
+  reportType: ReportType;
+  isRestoredSnapshot: boolean;
+  savedReportId?: string;
+  snapshotLabel?: string;
   chatEndRef: RefObject<HTMLDivElement>;
   onClose: () => void;
   onSetMapLayer: (layer: MapLayerState) => void;
@@ -23,6 +30,7 @@ type AiChatLayerProps = {
   onShowReport: (reportType: ReportType) => void;
   onChangeChatInput: (value: string) => void;
   onSendMessage: (message: string) => void;
+  onRetryMessage: () => void;
 };
 
 export function AiChatLayer({
@@ -34,6 +42,12 @@ export function AiChatLayer({
   suggestedPrompts,
   plans,
   selectedPlan,
+  startStation,
+  endStation,
+  reportType,
+  isRestoredSnapshot,
+  savedReportId,
+  snapshotLabel,
   chatEndRef,
   onClose,
   onSetMapLayer,
@@ -42,74 +56,43 @@ export function AiChatLayer({
   onShowReport,
   onChangeChatInput,
   onSendMessage,
+  onRetryMessage,
 }: AiChatLayerProps) {
+  const routeScrollerRef = useRef<HTMLDivElement>(null);
+  const dragStateRef = useRef({ isDragging: false, startX: 0, scrollLeft: 0, moved: false });
+  const isSubmitDisabled = chatbotLoading || !chatInput.trim();
+  const selectedPlanLabel = selectedPlan ? selectedPlan.name.replace(/^추천:\s?/, "") : "선택 경로";
+  const reportTypeLabel = getReportTypeLabel(reportType);
+
   if (mapLayer === "default" || mapLayer === "report_detail") return null;
 
-  const isSubmitDisabled = chatbotLoading || !chatInput.trim();
+  const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    const element = routeScrollerRef.current;
+    if (!element) return;
+    dragStateRef.current = {
+      isDragging: true,
+      startX: event.clientX,
+      scrollLeft: element.scrollLeft,
+      moved: false,
+    };
+  };
+
+  const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
+    const element = routeScrollerRef.current;
+    if (!element || !dragStateRef.current.isDragging) return;
+    const deltaX = event.clientX - dragStateRef.current.startX;
+    if (Math.abs(deltaX) > 4) dragStateRef.current.moved = true;
+    element.scrollLeft = dragStateRef.current.scrollLeft - deltaX;
+  };
+
+  const handlePointerUp = () => {
+    window.setTimeout(() => {
+      dragStateRef.current = { ...dragStateRef.current, isDragging: false, moved: false };
+    }, 0);
+  };
 
   return (
-    <div className={`absolute z-40 transition-all duration-300 pointer-events-none ${
-      mapLayer === "ai_result"
-        ? "bottom-[76px] inset-x-3"
-        : "inset-x-0 top-0 bottom-[64px] flex flex-col justify-end"
-    }`}>
-      {mapLayer === "ai_result" && (
-        <div className="surface-panel flex flex-col gap-3 p-4 animate-in fade-in slide-in-from-bottom-8 pointer-events-auto">
-          <div className="flex justify-between items-start">
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-[#0A84FF]" />
-              <span className="type-title text-white">AI 전략 브리핑 종료</span>
-            </div>
-            <button onClick={onClose} className="control-base focus-ring text-white/50 hover:text-white" aria-label="브리핑 닫기">
-              <Plus className="w-5 h-5 rotate-45" />
-            </button>
-          </div>
-          <div className="rounded-xl border border-white/10 bg-white/[0.055] p-3">
-            <p className="type-body line-clamp-3 text-white/82">
-              {chatMessages[chatMessages.length - 1]?.text?.replace(/[*#]/g, "") || "분석 완료"}
-            </p>
-          </div>
-
-          {plans.length > 0 && (
-            <div className="flex flex-col gap-1.5">
-              <span className="type-caption px-1 text-white/55">추천 전술 경로</span>
-              <div className="flex gap-2 overflow-x-auto scrollbar-none pb-1">
-                {plans.map((plan) => (
-                  <button
-                    key={plan.id}
-                    onClick={() => onSelectPlan(plan)}
-                    className={`control-base focus-ring shrink-0 rounded-xl border px-3 py-2 text-[11px] font-bold ${
-                      selectedPlan?.id === plan.id
-                        ? "bg-[#0A84FF]/20 border-[#0A84FF] text-white"
-                        : "apple-glass border-white/10 text-white/60 hover:text-white hover:border-white/20"
-                    }`}
-                  >
-                    {plan.name} <span className="text-[#0A84FF] ml-1">{plan.eta}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <div className="flex gap-2">
-            <button
-              onClick={() => onSetMapLayer("report_detail")}
-              className="control-base focus-ring flex-1 rounded-xl border border-[#0A84FF]/50 bg-white/[0.045] py-2 text-xs font-bold text-[#74B9FF] hover:bg-white/10"
-              disabled={chatbotLoading}
-            >
-              전략 근거 보기
-            </button>
-            <button
-              onClick={onSaveTacticalReport}
-              className="control-base focus-ring flex-1 rounded-xl bg-[#0A84FF] py-2 text-xs font-bold text-white"
-              disabled={chatbotLoading}
-            >
-              전략 리포트 저장
-            </button>
-          </div>
-        </div>
-      )}
-
+    <div className="absolute inset-x-0 top-0 bottom-[64px] z-40 flex flex-col justify-end transition-all duration-300 pointer-events-none">
       {(mapLayer === "ai_overlay" || mapLayer === "ai_peek") && (
         <>
           <div
@@ -119,6 +102,10 @@ export function AiChatLayer({
             onClick={onClose}
           />
           <div
+            data-testid="ai-chat-overlay"
+            role="dialog"
+            aria-modal="true"
+            aria-label="AI 근거 설명"
             className={`surface-panel relative flex cursor-pointer flex-col transition-all duration-300 pointer-events-auto ${
               mapLayer === "ai_peek" ? "h-[70px] rounded-[24px] mx-3 mb-3 opacity-90 hover:opacity-100" : "w-full rounded-t-[32px] h-[75vh]"
             }`}
@@ -138,36 +125,50 @@ export function AiChatLayer({
                 <div className="w-12 h-1.5 bg-white/25 rounded-full" />
               </div>
               <button
-                className="control-base focus-ring flex h-6 w-6 items-center justify-center text-white/50 hover:text-white"
+                className="control-base focus-ring flex h-11 w-11 items-center justify-center rounded-xl text-white/58 hover:bg-white/[0.06] hover:text-white"
                 onClick={(event) => {
                   event.stopPropagation();
                   onClose();
                 }}
                 aria-label="AI 패널 닫기"
               >
-                <Plus className="w-6 h-6 rotate-45" />
+                <Plus className="h-6 w-6 rotate-45" />
               </button>
             </div>
 
             <div className={`flex-1 flex flex-col overflow-hidden px-4 pb-4 ${mapLayer === "ai_peek" ? "pointer-events-none opacity-40 blur-[1px]" : "opacity-100"}`}>
-              <div className="mb-3 shrink-0 rounded-2xl border border-white/10 bg-[#101316]/82 p-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+              <div data-testid="ai-context-summary" className="mb-3 shrink-0 rounded-2xl border border-white/10 bg-[#101316]/82 p-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
                 <div className="mb-2 flex items-center justify-between gap-3">
-                  <span className="type-label rounded-full border border-[#0A84FF]/25 bg-[#0A84FF]/10 px-2.5 py-1 text-[#74B9FF]">Gemini route engine</span>
-                  <span className="type-label text-white/35">실시간 문맥</span>
+                  <span className="type-label rounded-full border border-[#0A84FF]/25 bg-[#0A84FF]/10 px-2.5 py-1 text-[#74B9FF]">AI 근거 설명</span>
+                  <span className="type-label text-white/35">{isRestoredSnapshot ? "저장 리포트 기준" : "현재 전략 기준"}</span>
                 </div>
                 <p className="type-subtitle max-w-[320px] text-white/68">
-                  지도의 현재 상태를 결합해 복합수단 최적 해법을 브리핑합니다. 질문 시 자동으로 지도 경로가 반응합니다.
+                  {startStation} → {endStation} · {selectedPlanLabel} · {reportTypeLabel}
                 </p>
+                {isRestoredSnapshot && (
+                  <span data-testid="snapshot-badge" className="type-label mt-2 inline-flex rounded-full bg-white/[0.06] px-2 py-1 text-white/45">
+                    {snapshotLabel ?? "저장 시점 기준"}
+                  </span>
+                )}
               </div>
 
               {chatError && (
-                <div className="mb-3 flex items-start gap-2 rounded-xl border border-[#FFB020]/30 bg-[#FFB020]/12 p-3 text-[11px] font-semibold leading-relaxed text-[#FFB020]">
+                <div className="mb-3 flex items-start gap-2 rounded-xl border border-[#FFB020]/30 bg-[#FFB020]/12 p-3 text-[11px] font-semibold leading-relaxed text-[#FFB020]" role="status">
                   <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                  <span>{chatError}</span>
+                  <div className="min-w-0 flex-1">
+                    <span>{chatError}</span>
+                    <button
+                      type="button"
+                      onClick={onRetryMessage}
+                      className="control-base focus-ring mt-2 inline-flex rounded-lg border border-[#FFB020]/35 px-2 py-1 text-[10px] font-bold text-[#FFD28A] hover:bg-[#FFB020]/10"
+                    >
+                      다시 시도
+                    </button>
+                  </div>
                 </div>
               )}
 
-              <div className="mb-3 flex-1 space-y-3 overflow-y-auto pr-1 scrollbar-none min-h-[120px]" aria-busy={chatbotLoading}>
+              <div className="mb-3 flex-1 space-y-3 overflow-y-auto pr-1 scrollbar-none min-h-[120px]" aria-busy={chatbotLoading} aria-live="polite">
                 {chatMessages.map((message) => (
                   <div
                     key={message.id}
@@ -215,9 +216,16 @@ export function AiChatLayer({
 
                 {chatbotLoading && (
                   <div className="flex justify-start">
-                    <div className="skeleton-bubble max-w-[82%] space-y-3">
+                    <div data-testid="ai-message-skeleton" className="skeleton-bubble max-w-[82%] space-y-3">
                       <div className="flex items-center gap-2">
-                        <span className="status-dot text-[#0A84FF]" />
+                        <TalsuLogo
+                          className="w-16 rounded-md bg-white px-1.5 py-1"
+                          variant="default"
+                          state="tight"
+                          loader
+                          compact
+                          ariaLabel="경로 판단 중"
+                        />
                         <span className="type-label text-white/45">데이터 근거 확인 중</span>
                       </div>
                       <div className="space-y-2">
@@ -234,6 +242,44 @@ export function AiChatLayer({
               </div>
 
               <div className="space-y-2 shrink-0">
+                {plans.length > 0 && (
+                  <div className="space-y-1.5">
+                    <span className="type-label block text-white/45">추천 전략 경로</span>
+                    <div
+                      ref={routeScrollerRef}
+                      data-testid="tactical-route-carousel"
+                      aria-label="추천 전략 경로"
+                      className="flex gap-2 overflow-x-auto scrollbar-none pb-1 snap-x touch-pan-x cursor-grab active:cursor-grabbing select-none"
+                      onPointerDown={handlePointerDown}
+                      onPointerMove={handlePointerMove}
+                      onPointerUp={handlePointerUp}
+                      onPointerCancel={handlePointerUp}
+                    >
+                      {plans.map((plan) => (
+                        <button
+                          key={plan.id}
+                          data-testid={`tactical-route-card-${plan.id}`}
+                          aria-pressed={selectedPlan?.id === plan.id}
+                          onClick={(event) => {
+                            if (dragStateRef.current.moved) {
+                              event.preventDefault();
+                              return;
+                            }
+                            onSelectPlan(plan);
+                          }}
+                          className={`control-base focus-ring shrink-0 snap-start rounded-xl border px-3 py-2 text-left text-[11px] font-bold ${
+                            selectedPlan?.id === plan.id
+                              ? "bg-[#0A84FF]/20 border-[#0A84FF] text-white"
+                              : "apple-glass border-white/10 text-white/60 hover:text-white hover:border-white/20"
+                          }`}
+                        >
+                          <span className="block max-w-[190px] truncate">{plan.name.replace(/^추천:\s?/, "")}</span>
+                          <span className="text-[#74B9FF]">{plan.eta}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <span className="type-label block text-white/45">추천 안전 질문</span>
                 <div className="grid grid-cols-2 gap-1.5 mb-2.5">
                   {suggestedPrompts.map((prompt) => (
@@ -277,4 +323,11 @@ export function AiChatLayer({
       )}
     </div>
   );
+}
+
+function getReportTypeLabel(reportType: ReportType) {
+  if (reportType === "deadline") return "마감도착 리포트";
+  if (reportType === "boarding") return "탑승가능성 리포트";
+  if (reportType === "carriage") return "생존칸 리포트";
+  return "복구전략 리포트";
 }

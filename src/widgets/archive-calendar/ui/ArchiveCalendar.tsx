@@ -137,7 +137,17 @@ export function ArchiveCalendar({
           savedReports.map((report) => (
             <div
               key={report.id}
-              className="surface-card stack-sm relative p-3"
+              data-testid={`archive-report-card-${report.id}`}
+              role="button"
+              tabIndex={0}
+              onClick={() => onRestoreReport(report)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  onRestoreReport(report);
+                }
+              }}
+              className="surface-card stack-sm relative w-full cursor-pointer p-3 text-left"
             >
               <div className="flex justify-between items-center">
                 <span className={`type-label rounded-full px-2 py-0.5 ${getReportStatusClassName(report)}`}>
@@ -151,7 +161,11 @@ export function ArchiveCalendar({
               <div className="type-caption flex items-center justify-between border-t border-white/15 pt-2 text-white/50">
                 <span>출발-도착: {report.from} ↔ {report.to}</span>
                 <button
-                  onClick={() => onRestoreReport(report)}
+                  data-testid={`archive-map-restore-button-${report.id}`}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onRestoreReport(report);
+                  }}
                   className="control-base focus-ring flex items-center gap-1 text-[#74B9FF] hover:text-white"
                 >
                   <span>지도 이동</span>

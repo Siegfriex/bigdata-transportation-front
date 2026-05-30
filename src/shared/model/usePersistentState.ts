@@ -6,7 +6,18 @@ function readStoredValue<T>(key: string, initialValue: T): T {
   try {
     const raw = window.localStorage.getItem(key);
     if (!raw) return initialValue;
-    return JSON.parse(raw) as T;
+    const parsed = JSON.parse(raw) as unknown;
+    if (parsed === null) return initialValue;
+    if (Array.isArray(initialValue) && !Array.isArray(parsed)) return initialValue;
+    if (
+      typeof initialValue === "object" &&
+      initialValue !== null &&
+      !Array.isArray(initialValue) &&
+      (typeof parsed !== "object" || Array.isArray(parsed))
+    ) {
+      return initialValue;
+    }
+    return parsed as T;
   } catch {
     return initialValue;
   }

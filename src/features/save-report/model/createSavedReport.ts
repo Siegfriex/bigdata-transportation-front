@@ -33,12 +33,18 @@ export function createSavedReport(input: {
   return {
     id: `rep-${now.getTime()}`,
     date: now.toISOString().split("T")[0],
+    savedAt: now.toISOString(),
     type: selectedReportType,
     selectedPlanId: selectedPlan.id,
+    selectedPlanSnapshot: selectedPlan,
+    selectedStrategyId: selectedPlan.id,
+    routePlanId: `${startStation}-${endStation}`,
+    decisionReportId: `decision-${now.getTime()}`,
     from: startStation,
     to: endStation,
     status: selectedPlan.risk === "high" ? "danger" : selectedPlan.risk === "medium" ? "warning" : "success",
     summary: `${reportLabelMap[selectedReportType]}: ${startStation} ↔ ${endStation} (${selectedPlan.eta} 예상)`,
     cost: selectedPlan.extraCost,
+    snapshotLabel: "저장 시점 기준",
   };
 }

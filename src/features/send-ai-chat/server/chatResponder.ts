@@ -41,7 +41,7 @@ function createHeuristicResponse(request: AiChatRequest): AiChatResponse {
 
   if (query.includes("9시") || query.includes("deadline") || query.includes("마감")) {
     return {
-      textAnswer: `⏱️ **[마감도착 AI 최적 전술]** 9시 정각까지 **${startStation}**에서 **${endStation}**로 전력 이동하는 가상 시뮬레이션입니다.\n\n일반 대중교통만으로는 9시 7분 도착이 예상되어 직속 지각 위기입니다.\n\n- **추천 (Plan A)**: 출발지에서 처음에 대중교통 대신 **택시 선탑승 구간(2.4km)**을 이용하세요. 신호 압박을 우회한 뒤, **9호선 급행 지하철**로 여의도역에서 환승하시면 안정적으로 안착합니다.\n- **도착 예정 시간**: 08:57 (여유 3분)\n- **추수 예상 비용**: 약 8,000원 (택시비 실측 기본~거리 요금 합산)\n\n시간을 절약하고 지각 비용을 획기적으로 낮추는 복합 결합 추천안입니다!`,
+      textAnswer: `**마감도착 근거**\n\n${startStation}에서 ${endStation}까지 9시 전 도착을 기준으로 도착 여유와 환승 실패 위험을 함께 봅니다.\n\n- 추천 방향: 초반 지연 구간은 택시 또는 고빈도 대중교통으로 우회하고, 이후 급행 또는 수송력이 큰 노선으로 연결합니다.\n- 도착 예정: 08:57 기준으로 약 3분 여유가 있습니다.\n- 비용 영향: 약 8,000원 수준의 추가 비용을 지각 리스크와 비교해야 합니다.\n\n현재 전략리포트의 선택 경로를 유지한 상태에서 대기 시간이 늘어나면 다음 후보로 전환하는 것이 안전합니다.`,
       suggestedReportType: "deadline",
       startStation,
       endStation,
@@ -52,7 +52,7 @@ function createHeuristicResponse(request: AiChatRequest): AiChatResponse {
 
   if (query.includes("칸") || query.includes("car") || query.includes("몇번") || query.includes("생존")) {
     return {
-      textAnswer: `🚇 **[지하철 칸별 생존 어드바이스]** **${startStation}**에서 **${endStation}**로 이동 시 최적의 추천 탑승 칸 정보입니다.\n\n급행 지하철의 경우, 빠른 하차와 빠른 환승 통로(4-2) 주위에 고밀도 인파가 쏠려 극도의 혼잡과 신체 피로를 초래합니다.\n\n- **생존 추천 칸: 3-3번 및 6-1번 문**\n- **이유**: 환승 게이트에서 단 15초(도보 10걸음) 떨어져 있으나 차내 입석 혼잡도는 최소 35% 이상 여유로워 출근 피로도를 혁신적으로 절감합니다.\n- **절대회피 칸**: 4호차 전체 (환승 쏠림 역의 중심부로 가방을 메고 서 있기도 힘듭니다)`,
+      textAnswer: `**생존칸 근거**\n\n${startStation}에서 ${endStation}까지의 선택 경로는 빠른 환승보다 혼잡 압력 완화를 우선합니다.\n\n- 추천 칸: 3-3번 또는 6-1번 문 주변을 우선 봅니다.\n- 이유: 환승 게이트 중심부에서 한 칸 이상 떨어져 차내 압박과 하차 인파 충돌을 낮춥니다.\n- 회피 기준: 환승 통로 바로 앞 칸은 빠르지만 인파가 집중되므로 혼잡 민감도가 높으면 피하는 편이 안전합니다.`,
       suggestedReportType: "carriage",
       startStation,
       endStation,
@@ -63,7 +63,7 @@ function createHeuristicResponse(request: AiChatRequest): AiChatResponse {
 
   if (query.includes("막차") || query.includes("recovery") || query.includes("놓치면") || query.includes("실패")) {
     return {
-      textAnswer: `🌙 **[막차 실패복구 전술 리포트]** 심야 자정 이후 수도권에서 자택으로 복귀해야 하는 지연 위 상황 해결 플랜입니다.\n\n현재 지하철 광역 막차가 이미 종료되었으므로 완전한 단독 지하철 복귀는 불가능합니다.\n\n- **복구 추천 편 (Plan A)**: 서울 도심 근교를 연결하는 심야전용 **N버스(N62 등)**를 탭승하여 최대 교외 지점까지 이동 후, 광역 연담 부분의 마지막 4.2km 구간을 택시 결합하는 분할 설계를 제안합니다.\n- **예상 택시 비용**: 약 9,800원 (전체 택시 탑승비 35,000 대폭 절약)\n- **심야 대기 처방**: 근처 24시간 개방 안심 쉼터(사우나, 소방서 인근) 및 새벽 첫차 연대 대기 거점이 함께 표시되어 안심하고 이동하셔도 됩니다.`,
+      textAnswer: `**복구전략 근거**\n\n${startStation}에서 ${endStation}까지 막차 또는 만차 실패가 발생하면 전체 택시보다 남아 있는 대중교통 구간을 먼저 쓰는 편이 손실을 줄입니다.\n\n- 추천 방향: 심야 버스로 이동 가능한 구간을 먼저 확보한 뒤 마지막 단절 구간만 택시로 연결합니다.\n- 예상 비용: 단절 구간 택시 기준 약 9,800원 수준으로 비교합니다.\n- 대기 기준: 대체 교통이 끊기면 24시간 개방 대기 지점에서 첫차 연계를 선택합니다.`,
       suggestedReportType: "recovery",
       startStation,
       endStation,
@@ -74,7 +74,7 @@ function createHeuristicResponse(request: AiChatRequest): AiChatResponse {
 
   if (query.includes("이번") || query.includes("버스") || query.includes("boarding") || query.includes("탈수") || query.includes("가능성")) {
     return {
-      textAnswer: `🚍 **[광역 버스 탑승가능성 진단]** 실시간 잔여석 정보에 따른 전술적 권고입니다.\n\n- **목포 8100번 / 광역 버스**: 현재 3분 뒤 진입하는 이번 차량은 **혼잡도 매우 높음 (잔여석 0)** 으로 정류장 대기 인원을 수용하지 못하고 무정차 통과 가능성이 90%입니다.\n- **AI 추천**: 해당 차를 무리하게 차도에서 대기하기보다, **8분 후 진입하는 다음 차량**을 편안하게 맞이하세요.\n- **이유**: 다음 버스는 기점 시각 데이터상 잔여석이 13석 확보된 상태로 운행하고 있어 안전한 좌석 입석 착석 탑승이 92% 보장됩니다. 무리한 무정차 탈락 리스크를 예방하십시오.`,
+      textAnswer: `**탑승가능성 근거**\n\n현재 선택 전략은 이번 차 탑승 성공률과 다음 차 대기 손실을 함께 비교합니다.\n\n- 현재 차량: 잔여석이 낮고 정류장 대기 인원이 많아 무정차 또는 탑승 실패 위험이 큽니다.\n- 추천 방향: 다음 차량 대기로 전환하면 좌석 확보 가능성과 안정성이 높아집니다.\n- 판단 기준: 8분 대기 손실보다 만차 실패 후 재대기 손실이 더 크면 다음 차 전략이 유리합니다.`,
       suggestedReportType: "boarding",
       startStation,
       endStation,
@@ -84,7 +84,7 @@ function createHeuristicResponse(request: AiChatRequest): AiChatResponse {
   }
 
   return {
-    textAnswer: `💡 반갑습니다! 수도권 실시간 대중교통 탈출 스마트 솔루션 **'탈수있나' AI 챗봇**입니다!\n\n귀하의 상황(현재 출발지: \`${startStation}\`, 목적지: \`${endStation}\`)을 관측 중입니다. 다음 중 문의하고 싶으신 핵심 대피 전술을 선택하세요:\n\n1. ⏱️ **"9시까지 도착할 수 있어?"** (마감도착 복합구간 산출)\n2. 🚍 **"이번 버스 만차인데 탈 수 있어?"** (탑승가능성 실시간 진단)\n3. 🚇 **"9호선 출근 지하철 어느 칸이 한산해?"** (지하철 칸별 생존 가이드)\n4. 🌙 **"막차가 끊겼는데 최소비용 복구 방법은?"** (심야 실패복구 설계)`,
+    textAnswer: `**선택 전략 근거**\n\n${startStation}에서 ${endStation}까지의 현재 경로를 기준으로 도착 여유, 탑승 가능성, 혼잡 압력, 실패 시 복구 대안을 함께 설명할 수 있습니다.\n\n리포트의 선택 전략을 유지한 상태에서 궁금한 근거 항목을 질문해 주세요.`,
     suggestedReportType: null,
     startStation,
     endStation,
@@ -105,7 +105,7 @@ export async function createAiChatResponse(
   const systemInstruction = `
 You are the core AI decision center for "탈수있나" (Can I Ride?), a Korean transit mobile web app that helps users optimize their trip based on 'Boarding Possibility' (탑승가능성), 'Carriage Survival' (칸별 생존가이드), 'Deadline Arrival' (마감도착), and 'Late Night Failure Recovery' (실패복구).
 
-Always answer in polite Korean using high-contrast clear emojis and structured transport terms. Keep the formatting neat and professional in Markdown. Do not include verbose introductory phrases. Go straight to providing help with actionable advice.
+Always answer in polite Korean with structured transport terms. Do not use emoji prefixes, chatbot self-introductions, product marketing copy, or raw internal labels such as Plan A, plan_a, boarding, deadline, carriage, recovery, savedReportId, or report ids. Keep the formatting neat and professional in Markdown. Go straight to the current route evidence and actionable advice.
 
 Given the user query, identify:
 1. textAnswer: A detailed analysis with transport reasoning, comparison tables, or clear steps (referencing real patterns in Seoul metro/bus).
@@ -117,7 +117,7 @@ Given the user query, identify:
 3. startStation: Source station if mentioned (Korean, default e.g. "염창역").
 4. endStation: Destination station if mentioned (Korean, default e.g. "여의도역" or "강남역").
 5. recommendedCarNo: If 지하철 carriage is asked, suggest a less crowded car (e.g. "3-3" or "6-1").
-6. routeIndex: Route option indexing (0 for Plan A, 1 for Plan B, 2 for Plan C) to recommend.
+6. routeIndex: 0-based route candidate index to recommend. Do not mention this index in user-facing text.
 
 Current state context provided by user:
 ${JSON.stringify(context)}

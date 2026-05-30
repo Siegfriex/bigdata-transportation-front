@@ -1,5 +1,6 @@
-import { ArrowRight, Bike, CheckCircle2, Compass, Sliders, Train } from "lucide-react";
+import { ArrowRight, Bike, CheckCircle2, Sliders, Train } from "lucide-react";
 import type { UserPreferences } from "../../../entities/user-preferences";
+import { TalsuLogo } from "../../../shared/ui/brand/TalsuLogo";
 
 type UserProfile = {
   name: string;
@@ -42,8 +43,13 @@ export function OnboardingOverlay({
       {step === 1 ? (
         <div className="flex-1 flex flex-col justify-between py-8">
           <div className="space-y-4 text-center mt-12">
-            <div className="surface-card mx-auto flex h-20 w-20 items-center justify-center rounded-[24px] text-white">
-              <Compass className="w-10 h-10 animate-spin-slow" />
+            <div className="surface-card mx-auto flex h-[104px] w-[188px] items-center justify-center rounded-[22px] bg-white px-5 shadow-[0_18px_44px_rgba(0,0,0,0.36)]">
+              <TalsuLogo
+                className="w-full"
+                state="go"
+                interactive
+                ariaLabel="탈수있나 첫 화면 로고"
+              />
             </div>
             <h1 className="text-[28px] leading-tight font-semibold tracking-tight text-white mt-6">
               빠른 길 말고,<br />

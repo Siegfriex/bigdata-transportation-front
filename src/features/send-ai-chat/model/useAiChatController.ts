@@ -29,6 +29,9 @@ export function useAiChatController({
   const [chatError, setChatError] = useState<string | null>(null);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>(initialChatMessages);
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const inFlightRef = useRef(false);
+  const lastRequestRef = useRef<string | null>(null);
+  const fallbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -36,7 +39,13 @@ export function useAiChatController({
 
   const sendMessage = useCallback(
     async (text: string) => {
-      if (!text.trim() || chatbotLoading) return;
+      if (!text.trim() || chatbotLoading || inFlightRef.current) return;
+      if (fallbackTimerRef.current) {
+        clearTimeout(fallbackTimerRef.current);
+        fallbackTimerRef.current = null;
+      }
+      inFlightRef.current = true;
+      lastRequestRef.current = text;
 
       const userMsg: ChatMessage = {
         id: `msg-${Date.now()}`,
@@ -71,18 +80,41 @@ export function useAiChatController({
         setChatMessages((prev) => [...prev, aiMsg]);
         onApplyResponse(data);
         setChatbotLoading(false);
+        inFlightRef.current = false;
       } catch {
         setChatError("실시간 AI 연결이 불안정해 로컬 안전 플랜으로 대체했습니다.");
-        setTimeout(() => {
+        setChatbotLoading(false);
+        inFlightRef.current = false;
+        fallbackTimerRef.current = setTimeout(() => {
           const fallbackMsg = createFallbackChatMessage(text);
           setChatMessages((prev) => [...prev, fallbackMsg]);
           onApplyFallback(fallbackMsg);
-          setChatbotLoading(false);
+          fallbackTimerRef.current = null;
         }, 700);
       }
     },
     [chatbotLoading, context, onApplyFallback, onApplyResponse]
   );
+
+  const startContextualBriefing = useCallback(
+    (seedText: string, requestText: string) => {
+      const seedMsg: ChatMessage = {
+        id: `msg-context-${Date.now()}`,
+        sender: "ai",
+        text: seedText,
+        timestamp: formatKoreanTime(),
+      };
+      setChatMessages([seedMsg]);
+      void sendMessage(requestText);
+    },
+    [sendMessage]
+  );
+
+  const retryLastMessage = useCallback(() => {
+    const lastRequest = lastRequestRef.current;
+    if (!lastRequest || chatbotLoading || inFlightRef.current) return;
+    void sendMessage(lastRequest);
+  }, [chatbotLoading, sendMessage]);
 
   return {
     chatInput,
@@ -92,5 +124,7 @@ export function useAiChatController({
     chatEndRef,
     setChatInput,
     sendMessage,
+    startContextualBriefing,
+    retryLastMessage,
   };
 }
