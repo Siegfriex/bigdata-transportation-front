@@ -329,10 +329,10 @@
 | App shell/router | `src/App.tsx`, `src/app/model/useAppController.ts`, `src/app/layouts/AppShell.tsx`, `src/app/router/AppRouter.tsx` | provider 분리와 URL router 도입 여부 결정 필요 |
 | 온보딩 | `features/complete-onboarding/ui/OnboardingOverlay.tsx` | step state/model 분리 필요 |
 | 지도 | `widgets/transit-map-panel/ui/InteractiveMap.tsx` | 기존 `components` re-export 제거 시점 결정 필요 |
-| 리포트 시트 | `widgets/report-sheet/ui/*` | 리포트 상세 panel/CTA 분리 완료, 상위 sheet shell 정리 필요 |
+| 리포트 시트 | `widgets/report-sheet/ui/*`, `entities/report/model/insights.ts` | 리포트 상세 panel/CTA 분리 완료, 상위 sheet shell 정리 필요 |
 | AI API/UI | `features/send-ai-chat/api`, `features/send-ai-chat/model/useAiChatController.ts`, `features/send-ai-chat/server`, `widgets/ai-chat-panel`, `api/chat.ts` | 후속으로 session/history persistence 검토 |
-| 저장/아카이브 | `entities/report/model/store.ts`, `widgets/archive-calendar` | archive fixture/config 분리 필요 |
-| 설정 | `entities/user-preferences/model/store.ts`, `widgets/settings-form` | settings content config 분리 필요 |
+| 저장/아카이브 | `entities/report/model/store.ts`, `widgets/archive-calendar` | archive calendar display config는 widget model로 분리됨. report archive fixture 세분화는 후속 후보 |
+| 설정 | `entities/user-preferences/model/store.ts`, `widgets/settings-form` | settings option/source notice config는 widget model로 분리됨 |
 
 ## 10-2. Dev 라우팅/어댑터 점검
 
@@ -355,13 +355,13 @@
 | `features/generate-route-plan/model/presets.ts` | feature preset fixture로 허용 | 향후 API 연동 시 fixture 명명 검토 |
 | `features/send-ai-chat/model/fallback.ts` | fallback model로 허용 | 문구/시나리오 fixture 분리 가능 |
 | `features/send-ai-chat/server/chatResponder.ts` | 서버 fallback과 prompt에 도메인 문구가 많음 | Gemini mock responder와 prompt template 분리 후보 |
-| `widgets/report-sheet/ui/BoardingReportView.tsx` | UI 안에 버스 잔여석/시간 mock 문구가 남아 있음 | 다음 report model fixture로 이동 후보 |
-| `widgets/report-sheet/ui/RecoveryReportView.tsx` | UI 안에 N버스/거점/금액 mock 문구가 남아 있음 | report recovery fixture로 이동 후보 |
-| `widgets/report-sheet/ui/CarriageReportView.tsx` | 일부 제목에 고정 출발/도착 문구가 남아 있음 | props 또는 route context 기반으로 교체 필요 |
+| `widgets/report-sheet/ui/BoardingReportView.tsx` | 버스 잔여석/시간 mock 문구가 `entities/report/model/insights.ts`로 이동됨 | 실제 API 연동 시 report insight schema로 교체 후보 |
+| `widgets/report-sheet/ui/RecoveryReportView.tsx` | N버스/거점/금액 mock 문구가 `entities/report/model/insights.ts`로 이동됨 | 실제 API 연동 시 recovery plan schema로 교체 후보 |
+| `widgets/report-sheet/ui/CarriageReportView.tsx` | 제목의 출발/도착역이 props 기반으로 교체됨 | 급행 혼잡도/출구거리 문구는 route-plan/car detail model 확장 후보 |
 | `widgets/ai-chat-panel/ui/AiChatLayer.tsx` | 추천 질문 배열과 chat state hook은 feature model로 이동됨 | session/history persistence 후보 |
 | `App.tsx` | host 수준으로 축소됨 | 추가 상태 이동은 `app/model` 또는 feature model에서 진행 |
-| `widgets/settings-form/ui/SettingsForm.tsx` | 공공데이터 출처 문구/옵션 배열이 widget 내부에 있음 | settings config 또는 shared content 분리 후보 |
-| `widgets/archive-calendar/ui/ArchiveCalendar.tsx` | 2026년 5월/31일/92.8% mock 수치가 widget 내부에 있음 | archive fixture/config 분리 후보 |
+| `widgets/settings-form/ui/SettingsForm.tsx` | 공공데이터 출처 문구/옵션 배열이 `widgets/settings-form/model/config.ts`로 이동됨 | BE/API 정합화 후 data source registry와 연결 후보 |
+| `widgets/archive-calendar/ui/ArchiveCalendar.tsx` | 2026년 5월/31일/92.8% display config가 `widgets/archive-calendar/model/config.ts`로 이동됨 | 실제 통계 API 연동 시 entity/report summary로 교체 후보 |
 
 ## 11. 비즈니스 규칙
 

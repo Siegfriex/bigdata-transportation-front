@@ -145,7 +145,7 @@
 | Vercel adapter | 정상 방향 | `api/chat.ts`와 `server.ts`가 같은 `createAiChatResponse`를 공유한다. |
 | API client | 개선됨 | `shared/api/http-client.ts`와 `postJson`이 추가되어 `sendAiChat`의 raw fetch는 제거됐다. |
 | mock 위치 | 절반 이상 적정 | station/route/report mock은 entity에 있다. route preset은 feature model에 있다. |
-| 남은 UI mock | 존재 | report-sheet의 버스 잔여석, recovery 거점/금액, carriage 제목, archive-calendar의 월/통계 수치, settings-form의 공공데이터 출처 문구가 widget 내부 하드코딩이다. AI 추천 질문은 feature model로 이동했다. |
+| 남은 UI mock | 일부 축소 | report-sheet의 버스 잔여석/recovery 거점·금액은 `entities/report/model/insights.ts`로, archive/settings 표시 config는 각 widget model로 이동했다. carriage 제목의 출발/도착역은 props 기반으로 교체됐다. 남은 mock은 실제 API/schema 연동 전 display fixture 성격이다. |
 | 위험 지점 | markdown renderer | `shared/lib/markdown/renderSafeMarkdown.tsx`로 `dangerouslySetInnerHTML` 제거 완료. |
 
 ## 10. Phase 6. Persistence/API 정리
@@ -185,7 +185,7 @@
 | 워크트리 | `.gitignore`, `.env.local` 변경은 별도 로컬 변경으로 유지한다. Phase 6 변경과 분리한다. |
 | 병렬 작업 충돌 | `.env.example`, `README.md`, `server.ts`, Vercel 코드 파일은 이미 원격 반영되었고 다음 UI refactor에서는 건드리지 않는다. |
 | 다음 코드 터치 범위 | `src/app/**`, `src/features/*/model`, `src/entities/*/model/store`, `src/widgets/**`, `docs/*` |
-| 검증 | Phase 7에서 `npm run lint`, `npm run build`, dev/API smoke, UI smoke를 반복한다. |
+| 검증 | Phase 7에서 `npm run lint`, `npm run build`, dev/API smoke, UI smoke를 반복한다. 1차 hardcoding cleanup 후 `npm run lint`, `npm run build` 통과. |
 
 ## 12. 완료 정의
 

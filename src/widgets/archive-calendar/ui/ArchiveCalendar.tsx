@@ -1,5 +1,6 @@
 import { BookmarkCheck, ChevronRight, Trash2 } from "lucide-react";
 import type { SavedReport } from "../../../entities/report";
+import { archiveCalendarConfig } from "../model/config";
 
 type ArchiveCalendarProps = {
   savedReports: SavedReport[];
@@ -8,8 +9,6 @@ type ArchiveCalendarProps = {
   onClearReports: () => void;
   onRestoreReport: (report: SavedReport) => void;
 };
-
-const weekDays = ["월", "화", "수", "목", "금", "토", "일"];
 
 function getReportDay(report: SavedReport) {
   const match = report.date.match(/-(\d{2})$/);
@@ -42,26 +41,26 @@ export function ArchiveCalendar({
     <div className="flex-1 flex flex-col p-4 space-y-3 absolute inset-0 z-10 overflow-y-auto bg-black/80 backdrop-blur-3xl pointer-events-auto">
       <div className="apple-glass border border-white/10 rounded-2xl p-3 flex justify-between items-center shrink-0">
         <div className="space-y-0.5">
-          <span className="text-[10px] font-mono text-white/50 uppercase">COMMUTING STATS</span>
-          <div className="text-sm font-bold text-white">이번 달 통근 세이프안착율</div>
+          <span className="text-[10px] font-mono text-white/50 uppercase">{archiveCalendarConfig.statsEyebrow}</span>
+          <div className="text-sm font-bold text-white">{archiveCalendarConfig.statsTitle}</div>
         </div>
         <div className="text-right">
-          <span className="text-2xl font-black text-[#0A84FF] font-mono">92.8%</span>
+          <span className="text-2xl font-black text-[#0A84FF] font-mono">{archiveCalendarConfig.safeArrivalRateLabel}</span>
         </div>
       </div>
 
       <div className="apple-glass border border-white/10 rounded-2xl p-3.5 space-y-3 shrink-0">
         <div className="flex justify-between items-center border-b border-white/15 pb-2">
-          <span className="text-xs font-bold font-mono text-white">2026년 5월 통근캘린더</span>
+          <span className="text-xs font-bold font-mono text-white">{archiveCalendarConfig.monthLabel} 통근캘린더</span>
           <span className="text-[10px] text-[#0A84FF] font-mono">총 {savedReportDays.size}일 출근</span>
         </div>
 
         <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-mono text-white/50">
-          {weekDays.map((day) => <span key={day}>{day}</span>)}
+          {archiveCalendarConfig.weekDays.map((day) => <span key={day}>{day}</span>)}
         </div>
 
         <div className="grid grid-cols-7 gap-1.5 text-center text-xs font-mono">
-          {Array.from({ length: 31 }, (_, index) => {
+          {Array.from({ length: archiveCalendarConfig.daysInMonth }, (_, index) => {
             const day = index + 1;
             const isSelect = selectedCalendarDay === day;
             const reportsForDay = savedReports.filter((report) => getReportDay(report) === day);
@@ -97,7 +96,7 @@ export function ArchiveCalendar({
         </div>
 
         <div className="apple-glass-light border border-white/15 rounded-xl p-2.5 text-[11px] leading-relaxed">
-          <span className="text-[#0A84FF] font-bold block mb-1">📅 5월 {selectedCalendarDay}일 통근 피드백</span>
+          <span className="text-[#0A84FF] font-bold block mb-1">{archiveCalendarConfig.feedbackMonthLabel} {selectedCalendarDay}일 통근 피드백</span>
           {(() => {
             const selectedReports = savedReports.filter((report) => getReportDay(report) === selectedCalendarDay);
             if (selectedReports.length === 0) {

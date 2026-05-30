@@ -25,10 +25,10 @@
 | `pages` | `map-page`, `archive-page`, `settings-page`의 `index.tsx`만 생성됐다. | 계속 `pages/*/ui` 없이 widget composition entry로 유지한다. |
 | `widgets/transit-map-panel` | `InteractiveMap` 실제 구현이 이동했고 `components/InteractiveMap.tsx`는 호환 re-export다. | 신규 import는 반드시 `widgets/transit-map-panel` public API를 사용한다. |
 | `widgets/map-workspace` | map 탭의 프리셋, AI 검색 진입, 리포트 상세 composition이 분리됐다. | page/router 생성 전까지 임시 map tab composition boundary로 사용한다. |
-| `widgets/report-sheet` | 조건 카드, 리포트 탭, 4개 리포트 view, `ReportActionBar`, `ReportDetailPanel`이 분리됐다. | report 문구/수치 mock은 entity/report fixture로 이동한다. |
+| `widgets/report-sheet` | 조건 카드, 리포트 탭, 4개 리포트 view, `ReportActionBar`, `ReportDetailPanel`이 분리됐다. 버스/recovery display insight는 `entities/report/model/insights.ts`로 이동했다. | 남은 report 문구/수치 mock은 실제 API schema 도입 시 entity/report fixture 또는 contract schema로 이동한다. |
 | `widgets/ai-chat-panel` | `AiChatLayer`가 분리됐고 추천 질문/welcome message/chat state hook은 feature model로 이동했다. 현재 구현에서 AI 챗은 하단 독립 탭이 아니라 지도 컨텍스트 overlay다. | session/history persistence가 필요해질 때 feature/entity store를 추가한다. |
-| `widgets/archive-calendar` | 저장 리포트 달력/목록/복원 UI가 분리됐고 report localStorage store는 entity/model로 이동했다. | 월/통계 mock config를 entity/report fixture로 이동한다. |
-| `widgets/settings-form` | preferences form, 루틴 동기화 UI, 데이터 출처 안내가 분리됐고 preference store는 entity/model로 이동했다. | settings content config를 분리한다. |
+| `widgets/archive-calendar` | 저장 리포트 달력/목록/복원 UI가 분리됐고 report localStorage store는 entity/model로 이동했다. 월/통계 display config는 widget model로 분리됐다. | 실제 통계 API 연동 시 entity/report summary fixture 또는 API schema로 이동한다. |
+| `widgets/settings-form` | preferences form, 루틴 동기화 UI, 데이터 출처 안내가 분리됐고 preference store는 entity/model로 이동했다. settings content config도 widget model로 분리됐다. | 데이터 출처 registry가 확정되면 API/data policy contract와 연결한다. |
 | `features` | onboarding, route preset carousel, route planner hook, save-report, send-ai-chat controller, toggle-map-layer가 생성됐다. | 남은 feature 상태는 select-station/onboarding model로 단계적으로 이동한다. |
 | `entities` | station/route-plan/report/user-preferences/chat-message 타입과 mock/default/store가 이동됐다. | 추가 schema가 필요해지면 entity/model에 둔다. |
 | `shared` | config, `cn`, markdown safe renderer, `usePersistentState`, toast/page-container UI, http client가 생성됐다. | token/style primitive를 추가한다. |

@@ -1,4 +1,5 @@
 import { AlertTriangle, ShieldCheck } from "lucide-react";
+import { boardingComparison } from "../../../entities/report";
 
 type BoardingReportViewProps = {
   startStation: string;
@@ -19,25 +20,25 @@ export function BoardingReportView({ startStation }: BoardingReportViewProps) {
 
       <div className="grid grid-cols-2 gap-2">
         <div className="apple-glass border border-white/10 p-2.5 rounded-xl text-center space-y-1">
-          <span className="text-[10px] text-white/50 font-mono block uppercase">이번 차량 (1st Bus)</span>
-          <span className="text-sm font-black text-[#FF3B30] tracking-tight">3분 후 진입</span>
-          <span className="text-[10px] bg-[#FF3B30]/15 text-[#FF3B30] px-1.5 py-0.5 rounded-full inline-block font-mono">만석 (잔여 0석)</span>
-          <span className="text-[9px] text-white/50 block">차내혼잡: 최고조</span>
+          <span className="text-[10px] text-white/50 font-mono block uppercase">{boardingComparison.currentBus.label}</span>
+          <span className="text-sm font-black text-[#FF3B30] tracking-tight">{boardingComparison.currentBus.etaLabel}</span>
+          <span className="text-[10px] bg-[#FF3B30]/15 text-[#FF3B30] px-1.5 py-0.5 rounded-full inline-block font-mono">{boardingComparison.currentBus.seatStatus}</span>
+          <span className="text-[9px] text-white/50 block">{boardingComparison.currentBus.crowdStatus}</span>
         </div>
         <div className="apple-glass border border-[#0A84FF]/30 p-2.5 rounded-xl text-center space-y-1 shadow-[0_4px_12px_rgba(10,132,255,0.15)]">
-          <span className="text-[10px] text-[#0A84FF] font-mono block uppercase">다음 차량 (2nd Bus)</span>
-          <span className="text-sm font-black text-[#0A84FF] tracking-tight">8분 후 진입</span>
-          <span className="text-[10px] bg-[#0A84FF]/15 text-[#0A84FF] px-1.5 py-0.5 rounded-full inline-block font-mono">원활 (잔여 13석)</span>
-          <span className="text-[9px] text-white/70 block">좌석착정: 92% 보장</span>
+          <span className="text-[10px] text-[#0A84FF] font-mono block uppercase">{boardingComparison.nextBus.label}</span>
+          <span className="text-sm font-black text-[#0A84FF] tracking-tight">{boardingComparison.nextBus.etaLabel}</span>
+          <span className="text-[10px] bg-[#0A84FF]/15 text-[#0A84FF] px-1.5 py-0.5 rounded-full inline-block font-mono">{boardingComparison.nextBus.seatStatus}</span>
+          <span className="text-[9px] text-white/70 block">{boardingComparison.nextBus.crowdStatus}</span>
         </div>
       </div>
 
       <div className="border-t border-white/15 pt-2 flex items-center justify-between text-[11px] text-white/70 font-mono">
         <span className="flex items-center gap-1">
           <ShieldCheck className="w-3.5 h-3.5 text-[#0A84FF]" />
-          <span>신뢰도: 패턴+실시간 융합</span>
+          <span>{boardingComparison.confidenceLabel}</span>
         </span>
-        <span className="text-[#0A84FF]">다음 차량 착석 권고</span>
+        <span className="text-[#0A84FF]">{boardingComparison.recommendationLabel}</span>
       </div>
     </div>
   );

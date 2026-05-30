@@ -3,6 +3,8 @@ import type { CarDetail } from "../../../entities/route-plan";
 type CarriageReportViewProps = {
   carDetails: CarDetail[];
   activeCarNo: string;
+  startStation: string;
+  endStation: string;
   onSelectCar: (carNo: string) => void;
 };
 
@@ -19,13 +21,13 @@ const getCarButtonClassName = (car: CarDetail, isActive: boolean) => {
   return "apple-glass border-white/10 text-[#FF3B30]";
 };
 
-export function CarriageReportView({ carDetails, activeCarNo, onSelectCar }: CarriageReportViewProps) {
+export function CarriageReportView({ carDetails, activeCarNo, startStation, endStation, onSelectCar }: CarriageReportViewProps) {
   const activeCar = carDetails.find((car) => car.carNo === activeCarNo);
 
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between text-xs font-bold border-b border-white/15 pb-2 text-white">
-        <span>🚇 최한산 안심 탑승 칸 추천 (염창역 → 여의도기)</span>
+        <span>최한산 안심 탑승 칸 추천 ({startStation} → {endStation})</span>
         <span className="text-[#FF3B30] text-[11px] font-mono">급행 혼잡도: 극심</span>
       </div>
 

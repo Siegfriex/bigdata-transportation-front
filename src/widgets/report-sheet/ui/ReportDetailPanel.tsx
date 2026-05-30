@@ -56,6 +56,8 @@ export function ReportDetailPanel({
           <CarriageReportView
             carDetails={carDetails}
             activeCarNo={activeCarNo}
+            startStation={startStation}
+            endStation={endStation}
             onSelectCar={onSelectCar}
           />
         )}

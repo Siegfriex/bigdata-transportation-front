@@ -1,6 +1,12 @@
 import { Bike, ShieldCheck } from "lucide-react";
 import { stationNames } from "../../../entities/station";
 import type { UserPreferences } from "../../../entities/user-preferences";
+import {
+  aiStyleOptions,
+  publicDataSourceNotice,
+  taxiFeeOptions,
+  walkLimitOptions,
+} from "../model/config";
 
 type SettingsFormProps = {
   preferences: UserPreferences;
@@ -10,16 +16,6 @@ type SettingsFormProps = {
 };
 
 type CrowdSensitivity = UserPreferences["crowdSensitivity"];
-type AiStyle = UserPreferences["aiStyle"];
-
-const taxiFeeOptions = [0, 5000, 10000, 20000, 100000];
-const walkLimitOptions = [5, 10, 15, 20];
-
-const aiStyleOptions: Array<{ id: AiStyle; label: string }> = [
-  { id: "brief", label: "간결형" },
-  { id: "detailed", label: "세부설명형" },
-  { id: "emergency", label: "지각긴급형" },
-];
 
 const isCrowdSensitivity = (value: string): value is CrowdSensitivity =>
   value === "low" || value === "normal" || value === "high";
@@ -164,18 +160,17 @@ export function SettingsForm({
         <span className="text-[10px] font-mono text-white/50 uppercase tracking-wider block">공공데이터 예측 출처 안내</span>
         <div className="apple-glass border border-white/10 rounded-2xl p-3.5 space-y-2 text-[10.5px] leading-relaxed text-white/70">
           <div className="flex items-center justify-between border-b border-white/15 pb-1.5 text-white">
-            <span className="font-bold font-sans">실시간 데이터 출처</span>
-            <span className="text-[#0A84FF] text-[10px] font-mono">2026 기준 가동</span>
+            <span className="font-bold font-sans">{publicDataSourceNotice.heading}</span>
+            <span className="text-[#0A84FF] text-[10px] font-mono">{publicDataSourceNotice.statusLabel}</span>
           </div>
           <ul className="list-disc pl-4 space-y-1">
-            <li><strong>실시간 버스위치 및 잔여석</strong>: 경기도 버스정보 GBIS open API</li>
-            <li><strong>지하철 혼잡도 가용범위</strong>: 서울 열린데이터광장 + 서울교통공사 빅데이터 통계</li>
-            <li><strong>따릉이 자전거 실시간 카운트</strong>: 서울 열린데이터광장 따릉이 대여</li>
-            <li><strong>지상구간 경로 가중치 역산</strong>: OSM 네트워크 보행 기반 엔진</li>
+            {publicDataSourceNotice.items.map((item) => (
+              <li key={item.label}><strong>{item.label}</strong>: {item.source}</li>
+            ))}
           </ul>
           <div className="apple-glass-light p-2 rounded-lg text-[9.5px] font-mono text-white/50 flex items-center gap-1">
             <ShieldCheck className="w-3.5 h-3.5 text-[#0A84FF]" />
-            <span>본 추정 결과물은 기상 및 도로 통제상 오차가 있을 수 있습니다.</span>
+            <span>{publicDataSourceNotice.disclaimer}</span>
           </div>
         </div>
       </div>
