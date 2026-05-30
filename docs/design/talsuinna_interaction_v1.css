@@ -1,0 +1,48 @@
+:root {
+  --talsu-primary: #06111F;
+  --talsu-accent: #1677FF;
+  --talsu-go: #12B76A;
+  --talsu-tight: #FF7A1A;
+  --talsu-stop: #F04438;
+  --talsu-ai: #7C3AED;
+  --talsu-night: #B6FF3B;
+  --talsu-ease-decision: cubic-bezier(.2,.8,.2,1);
+  --talsu-duration-fast: 180ms;
+  --talsu-duration-route: 1150ms;
+}
+
+.talsu-logo .train { color: var(--talsu-primary); }
+.talsu-logo .rail { color: var(--talsu-accent); }
+.talsu-logo .wordmark { color: var(--talsu-primary); }
+
+.talsu-logo--go { --talsu-accent: var(--talsu-go); }
+.talsu-logo--tight { --talsu-accent: var(--talsu-tight); }
+.talsu-logo--no-go { --talsu-accent: var(--talsu-stop); }
+.talsu-logo--ai { --talsu-accent: var(--talsu-ai); }
+
+.talsu-loader .train {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: talsu-train-pass var(--talsu-duration-route) var(--talsu-ease-decision) infinite;
+}
+.talsu-loader .rail {
+  transform-box: fill-box;
+  transform-origin: 88% 50%;
+  animation: talsu-node-pulse var(--talsu-duration-route) ease-in-out infinite;
+}
+
+@keyframes talsu-train-pass {
+  0% { transform: translateX(-18px); opacity: .35; }
+  20% { opacity: 1; }
+  62% { transform: translateX(16px); opacity: 1; }
+  100% { transform: translateX(36px); opacity: 0; }
+}
+@keyframes talsu-node-pulse {
+  0%, 100% { opacity: .44; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.025); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .talsu-loader .train,
+  .talsu-loader .rail { animation: none !important; }
+}
