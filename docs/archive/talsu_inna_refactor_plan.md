@@ -1,7 +1,7 @@
 # 탈수있나 FSD Refactor Execution Plan v1.0
 
-> 목적: 현재 `data_insight` 구현을 `docs/talsu_inna_architecture_rules.md`의 FSD 규칙에 맞게 단계적으로 옮기는 실행 계획을 정의한다.  
-> 작성일: 2026-05-27  
+> 목적: 현재 `data_insight` 구현을 `docs/talsu_inna_architecture_rules.md`의 FSD 규칙에 맞게 단계적으로 옮기는 실행 계획을 정의한다.
+> 작성일: 2026-05-27
 > 기준 문서: `docs/talsu_inna_fsd_current.md`, `docs/talsu_inna_architecture_rules.md`
 
 ## 1. 실행 원칙

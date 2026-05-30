@@ -1,8 +1,8 @@
 # 탈수있나 Refactor & Development Plan v1.0
 
-> 목적: `docs/talsu_inna_code_based_fsd_v1.md`의 기능 분해와 리팩토링 슬라이스를 실제 개발 가능한 단계로 심층화한다.  
-> 기준 코드: `cf6365e` (`publish/main`)  
-> 작성일: 2026-05-26  
+> 목적: `docs/talsu_inna_code_based_fsd_v1.md`의 기능 분해와 리팩토링 슬라이스를 실제 개발 가능한 단계로 심층화한다.
+> 기준 코드: `cf6365e` (`publish/main`)
+> 작성일: 2026-05-26
 > 원칙: 현 기능을 깨지 않고, `App.tsx` 과밀 구조를 점진적으로 해체하며, mock 기반 MVP를 실제 데이터/영속성/테스트 가능한 구조로 전환한다.
 
 ## 1. 현재 상태 진단

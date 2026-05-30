@@ -228,7 +228,7 @@ src/features/send-ai-chat/lib/renderMarkdown.tsx:dangerouslySetInnerHTML ...
 | theme token | `src/index.css` | `--font-*`, `--color-apple-*` | `src/index.css:4-14` |
 | body reset | `src/index.css` | margin/padding/background | `src/index.css:16-20` |
 | reusable classes | `src/index.css` | `.apple-mesh-bg`, `.apple-glass`, `.apple-glass-light`, `.stroke-dash-animated`, `.scrollbar-none`, `.animate-spin-slow` | `src/index.css:22-88` |
-| component style | TSX className | layout, z-index, colors, shadows, spacing 대부분 inline Tailwind | grep magic result | 
+| component style | TSX className | layout, z-index, colors, shadows, spacing 대부분 inline Tailwind | grep magic result |
 
 ### public API(index.ts) 존재 여부
 

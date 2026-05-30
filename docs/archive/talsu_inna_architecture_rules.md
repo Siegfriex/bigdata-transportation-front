@@ -1,8 +1,8 @@
 # 탈수있나 Frontend Architecture Rules v1.0
 
-> 목적: `data_insight` 프론트엔드의 UI, 상태, 도메인, 스타일, 설정값, schema, mock, caching 위치를 FSD 기준으로 고정한다.  
-> 작성일: 2026-05-27  
-> 레퍼런스: `/home/sieg/projects-wsl/MiriArt/src` 현 코드 176개 파일 전수 조사  
+> 목적: `data_insight` 프론트엔드의 UI, 상태, 도메인, 스타일, 설정값, schema, mock, caching 위치를 FSD 기준으로 고정한다.
+> 작성일: 2026-05-27
+> 레퍼런스: `/home/sieg/projects-wsl/MiriArt/src` 현 코드 176개 파일 전수 조사
 > 관련 문서: `docs/talsu_inna_fsd_current.md`, `docs/talsu_inna_refactor_plan.md`
 
 ## 1. 결정 요약

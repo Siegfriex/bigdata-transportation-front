@@ -1,8 +1,8 @@
 # 탈수있나 Google Maps Platform 도입 개발계획 v1.0
 
-> 목적: 현 `data_insight` 코드베이스를 기준으로 Google Maps Platform을 안전하게 도입하기 위한 범위, 아키텍처 경계, 단계별 실행 순서, 보안/검증 기준을 정의한다.  
-> 작성일: 2026-05-27  
-> 기준 코드: React 19 + Vite 6 + Express, `InteractiveMap.tsx` SVG mock map, `entities/*` 일부 분리 상태  
+> 목적: 현 `data_insight` 코드베이스를 기준으로 Google Maps Platform을 안전하게 도입하기 위한 범위, 아키텍처 경계, 단계별 실행 순서, 보안/검증 기준을 정의한다.
+> 작성일: 2026-05-27
+> 기준 코드: React 19 + Vite 6 + Express, `InteractiveMap.tsx` SVG mock map, `entities/*` 일부 분리 상태
 > 관련 문서: `docs/talsu_inna_fsd_current.md`, `docs/talsu_inna_architecture_rules.md`, `docs/talsu_inna_refactor_plan.md`
 
 ## 1. 결정 요약

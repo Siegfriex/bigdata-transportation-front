@@ -1,7 +1,7 @@
 # 탈수있나 Current-State Functional Specification v1.0
 
-> 목적: 현재 `data_insight` 프론트엔드가 실제로 무엇을 구현하고 있는지 기능, 입출력, 상태, 비즈니스 규칙, 갭, QA 기준으로 고정한다.  
-> 작성일: 2026-05-27  
+> 목적: 현재 `data_insight` 프론트엔드가 실제로 무엇을 구현하고 있는지 기능, 입출력, 상태, 비즈니스 규칙, 갭, QA 기준으로 고정한다.
+> 작성일: 2026-05-27
 > 기준 커밋: 현 로컬 작업트리 기준. 직전 원격 커밋 `a2cedcc` 이후 `widgets/map-workspace` 추출 반영.
 > 관련 문서: `docs/talsu_inna_architecture_rules.md`, `docs/talsu_inna_refactor_plan.md`
 

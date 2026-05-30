@@ -1,7 +1,7 @@
 # 탈수있나 Documentation Agent Prompt Set v1.0
 
-> 목적: 에이전트가 실제 코드베이스를 읽고 `Current FSD`, `Architecture Rules`, `Refactor Plan` 세 문서를 증거 기반으로 점진 갱신할 수 있게 하는 작업 지시 프롬프트를 제공한다.  
-> 작성일: 2026-05-27  
+> 목적: 에이전트가 실제 코드베이스를 읽고 `Current FSD`, `Architecture Rules`, `Refactor Plan` 세 문서를 증거 기반으로 점진 갱신할 수 있게 하는 작업 지시 프롬프트를 제공한다.
+> 작성일: 2026-05-27
 > 대상 문서: `docs/talsu_inna_fsd_current.md`, `docs/talsu_inna_architecture_rules.md`, `docs/talsu_inna_refactor_plan.md`
 
 ## 1. 사용 원칙

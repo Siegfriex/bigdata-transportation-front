@@ -1,7 +1,7 @@
 # 탈수있나 Vercel Functions & Environment Plan
 
-> 목적: 프론트 리팩토링과 겹치지 않게 Vercel 배포/환경 변수/API Function 경계를 고정한다.  
-> 작성일: 2026-05-27  
+> 목적: 프론트 리팩토링과 겹치지 않게 Vercel 배포/환경 변수/API Function 경계를 고정한다.
+> 작성일: 2026-05-27
 > 범위: `/api/chat`, Vercel Functions, env, 정적 Vite 배포. UI widget/page 리팩토링은 `docs/talsu_inna_refactor_plan.md`에서 관리한다.
 
 ## 1. 현재 결정

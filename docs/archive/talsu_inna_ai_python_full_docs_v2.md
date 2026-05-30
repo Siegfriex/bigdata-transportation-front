@@ -1,17 +1,17 @@
 # 탈수있나 AI 측 Python/FastAPI 통합 문서 v2
 
-**문서 유형:** AI-side Python/FastAPI Architecture + Model Engine Blueprint + API Contract + Feature Contract + Model Card + Evaluation/Fallback Policy  
-**서비스명:** 탈수있나  
-**대상 노드:** FastAPI Decision API + 내부 AI/ML 모델 레이어  
-**연동 대상:** Spring Boot Core API / React TypeScript Frontend / GCP Data & AI Infra  
-**작성 버전:** v2.0  
+**문서 유형:** AI-side Python/FastAPI Architecture + Model Engine Blueprint + API Contract + Feature Contract + Model Card + Evaluation/Fallback Policy
+**서비스명:** 탈수있나
+**대상 노드:** FastAPI Decision API + 내부 AI/ML 모델 레이어
+**연동 대상:** Spring Boot Core API / React TypeScript Frontend / GCP Data & AI Infra
+**작성 버전:** v2.0
 **작성 목적:** 기존 AI 판단 서비스 블루프린트를 모델러·데이터사이언티스트 관점에서 재구조화하고, FastAPI/Python 계층이 단순 공공 API 호출 서버가 아니라 **데이터 기반 이동 판단 엔진**으로 작동하도록 전체 문서를 통합 업데이트한다.
 
 ---
 
 ## 0. 핵심 결론
 
-탈수있나의 Python/FastAPI 계층은 단순히 서울버스, 경기버스, 지하철, 따릉이 API를 호출하는 서버가 아니다.  
+탈수있나의 Python/FastAPI 계층은 단순히 서울버스, 경기버스, 지하철, 따릉이 API를 호출하는 서버가 아니다.
 이 계층은 공공·민간 이동 데이터를 정규화하고, feature를 만들고, 규칙 기반 점수·ML 예측·제약 최적화·LLM 요약을 조합해 최종 이동 판단 리포트를 생성하는 **Decision / AI Engine Server**다.
 
 최종 구조는 다음으로 고정한다.
@@ -28,7 +28,7 @@
 → 지도 위 리포트
 ```
 
-FastAPI는 “AI 서버”라기보다 **이동 판단 엔진 서버**다.  
+FastAPI는 “AI 서버”라기보다 **이동 판단 엔진 서버**다.
 내부 AI는 LLM 하나가 아니라 다음의 조합이다.
 
 ```text
@@ -52,7 +52,7 @@ FastAPI는 “AI 서버”라기보다 **이동 판단 엔진 서버**다.
 | Decision API | Python FastAPI | 외부 데이터 호출, 정규화, feature 생성, 모델 추론, 최적화, AI 리포트 |
 | Data/AI Infra | GCP | Redis, BigQuery, Cloud Storage, Vertex AI, Pub/Sub, Cloud Run |
 
-FastAPI는 Core DB를 직접 소유하지 않는다.  
+FastAPI는 Core DB를 직접 소유하지 않는다.
 Spring이 사용자 식별, 권한, 저장 상태를 관리하고, FastAPI는 Spring으로부터 **비식별 조건 스냅샷**을 받아 계산한다.
 
 ---
@@ -124,7 +124,7 @@ LLM = 판단이 아니라 설명
 
 ## 5. 기존 Python 호출 코드 처리 원칙
 
-기존 공공 API 호출 Python 코드는 버리지 않는다.  
+기존 공공 API 호출 Python 코드는 버리지 않는다.
 다만 서비스 로직과 섞지 않고 `adapters/` 계층으로 격리한다.
 
 ### 5.1 나쁜 구조
@@ -434,7 +434,7 @@ class DecisionReportResponse(BaseModel):
 
 ## 9. 추가해야 할 모델러용 공통 계약
 
-기존 응답 구조에 아래 스키마를 추가한다.  
+기존 응답 구조에 아래 스키마를 추가한다.
 이 스키마는 “왜 이 판단이 나왔는가?”를 나중에 추적하기 위한 핵심이다.
 
 ```python
@@ -594,7 +594,7 @@ seat_bonus
 
 ### 주의
 
-Accuracy만 보지 않는다.  
+Accuracy만 보지 않는다.
 “탈 수 있다”고 했는데 못 타는 False Negative의 비용을 크게 둔다.
 
 ---
@@ -717,7 +717,7 @@ Regression / Ordinal Classification / Time-series Forecasting.
 
 ### 데이터 분할 원칙
 
-랜덤 split 금지.  
+랜덤 split 금지.
 시간 데이터이므로 과거로 학습하고 미래를 검증하는 **time-based split**을 적용한다.
 
 ---
@@ -1215,7 +1215,7 @@ class ModelRegistryRecord(BaseModel):
 
 ### 19.1 LLM 역할
 
-LLM은 최종 판단을 내리지 않는다.  
+LLM은 최종 판단을 내리지 않는다.
 LLM은 구조화된 decision result를 사용자 언어로 설명한다.
 
 | 허용 | 금지 |
