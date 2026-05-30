@@ -13,3 +13,4 @@ test-results/
 local.env*
 *:Zone.Identifier
 .env.local*
+.vercel
