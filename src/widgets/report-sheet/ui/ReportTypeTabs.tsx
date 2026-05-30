@@ -14,7 +14,7 @@ type ReportTypeTabsProps = {
 const reportTypeOptions: ReportTypeOption[] = [
   { id: "deadline", label: "⏱️ 마감도착", toastLabel: "마감도착" },
   { id: "boarding", label: "🚍 탑승가능", toastLabel: "탑승가능" },
-  { id: "carriage", label: "🚇 생존 칸", toastLabel: "생존 칸" },
+  { id: "carriage", label: "혼잡 회피 칸", toastLabel: "혼잡 회피 칸" },
   { id: "recovery", label: "🌙 실패복구", toastLabel: "실패복구" },
 ];
 

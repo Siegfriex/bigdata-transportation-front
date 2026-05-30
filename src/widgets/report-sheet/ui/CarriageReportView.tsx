@@ -63,7 +63,7 @@ export function CarriageReportView({ carDetails, activeCarNo, startStation, endS
 
           <div className="grid grid-cols-2 gap-2 text-[10px] font-mono text-white/50 border-t border-white/15 pt-2">
             <span>출구 거리: {activeCar.transferStatus === "fast" ? "초단거리 (4-2)" : "도보 50m"}</span>
-            <span className="text-right">체력생존율: {activeCar.comfortRating === "안전" ? "95%" : "30%"}</span>
+            <span className="text-right">쾌적도: {activeCar.comfortRating === "안전" ? "95%" : "30%"}</span>
           </div>
         </div>
       )}

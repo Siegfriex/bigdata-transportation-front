@@ -22,7 +22,7 @@ export function RouteConditionCard({
     <div className="apple-glass rounded-2xl border border-white/10 p-3 space-y-3 shadow-md relative pointer-events-auto">
       <div className="grid grid-cols-2 gap-2">
         <div className="space-y-1">
-          <label className="text-[9px] font-mono font-bold text-white/50 uppercase tracking-wider block">출발 정박사</label>
+          <label className="text-[9px] font-mono font-bold text-white/50 uppercase tracking-wider block">출발지</label>
           <div className="relative">
             <select
               id="start-station-select"
@@ -39,7 +39,7 @@ export function RouteConditionCard({
         </div>
 
         <div className="space-y-1">
-          <label className="text-[9px] font-mono font-bold text-white/50 uppercase tracking-wider block">목적 대피지</label>
+          <label className="text-[9px] font-mono font-bold text-white/50 uppercase tracking-wider block">도착지</label>
           <div className="relative">
             <select
               id="end-station-select"

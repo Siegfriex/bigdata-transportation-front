@@ -50,7 +50,7 @@ export function OnboardingOverlay({
               <span className="text-[#0A84FF]">실제로 탈 수 있는 안심 길</span>
             </h1>
             <p className="text-[13px] text-white/60 max-w-[280px] mx-auto leading-relaxed mt-3">
-              수도권 버스 잔여좌석, 지하철 혼잡도, 따릉이 결합 전술을 계산해 안심 도착을 보장합니다.
+              수도권 버스 잔여좌석, 지하철 혼잡도, 따릉이 연계를 함께 고려해 도착 가능성을 비교합니다.
             </p>
           </div>
 
@@ -64,7 +64,7 @@ export function OnboardingOverlay({
                 <Train className="w-4 h-4 text-[#0A84FF]" />
                 <span>염창역 → 여의도역 (9호선 급행)</span>
               </div>
-              <div className="text-[11px] text-white/60 pl-6">지하철 계단 몰림 피로 회피 전술 장착</div>
+              <div className="text-[11px] text-white/60 pl-6">혼잡 구간을 피해 더 편한 탑승 위치를 추천합니다.</div>
             </div>
             <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden mt-4">
               <div className="h-full w-2/3 bg-[#0A84FF] rounded-full shadow-[0_0_12px_rgba(10,132,255,0.8)]" />

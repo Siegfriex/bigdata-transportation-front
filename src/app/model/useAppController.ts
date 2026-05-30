@@ -47,7 +47,7 @@ export function useAppController() {
 
   const triggerPreset = useCallback((preset: RoutePreset) => {
     routePlanner.applyPreset(preset);
-    showToast(`📍 '${preset.title}' 비상 시나리오가 로드되었습니다.`);
+    showToast(`'${preset.title}' 경로 조건을 적용했습니다.`);
     setMapLayer("report_detail");
   }, [routePlanner, showToast]);
 
@@ -68,7 +68,7 @@ export function useAppController() {
       routePlanner.setSelectedPlan(nextPlans[data.routeIndex]);
     }
 
-    showToast("💡 AI가 지도를 분석하여 전술 경로를 업데이트했습니다.");
+    showToast("AI 분석 결과를 지도와 리포트에 반영했습니다.");
     setMapLayer("ai_result");
   }, [routePlanner, showToast]);
 
@@ -106,7 +106,7 @@ export function useAppController() {
       type: routePlanner.selectedReportType,
     });
     if (isExist) {
-      showToast("이미 보관함에 물리 장착된 리포트입니다.");
+      showToast("이미 저장된 리포트입니다.");
       return;
     }
 
@@ -118,7 +118,7 @@ export function useAppController() {
     });
 
     setSavedReports((prev) => [newReport, ...prev]);
-    showToast("💾 통근 리포트가 보관함에 영구 저장되었습니다.");
+    showToast("통근 리포트를 저장했습니다.");
   }, [routePlanner, savedReports, setSavedReports, showToast]);
 
   return {
@@ -174,11 +174,11 @@ export function useAppController() {
         onChangeDeadlineTime: routePlanner.setDeadlineTime,
         onSelectReport: (reportType: ReportType, label: string) => {
           routePlanner.setSelectedReportType(reportType);
-          showToast(`📊 '${label}' 분석 보고서가 로딩되었습니다.`);
+          showToast(`'${label}' 리포트를 열었습니다.`);
         },
         onSelectCar: (carNo: string) => {
           routePlanner.setActiveCarNo(carNo);
-          showToast(`🚇 ${carNo}번 칸 상세 분석을 로드했습니다.`);
+          showToast(`${carNo}번 칸 정보를 선택했습니다.`);
         },
         onSelectPlan: routePlanner.setSelectedPlan,
         onCopySummary: showToast,
@@ -187,7 +187,7 @@ export function useAppController() {
           setActiveTab("map");
           setMapLayer("ai_overlay");
           aiChat.sendMessage(`${routePlanner.startStation}에서 ${routePlanner.endStation} 가는 지각처방 리포트 요약해줘`);
-          showToast("🤖 리포트 근거 조회를 위해 AI 챗봇이 개입합니다.");
+          showToast("AI 리포트 요약을 요청했습니다.");
         },
       },
       archivePageProps: {
@@ -203,7 +203,7 @@ export function useAppController() {
           routePlanner.setEndStation(report.to);
           routePlanner.setSelectedReportType(report.type);
           setActiveTab("map");
-          showToast("🗺️ 해당 저장 조건으로 메인 지도를 갱신했습니다.");
+          showToast("저장된 조건을 지도에 반영했습니다.");
         },
       },
       settingsPageProps: {
@@ -212,7 +212,7 @@ export function useAppController() {
         onSyncRoutine: () => {
           routePlanner.setStartStation(preferences.home);
           routePlanner.setEndStation(preferences.work);
-          showToast("🏡 루틴 경로로 출발-목적지가 재구현 설정되었습니다.");
+          showToast("기본 루틴을 지도에 반영했습니다.");
         },
         onShowToast: showToast,
       },

@@ -3,7 +3,7 @@ import type { RoutePlan } from "../../../entities/route-plan/model/types";
 
 const reportLabelMap: Record<ReportType, string> = {
   boarding: "실시간 탑승가능성 진단",
-  carriage: "지하철 최적 생존 칸 추천",
+  carriage: "지하철 혼잡 회피 칸 추천",
   deadline: "9시 마감 연담 탈출",
   recovery: "심야 교통 단축 복구",
 };

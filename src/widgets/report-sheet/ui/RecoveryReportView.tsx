@@ -7,9 +7,9 @@ export function RecoveryReportView() {
       <div className="bg-[#FF3B30]/10 border border-[#FF3B30]/25 rounded-xl p-3 flex gap-2">
         <AlertTriangle className="w-4 h-4 text-[#FF3B30] shrink-0 mt-0.5" />
         <div className="flex-1">
-          <h4 className="text-xs font-bold text-[#FF3B30] mb-0.5">대중교통 단독 복구가 종료되었습니다.</h4>
+          <h4 className="text-xs font-bold text-[#FF3B30] mb-0.5">대중교통 단독 이동이 어려운 시간대입니다.</h4>
           <p className="text-[10px] text-white/70 leading-relaxed">
-            막차가 소진되었으므로, 불필요한 전구간 콜택시 수수료 낭비를 줄이기 위해 심야 연계 분할 전술(N버스 + 단거리 택시)을 가동합니다.
+            전구간 택시 이용을 줄이기 위해 심야 버스와 단거리 택시를 결합한 대안을 제안합니다.
           </p>
         </div>
       </div>

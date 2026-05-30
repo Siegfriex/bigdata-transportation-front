@@ -19,7 +19,7 @@ export function getSavedReportsMock(): SavedReport[] {
       from: "염창역",
       to: "여의도역",
       status: "success",
-      summary: "9호선 급행 3-3번 생존 칸 탑승: 입석 혼잡압력 40% 감축 해결",
+      summary: "9호선 급행 3-3번 칸 이용: 입석 혼잡 압력 40% 완화",
       cost: 1400,
     },
     {
@@ -29,7 +29,7 @@ export function getSavedReportsMock(): SavedReport[] {
       from: "홍대입구역",
       to: "남양주시",
       status: "warning",
-      summary: "심야 귀가: N버스 + 단거리 택시 분할 전술로 택시비 24,000원 대폭 절약",
+      summary: "심야 귀가: N버스와 단거리 택시 조합으로 택시비 24,000원 절약",
       cost: 9800,
     },
   ];

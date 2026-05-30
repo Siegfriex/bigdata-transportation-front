@@ -35,10 +35,10 @@ export function DeadlineReportView({
   const handleCopySummary = () => {
     if (!selectedPlan) return;
 
-    const summary = `[마감도착 비상 탈출 플랜]\n📍 출발: ${startStation}\n🏁 도착: ${endStation}\n⏱ 목표 시간: ${deadlineTime} 전\n\n[선택된 플랜: ${selectedPlan.name}]\n예상 도착 도착: ${selectedPlan.eta}\n추가 요금: ${selectedPlan.extraCost.toLocaleString()}원\n\n[타임라인 상세]\n${selectedPlan.timeline.map((step, idx) => `${idx + 1}. ${step.detail} (${step.duration}분)`).join("\n")}`;
+    const summary = `[마감 도착 경로]\n출발: ${startStation}\n도착: ${endStation}\n목표 시간: ${deadlineTime} 전\n\n[선택 경로: ${selectedPlan.name}]\n예상 도착: ${selectedPlan.eta}\n추가 요금: ${selectedPlan.extraCost.toLocaleString()}원\n\n[타임라인]\n${selectedPlan.timeline.map((step, idx) => `${idx + 1}. ${step.detail} (${step.duration}분)`).join("\n")}`;
 
     navigator.clipboard.writeText(summary);
-    onCopySummary("🔗 경로 요약이 클립보드에 복사되었습니다.");
+    onCopySummary("경로 요약을 클립보드에 복사했습니다.");
   };
 
   return (

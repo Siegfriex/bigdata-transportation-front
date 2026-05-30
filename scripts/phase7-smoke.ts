@@ -58,7 +58,7 @@ function assertRouteAndReportContracts() {
   });
 
   assert(plans.length >= 3, "염창역 -> 여의도역 should provide multiple route plans");
-  assert.equal(plans[0].id, "plan_a");
+  assert.equal(plans[0].id, "route:염창역->여의도역:plan-a");
 
   const savedReport = createSavedReport({
     selectedPlan: plans[0],

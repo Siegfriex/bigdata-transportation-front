@@ -54,7 +54,7 @@ export function AiChatLayer({
           <div className="flex justify-between items-start">
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-[#0A84FF]" />
-              <span className="text-xs font-bold text-white">AI 전략 브리핑 종료</span>
+              <span className="text-xs font-bold text-white">AI 경로 분석 결과</span>
             </div>
             <button onClick={onClose} className="text-white/50 hover:text-white transition-colors">
               <Plus className="w-5 h-5 rotate-45" />
@@ -68,7 +68,7 @@ export function AiChatLayer({
 
           {plans.length > 0 && (
             <div className="flex flex-col gap-1.5">
-              <span className="text-[10px] text-white/50 font-bold px-1">추천 전술 경로 (터치하여 지도 확인)</span>
+              <span className="text-[10px] text-white/50 font-bold px-1">추천 경로 (선택하면 지도에 반영)</span>
               <div className="flex gap-2 overflow-x-auto scrollbar-none pb-1">
                 {plans.map((plan) => (
                   <button
@@ -98,7 +98,7 @@ export function AiChatLayer({
               onClick={onSaveTacticalReport}
               className="flex-1 bg-[#0A84FF] text-white py-2 rounded-xl text-xs font-bold transition-all active:scale-95"
             >
-              전술 리포트 생성
+              리포트 저장
             </button>
           </div>
         </div>
@@ -144,7 +144,7 @@ export function AiChatLayer({
 
             <div className={`flex-1 flex flex-col overflow-hidden px-4 pb-4 ${mapLayer === "ai_peek" ? "pointer-events-none opacity-40 blur-[1px]" : "opacity-100"}`}>
               <div className="apple-glass rounded-2xl border border-white/10 p-3 text-center mb-2.5 shrink-0">
-                <span className="text-[10px] bg-[#0A84FF]/10 text-[#0A84FF] px-2.5 py-1 rounded-full font-mono font-bold inline-block mb-1.5">GEMINI 3.5 AI ENGINE</span>
+                <span className="text-[10px] bg-[#0A84FF]/10 text-[#0A84FF] px-2.5 py-1 rounded-full font-mono font-bold inline-block mb-1.5">AI ROUTE ENGINE</span>
                 <p className="text-[11px] text-white/70 leading-relaxed max-w-[280px] mx-auto">
                   지도의 현재 상태를 결합해 복합수단 최적 해법을 브리핑합니다. 질문 시 자동으로 지도 경로가 반응합니다.
                 </p>
@@ -194,7 +194,7 @@ export function AiChatLayer({
                         <span className="w-2 h-2 rounded-full bg-[#0A84FF] animate-bounce [animation-delay:0.2s]" />
                         <span className="w-2 h-2 rounded-full bg-[#0A84FF] animate-bounce [animation-delay:0.4s]" />
                       </div>
-                      <span className="text-[10px] text-white/50 font-mono block">대중교통 네트워크 분석 및 최안심 경로 역산 중...</span>
+                      <span className="text-[10px] text-white/50 font-mono block">경로 조건과 교통 패턴을 분석하는 중...</span>
                     </div>
                   </div>
                 )}
@@ -211,7 +211,7 @@ export function AiChatLayer({
                       onClick={() => onSendMessage(prompt)}
                       className="text-left apple-glass hover:bg-white/10 border border-white/10 p-2 rounded-xl text-[10px] text-white/70 transition-colors truncate block"
                     >
-                      💡 {prompt}
+                      {prompt}
                     </button>
                   ))}
                 </div>

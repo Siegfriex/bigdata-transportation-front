@@ -142,7 +142,7 @@ export function SettingsForm({
               key={style.id}
               onClick={() => {
                 onChangePreferences((prev) => ({ ...prev, aiStyle: style.id }));
-                onShowToast(`🤖 AI 응답 톤앤매너가 '${style.label}' 스타일로 변경되었습니다.`);
+                onShowToast(`AI 응답 스타일을 '${style.label}'로 변경했습니다.`);
               }}
               className={`flex-1 py-1.5 text-center text-[10px] font-bold rounded-lg border transition-all ${
                 preferences.aiStyle === style.id
@@ -176,7 +176,7 @@ export function SettingsForm({
       </div>
 
       <div className="text-center pt-2 space-y-1">
-        <span className="text-[10px] text-white/50 font-mono block">탈수있나 Metropilitan FSD Platform v0.1</span>
+        <span className="text-[10px] text-white/50 font-mono block">탈수있나 Metropolitan FSD Platform v0.1</span>
         <span className="text-[9px] text-white/50 font-mono block">국토교통 공공 데이터 활용 경진대비 출품작</span>
       </div>
     </div>

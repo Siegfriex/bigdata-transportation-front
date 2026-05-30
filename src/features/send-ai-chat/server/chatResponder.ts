@@ -41,7 +41,7 @@ function createHeuristicResponse(request: AiChatRequest): AiChatResponse {
 
   if (query.includes("9시") || query.includes("deadline") || query.includes("마감")) {
     return {
-      textAnswer: `⏱️ **[마감도착 AI 최적 전술]** 9시 정각까지 **${startStation}**에서 **${endStation}**로 전력 이동하는 가상 시뮬레이션입니다.\n\n일반 대중교통만으로는 9시 7분 도착이 예상되어 직속 지각 위기입니다.\n\n- **추천 (Plan A)**: 출발지에서 처음에 대중교통 대신 **택시 선탑승 구간(2.4km)**을 이용하세요. 신호 압박을 우회한 뒤, **9호선 급행 지하철**로 여의도역에서 환승하시면 안정적으로 안착합니다.\n- **도착 예정 시간**: 08:57 (여유 3분)\n- **추수 예상 비용**: 약 8,000원 (택시비 실측 기본~거리 요금 합산)\n\n시간을 절약하고 지각 비용을 획기적으로 낮추는 복합 결합 추천안입니다!`,
+      textAnswer: `**[마감 도착 경로 추천]** 9시까지 **${startStation}**에서 **${endStation}**로 이동하는 기준입니다.\n\n일반 대중교통만 이용하면 9시 7분 전후 도착이 예상되어 여유가 부족합니다.\n\n- **추천 경로**: 출발지에서 짧은 택시 구간(약 2.4km)을 이용한 뒤, **9호선 급행 지하철**로 환승합니다.\n- **도착 예정 시간**: 08:57 (여유 3분)\n- **추가 예상 비용**: 약 8,000원\n\n시간 여유를 확보하기 위한 복합 이동 경로입니다.`,
       suggestedReportType: "deadline",
       startStation,
       endStation,
@@ -52,7 +52,7 @@ function createHeuristicResponse(request: AiChatRequest): AiChatResponse {
 
   if (query.includes("칸") || query.includes("car") || query.includes("몇번") || query.includes("생존")) {
     return {
-      textAnswer: `🚇 **[지하철 칸별 생존 어드바이스]** **${startStation}**에서 **${endStation}**로 이동 시 최적의 추천 탑승 칸 정보입니다.\n\n급행 지하철의 경우, 빠른 하차와 빠른 환승 통로(4-2) 주위에 고밀도 인파가 쏠려 극도의 혼잡과 신체 피로를 초래합니다.\n\n- **생존 추천 칸: 3-3번 및 6-1번 문**\n- **이유**: 환승 게이트에서 단 15초(도보 10걸음) 떨어져 있으나 차내 입석 혼잡도는 최소 35% 이상 여유로워 출근 피로도를 혁신적으로 절감합니다.\n- **절대회피 칸**: 4호차 전체 (환승 쏠림 역의 중심부로 가방을 메고 서 있기도 힘듭니다)`,
+      textAnswer: `**[지하철 칸별 혼잡 회피 추천]** **${startStation}**에서 **${endStation}**로 이동할 때의 추천 탑승 위치입니다.\n\n급행 지하철은 빠른 하차와 환승 통로 주변에 승객이 몰릴 수 있습니다.\n\n- **추천 위치**: 3-3번 또는 6-1번 문 주변\n- **이유**: 주요 환승 동선에서 약간 벗어나 있어 승차 피로도를 낮출 가능성이 높습니다.\n- **주의 위치**: 4호차 주변은 환승 동선과 가까워 혼잡할 수 있습니다.`,
       suggestedReportType: "carriage",
       startStation,
       endStation,
@@ -63,7 +63,7 @@ function createHeuristicResponse(request: AiChatRequest): AiChatResponse {
 
   if (query.includes("막차") || query.includes("recovery") || query.includes("놓치면") || query.includes("실패")) {
     return {
-      textAnswer: `🌙 **[막차 실패복구 전술 리포트]** 심야 자정 이후 수도권에서 자택으로 복귀해야 하는 지연 위 상황 해결 플랜입니다.\n\n현재 지하철 광역 막차가 이미 종료되었으므로 완전한 단독 지하철 복귀는 불가능합니다.\n\n- **복구 추천 편 (Plan A)**: 서울 도심 근교를 연결하는 심야전용 **N버스(N62 등)**를 탭승하여 최대 교외 지점까지 이동 후, 광역 연담 부분의 마지막 4.2km 구간을 택시 결합하는 분할 설계를 제안합니다.\n- **예상 택시 비용**: 약 9,800원 (전체 택시 탑승비 35,000 대폭 절약)\n- **심야 대기 처방**: 근처 24시간 개방 안심 쉼터(사우나, 소방서 인근) 및 새벽 첫차 연대 대기 거점이 함께 표시되어 안심하고 이동하셔도 됩니다.`,
+      textAnswer: `**[심야 귀가 대안 리포트]** 자정 이후 수도권 귀가 상황을 기준으로 한 대안입니다.\n\n현재 지하철 막차가 종료되어 지하철 단독 이동은 어렵습니다.\n\n- **추천 경로**: 심야 N버스로 최대한 이동한 뒤 마지막 약 4.2km 구간만 택시로 연결합니다.\n- **예상 택시 비용**: 약 9,800원\n- **대기 대안**: 24시간 이용 가능한 대기 거점과 첫차 연계 선택지도 함께 검토할 수 있습니다.`,
       suggestedReportType: "recovery",
       startStation,
       endStation,
@@ -74,7 +74,7 @@ function createHeuristicResponse(request: AiChatRequest): AiChatResponse {
 
   if (query.includes("이번") || query.includes("버스") || query.includes("boarding") || query.includes("탈수") || query.includes("가능성")) {
     return {
-      textAnswer: `🚍 **[광역 버스 탑승가능성 진단]** 실시간 잔여석 정보에 따른 전술적 권고입니다.\n\n- **목포 8100번 / 광역 버스**: 현재 3분 뒤 진입하는 이번 차량은 **혼잡도 매우 높음 (잔여석 0)** 으로 정류장 대기 인원을 수용하지 못하고 무정차 통과 가능성이 90%입니다.\n- **AI 추천**: 해당 차를 무리하게 차도에서 대기하기보다, **8분 후 진입하는 다음 차량**을 편안하게 맞이하세요.\n- **이유**: 다음 버스는 기점 시각 데이터상 잔여석이 13석 확보된 상태로 운행하고 있어 안전한 좌석 입석 착석 탑승이 92% 보장됩니다. 무리한 무정차 탈락 리스크를 예방하십시오.`,
+      textAnswer: `**[광역 버스 탑승 가능성 진단]** 잔여석과 혼잡도를 기준으로 한 권고입니다.\n\n- **8100번 광역 버스**: 3분 뒤 도착 예정인 이번 차량은 잔여석이 거의 없어 승차 실패 가능성이 높습니다.\n- **추천**: 8분 뒤 도착하는 다음 차량을 기다리는 편이 안정적입니다.\n- **근거**: 다음 차량은 목업 기준 잔여석 13석으로, 이번 차량보다 탑승 가능성이 높습니다.`,
       suggestedReportType: "boarding",
       startStation,
       endStation,
@@ -84,7 +84,7 @@ function createHeuristicResponse(request: AiChatRequest): AiChatResponse {
   }
 
   return {
-    textAnswer: `💡 반갑습니다! 수도권 실시간 대중교통 탈출 스마트 솔루션 **'탈수있나' AI 챗봇**입니다!\n\n귀하의 상황(현재 출발지: \`${startStation}\`, 목적지: \`${endStation}\`)을 관측 중입니다. 다음 중 문의하고 싶으신 핵심 대피 전술을 선택하세요:\n\n1. ⏱️ **"9시까지 도착할 수 있어?"** (마감도착 복합구간 산출)\n2. 🚍 **"이번 버스 만차인데 탈 수 있어?"** (탑승가능성 실시간 진단)\n3. 🚇 **"9호선 출근 지하철 어느 칸이 한산해?"** (지하철 칸별 생존 가이드)\n4. 🌙 **"막차가 끊겼는데 최소비용 복구 방법은?"** (심야 실패복구 설계)`,
+    textAnswer: `반갑습니다. 수도권 이동 판단 리포트 **'탈수있나' AI 챗봇**입니다.\n\n현재 출발지: \`${startStation}\`, 목적지: \`${endStation}\` 기준으로 질문할 수 있습니다.\n\n1. **"9시까지 도착할 수 있어?"** (마감 도착 경로)\n2. **"이번 버스 만차인데 탈 수 있어?"** (탑승 가능성)\n3. **"9호선 출근 지하철 어느 칸이 한산해?"** (칸별 혼잡 회피)\n4. **"막차가 끊겼는데 최소비용 복구 방법은?"** (심야 귀가 대안)`,
     suggestedReportType: null,
     startStation,
     endStation,
@@ -103,7 +103,7 @@ export async function createAiChatResponse(
 
   const context = request.context;
   const systemInstruction = `
-You are the core AI decision center for "탈수있나" (Can I Ride?), a Korean transit mobile web app that helps users optimize their trip based on 'Boarding Possibility' (탑승가능성), 'Carriage Survival' (칸별 생존가이드), 'Deadline Arrival' (마감도착), and 'Late Night Failure Recovery' (실패복구).
+You are the core AI decision center for "탈수있나" (Can I Ride?), a Korean transit mobile web app that helps users compare routes based on 'Boarding Possibility' (탑승가능성), 'Carriage Crowd Avoidance' (칸별 혼잡 회피), 'Deadline Arrival' (마감도착), and 'Late Night Recovery' (심야 귀가 대안).
 
 Always answer in polite Korean using high-contrast clear emojis and structured transport terms. Keep the formatting neat and professional in Markdown. Do not include verbose introductory phrases. Go straight to providing help with actionable advice.
 
@@ -111,7 +111,7 @@ Given the user query, identify:
 1. textAnswer: A detailed analysis with transport reasoning, comparison tables, or clear steps (referencing real patterns in Seoul metro/bus).
 2. suggestedReportType: Set to 'boarding', 'carriage', 'deadline', 'recovery' or null depending on what the user asks about:
  - "boarding" (탑승가능성 / 이번 차 vs 다음 차 / 잔여 좌석)
- - "carriage" (칸별 생존 / 지하철 어느 칸)
+ - "carriage" (칸별 혼잡 회피 / 지하철 어느 칸)
  - "deadline" (9시까지 / 특정 시각 도착 / 복합 수단 조합)
  - "recovery" (막차 / 실패 / 심야 대안 / 귀가 불가)
 3. startStation: Source station if mentioned (Korean, default e.g. "염창역").

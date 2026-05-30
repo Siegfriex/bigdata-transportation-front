@@ -17,7 +17,7 @@ function getReportDay(report: SavedReport) {
 
 function getReportTypeLabel(report: SavedReport) {
   if (report.type === "deadline") return "마감도착";
-  if (report.type === "carriage") return "생존칸";
+  if (report.type === "carriage") return "혼잡회피";
   if (report.type === "boarding") return "탑승가능";
   return "실패복구";
 }

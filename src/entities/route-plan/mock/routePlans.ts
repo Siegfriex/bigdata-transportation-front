@@ -1,19 +1,23 @@
 import type { RoutePlan, RoutePlanOptions } from "../model/types";
 
+function createRoutePlanId(start: string, end: string, variant: string) {
+  return `route:${start}->${end}:${variant}`;
+}
+
 export function getRoutePlans(start: string, end: string, opts: RoutePlanOptions): RoutePlan[] {
   const plans: RoutePlan[] = [];
 
   if (start === "염창역" && end === "여의도역") {
     plans.push({
-      id: "plan_a",
-      name: "추천: 급행 지하철 안심 결합 (생존 카)",
+      id: createRoutePlanId(start, end, "plan-a"),
+      name: "추천: 급행 지하철 안심 경로",
       modes: ["subway", "walk"],
       eta: "08:57",
       extraCost: 1400,
       risk: "medium",
       crowd: "crowded",
       confidence: "realtime",
-      description: "인파가 극심한 빠른 환승 칸 대신 3-3번, 6-1번 생존 칸을 선택하여 어깨 결림 압박을 피합니다.",
+      description: "빠른 환승 위치의 혼잡을 피하고 3-3번, 6-1번 칸 주변에서 여유 있는 승차를 유도합니다.",
       timeline: [
         { mode: "walk", detail: "염창역 승강장 이동 (3-3 위치 대기)", duration: 3 },
         { mode: "subway", detail: "9호선 급행 탑승 (여의도행)", duration: 8, cost: 1400 },
@@ -22,8 +26,8 @@ export function getRoutePlans(start: string, end: string, opts: RoutePlanOptions
     });
 
     plans.push({
-      id: "plan_b",
-      name: "비용최소: 따릉이 전술 우회",
+      id: createRoutePlanId(start, end, "plan-b"),
+      name: "비용 최소: 따릉이 연계 경로",
       modes: ["bike", "walk"],
       eta: "08:59",
       extraCost: 1000,
@@ -38,7 +42,7 @@ export function getRoutePlans(start: string, end: string, opts: RoutePlanOptions
     });
 
     plans.push({
-      id: "plan_c",
+      id: createRoutePlanId(start, end, "plan-c"),
       name: "안정: 택시 선탑승 우회 구간",
       modes: ["taxi", "subway", "walk"],
       eta: "08:53",
@@ -55,7 +59,7 @@ export function getRoutePlans(start: string, end: string, opts: RoutePlanOptions
     });
   } else if (start === "사당역" && end === "강남역") {
     plans.push({
-      id: "plan_a",
+      id: createRoutePlanId(start, end, "plan-a"),
       name: "추천: 지하철 2호선 우회 수평 이동",
       modes: ["subway", "walk"],
       eta: "18:25",
@@ -72,7 +76,7 @@ export function getRoutePlans(start: string, end: string, opts: RoutePlanOptions
     });
 
     plans.push({
-      id: "plan_b",
+      id: createRoutePlanId(start, end, "plan-b"),
       name: "대기: 버스 8100번 다음 차 대치",
       modes: ["bus", "walk"],
       eta: "18:32",
@@ -89,7 +93,7 @@ export function getRoutePlans(start: string, end: string, opts: RoutePlanOptions
     });
   } else if (start === "홍대입구역" && end === "남양주시") {
     plans.push({
-      id: "plan_a",
+      id: createRoutePlanId(start, end, "plan-a"),
       name: "추천: 심야 N버스 + 외곽 택시 분할 복구",
       modes: ["bus", "taxi"],
       eta: "01:28",
@@ -97,7 +101,7 @@ export function getRoutePlans(start: string, end: string, opts: RoutePlanOptions
       risk: "medium",
       crowd: "normal",
       confidence: "estimated",
-      description: "전구간 택시 요금(약 36,000원) 대비 심야 N버스를 중랑구까지 탑승 후, 차액 택시를 연계해 지각비용을 극단적으로 방어합니다.",
+      description: "전구간 택시 요금(약 36,000원)을 피하고, 심야 N버스와 단거리 택시를 결합해 비용 부담을 낮춥니다.",
       timeline: [
         { mode: "bus", detail: "홍대입구역 N62 심야 버스 승차 (동대문/중랑 방향)", duration: 38, cost: 2800 },
         { mode: "taxi", detail: "중랑외곽 지점 하차 후 단거리 택시 결합", duration: 15, cost: 9800 },
@@ -105,8 +109,8 @@ export function getRoutePlans(start: string, end: string, opts: RoutePlanOptions
     });
 
     plans.push({
-      id: "plan_b",
-      name: "심야 생존: 24h 안심쉘터 + 첫차 연계 대치",
+      id: createRoutePlanId(start, end, "plan-b"),
+      name: "심야 대기: 24시 거점 + 첫차 연계",
       modes: ["walk"],
       eta: "05:40",
       extraCost: 0,
@@ -123,8 +127,8 @@ export function getRoutePlans(start: string, end: string, opts: RoutePlanOptions
 
   if (plans.length === 0) {
     plans.push({
-      id: "dyn_a",
-      name: `추천: ${start} → ${end} 최적 해법 (대중교통 주도)`,
+      id: createRoutePlanId(start, end, "dynamic-a"),
+      name: `추천: ${start} → ${end} 대중교통 우선 경로`,
       modes: ["subway", "walk"],
       eta: "08:58",
       extraCost: 1400,
@@ -141,7 +145,7 @@ export function getRoutePlans(start: string, end: string, opts: RoutePlanOptions
 
     if (opts.useBike) {
       plans.push({
-        id: "dyn_b",
+        id: createRoutePlanId(start, end, "dynamic-b"),
         name: "우회: 따릉이 자전거 연계",
         modes: ["bike", "walk"],
         eta: "09:04",
@@ -159,7 +163,7 @@ export function getRoutePlans(start: string, end: string, opts: RoutePlanOptions
 
     if (opts.maxTaxiFee > 0) {
       plans.push({
-        id: "dyn_c",
+        id: createRoutePlanId(start, end, "dynamic-c"),
         name: "지각 예방: 단절 구간 택시 결합",
         modes: ["taxi", "subway"],
         eta: "08:52",
@@ -169,8 +173,8 @@ export function getRoutePlans(start: string, end: string, opts: RoutePlanOptions
         confidence: "realtime",
         description: "버스의 지연 구역을 택시로 선제적 탈출 후 전철로 안착합니다.",
         timeline: [
-          { mode: "taxi", detail: `${start} 정박지 택시 탑승`, duration: 8, cost: 5800 },
-          { mode: "subway", detail: "환승역에서 지하철 지하철 탑승", duration: 8, cost: 1400 },
+          { mode: "taxi", detail: `${start} 부근에서 택시 탑승`, duration: 8, cost: 5800 },
+          { mode: "subway", detail: "환승역에서 지하철 탑승", duration: 8, cost: 1400 },
         ],
       });
     }
