@@ -13,10 +13,11 @@
 | Public API | `/api/v1/...`로 버전 prefix를 도입한다. 기존 `/api/chat`은 legacy alias다. |
 | BE 경계 | Browser는 Spring Boot Core API만 호출한다. |
 | AI 경계 | FastAPI는 `/internal/decision/*` internal-only stateless service다. |
-| DB | route preview는 저장하지 않는다. 저장 report에만 route/decision snapshot을 남긴다. |
+| DB | `route_plans`/`route_plan_options`는 요청·옵션 resource로 저장하고, `saved_reports`는 immutable snapshot archive로 저장한다. |
 | FE IA | `activeTab`과 AI map overlay를 유지한다. URL router는 후순위다. |
-| AI | Deadline Success public baseline을 P0로 두고 SK calibration/fine-tuning은 후행한다. |
-| Infra | Vercel FE, Cloud Run Spring/FastAPI, Cloud SQL, Secret Manager를 target으로 둔다. |
+| AI | Deadline Success와 ETA public baseline을 P0로 두고 SK calibration/fine-tuning은 후행한다. |
+| AI data | BigQuery/Cloud Storage/PubSub/Vertex AI로 offline training path를 분리한다. |
+| Infra | Vercel FE, Cloud Run Spring/FastAPI, Cloud SQL, Secret Manager, BigQuery, Vertex AI를 target으로 둔다. |
 
 ## 2. 문서별 발전 목표
 
@@ -28,8 +29,8 @@
 | `talsu_inna_api_contract.md` | FE/BE/AI contract 기준 | OpenAPI 작성 전 request/response DTO를 endpoint별로 완성 |
 | `talsu_inna_api_endpoints.md` | endpoint inventory | Spring Boot OpenAPI tag, owner, auth, cache, error code까지 확장 |
 | `talsu_inna_erd.md` | frontend-derived draft ERD | canonical DB schema, migration batch, FK/index 정책으로 확장 |
-| `talsu_inna_infra.md` | Vercel/local/target infra | Cloud Run/Cloud SQL/Secret Manager deploy checklist와 env matrix 추가 |
-| `talsu_inna_ai_modeling_plan.md` | AI modeling 계획 | FastAPI request/response model, feature schema, model promotion gate 추가 |
+| `talsu_inna_infra.md` | Vercel/local/target infra | Cloud Run/Cloud SQL/Secret Manager/BigQuery/PubSub/Vertex deploy checklist와 env matrix 추가 |
+| `talsu_inna_ai_modeling_plan.md` | AI modeling 계획 | FastAPI request/response, feature schema, BigQuery schema, model promotion gate 추가 |
 
 ## 3. Phase Plan
 
@@ -90,15 +91,33 @@
 완료 기준:
 - 문서에 적힌 endpoint/schema와 실제 OpenAPI가 불일치하면 PR에서 잡힌다.
 
+### Phase D4. AI/Data Platform Readiness
+
+목표: AI 모델링 심층연구설계를 실제 실험/배포 운영 체계로 전환한다.
+
+작업:
+- `talsu_inna_ai_modeling_plan.md`의 BigQuery table draft를 실제 DDL/migration 문서로 분리한다.
+- Vertex AI Experiments/Pipelines/Model Registry naming rule을 확정한다.
+- Pub/Sub feedback topic과 idempotent consumer 계약을 endpoint 문서와 맞춘다.
+- `modelVersion`, `featureSchemaVersion`, `calibrationVersion`, `fallbackUsed`가 Spring/FastAPI/FE adapter/BigQuery에 모두 남는지 체크한다.
+- SK API schema/terms/quota/storage rights를 계약 검토 후 plan의 `미확정`에서 `결정됨`으로 승격한다.
+
+완료 기준:
+- Deadline/ETA public baseline 실험을 재현할 수 있다.
+- feedback event가 OLTP와 BigQuery label store에 중복 없이 적재된다.
+- shadow/canary/prod model alias 운영 기준이 문서화된다.
+
 ## 4. 구체 제언
 
 | 영역 | 제언 |
 |---|---|
-| API | `/api/v1/route-plans`와 `/api/v1/decision/route-report`를 절대 합치지 않는다. 전자는 route preview, 후자는 판단 preview다. |
-| DB | `route_plan` 정규 테이블을 P0에 만들지 않는다. 저장 리포트에 snapshot만 남긴다. |
+| API | `/api/v1/route-plans`와 `/api/v1/decision/route-report`를 절대 합치지 않는다. 전자는 route request/options, 후자는 판단 report다. |
+| DB | `route_plans`, `route_plan_options`, `decision_reports`, `saved_reports`를 분리한다. `saved_reports`는 immutable snapshot archive다. |
 | AI | LLM에게 판단을 맡기지 않는다. 모델/룰이 decision을 만들고 LLM은 설명한다. |
 | FE | React Router 도입보다 onboarding persistence와 API boundary 정리가 먼저다. |
-| Infra | Vercel live URL은 실제 deploy 성공 전까지 문서에서 "target"으로만 쓴다. |
+| Infra | frontend URL은 SSOT상 `https://bigdata-transportation-front.vercel.app/`로 기록하되, 실제 배포 health는 smoke check로 별도 검증한다. |
+| Analytics | BigQuery는 ML/분석 저장소이지 OLTP source of truth가 아니다. |
+| Feedback | `requestId`, `routeOptionId`, served model/feature/calibration version을 빼면 label reconstruction이 불가능하므로 API 초기에 고정한다. |
 | Docs | 문서 삭제는 바로 하지 말고 archive/reference 이동 후 1회 리뷰한다. metadata 파일만 즉시 삭제 가능하다. |
 
 ## 5. 다음 실행 체크리스트
@@ -110,11 +129,13 @@
 5. FastAPI internal response model을 Pydantic 기준으로 고정한다.
 6. Infra 문서에 GCP/Vercel env matrix를 채운다.
 7. Phase 7 smoke script와 문서 QA 기준을 연결한다.
+8. BigQuery/Vertex/PubSub 운영 스키마를 AI modeling plan과 infra 문서에 동기화한다.
+9. SK API 계약 검토 전까지 SK 필드는 residual teacher signal 가정으로만 유지한다.
 
 ## 6. 상태 표시
 
 | 구분 | 표시 |
 |---|---|
 | 현재 코드와 동기화됨 | FE IA, current `/api/chat`, localStorage, entity/view model |
-| 결정됨 | Spring Boot public API, FastAPI internal-only, `/api/v1`, report snapshot strategy |
-| 미확정 | auth go-live 시점, DB engine 최종 선택, CI drift check 방식 |
+| 결정됨 | Spring Boot public API, FastAPI internal-only, `/api/v1`, canonical station ID, route plan storage, immutable saved report snapshot, AI baseline/calibration/residual 전략 |
+| 미확정 | auth go-live 시점, DB engine 최종 선택, CI drift check 방식, SK API schema/terms/quota/storage rights |

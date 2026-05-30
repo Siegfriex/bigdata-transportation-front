@@ -82,18 +82,68 @@ React Query 도입 시 page에서 `useQuery`를 직접 호출하지 않고 featu
 | 현재 FE source | Target API | Target ownership | Persistence |
 |---|---|---|---|
 | `entities/station/mock/stations.ts` | `GET /api/v1/stations`, `GET /api/v1/stations/search` | Spring Boot `station` | station master/cache |
-| `entities/route-plan/mock/routePlans.ts` | `POST /api/v1/route-plans` | Spring Boot `route` | no-store preview |
-| selected route + report type | `POST /api/v1/decision/route-report` | Spring Boot -> FastAPI | no-store preview |
-| `entities/report/mock/savedReports.ts` | `GET/POST /api/v1/reports` | Spring Boot `report` | report + route/decision snapshot |
+| `entities/route-plan/mock/routePlans.ts` | `POST /api/v1/route-plans` | Spring Boot `route` | routePlan/options server resource, no saved archive |
+| selected route + report type | `POST /api/v1/decision/route-report` | Spring Boot -> FastAPI | decisionReport/evidence server resource, no saved archive |
+| `entities/report/mock/savedReports.ts` | `GET/POST /api/v1/reports` | Spring Boot `report` | immutable saved report + route/provider/decision/model/evidence snapshot |
 | `entities/user-preferences/model/store.ts` | `GET/PUT /api/v1/preferences` | Spring Boot `preference` | P1 auth sync |
 | `features/send-ai-chat/api/sendAiChat.ts` | `POST /api/v1/decision/chat` | Spring Boot -> FastAPI/LLM | no-store by default |
 
-`route preview`와 `saved report`는 UI가 비슷해도 source가 다르다. preview는 ephemeral server response이고, saved report detail은 `route_snapshots`와 `report_decisions`에서 읽는 재현 가능한 snapshot이다.
+`route preview`와 `saved report`는 UI가 비슷해도 source가 다르다. route preview는 `route_plans`/`route_plan_options`, decision preview는 `decision_reports`, saved report detail은 immutable `saved_reports` snapshot에서 읽는다.
+
+## 9-2. FE Adapter Policy
+
+| Server DTO | FE model | Adapter owner |
+|---|---|---|
+| Station DTO | `StationNode` | `entities/station` |
+| Route Preview Item | `RoutePlan` | `entities/route-plan` or `features/generate-route-plan/api` |
+| Decision Response | report view model + AI action | `features/send-ai-chat` and future `features/generate-decision-report` |
+| Saved Report Detail | `SavedReport` + snapshot view | `entities/report` |
+| Preference DTO | `UserPreferences` | `entities/user-preferences` |
+
+Adapters should normalize enum casing, preserve unknown provider payload only in snapshot fields, and keep UI-only fields out of persisted DTOs.
+
+Decision/report adapters must preserve model metadata even if the first UI does not render every field.
+
+| Field | Why FE keeps it |
+|---|---|
+| `modelVersion` | saved report reproducibility and support/debug |
+| `featureSchemaVersion` | model/feature compatibility and feedback labels |
+| `calibrationVersion` | confidence interpretation |
+| `confidenceRaw` | optional debug/evaluation display, not primary UX |
+| `confidence` | primary UI confidence |
+| `fallback` or `fallbackUsed` | degraded state messaging and analytics |
+| `dataFreshnessSeconds` | stale provider warning |
+| `evidence[]` | structured report rendering and LLM grounding |
+
+FE should not compute these values. It only renders or forwards server-provided metadata.
+
+## 9-3. Cache Policy
+
+| Data | FE cache | Server cache |
+|---|---|---|
+| station catalog/search | short client cache after React Query adoption | public short cache |
+| route preview | memory/session cache only | private no-store |
+| decision preview | memory/session cache only | private no-store |
+| decision chat | memory only by default | private no-store |
+| reports | user-private cache only after auth | private no-store |
+| preferences | localStorage P0, server sync P1 | private no-store |
+
+## 9-4. Feedback / Label Payload Boundary
+
+P1 feedback UI can start small, but the API payload must carry enough metadata for AI label reconstruction.
+
+| FE event source | Payload fields |
+|---|---|
+| report selected/saved | `decisionReportId`, `routeOptionId`, `servedModelVersion`, `servedFeatureSchemaVersion`, `servedCalibrationVersion`, `fallbackUsed` |
+| user outcome prompt | `arrivedBeforeDeadline`, `observedEtaMinutes`, `transferFailed`, `boardedFirstVehicle`, `observedCongestionLevel` |
+| rating/helpfulness | `userRating`, `helpful`, `feedbackType`, `comment` |
+
+If FE does not know a field, it sends null or omits it according to server schema. FE must not invent observed outcomes.
 
 ## 10. 상태 표시
 
 | 구분 | 표시 |
 |---|---|
 | 현재 코드와 동기화됨 | storage keys, stores, schema 위치, mock 위치, markdown 경계 |
-| 계획성 | React Query, Zod, server-state cache, entity adapter |
+| 계획성 | React Query, Zod, server-state cache, entity adapter, feedback label metadata |
 | 미확정 | persistence migration versioning, FE runtime parser 도입 방식, savedReports schema validation |

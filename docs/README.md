@@ -13,15 +13,23 @@
 | `talsu_inna_api_contract.md` | FE/Spring Boot/FastAPI 계약, envelope, DTO 방향 |
 | `talsu_inna_api_endpoints.md` | `/api/v1` 공개 API와 `/internal/decision/*` internal API 목록 |
 | `talsu_inna_erd.md` | canonical DB schema, report snapshot, migration batch |
-| `talsu_inna_infra.md` | Vercel/GCP Cloud Run/Cloud SQL/Secret Manager 운영 기준 |
-| `talsu_inna_ai_modeling_plan.md` | FastAPI 모델링, feature/target, inference response, promotion |
+| `talsu_inna_infra.md` | Vercel/GCP Cloud Run/Cloud SQL/Secret Manager/BigQuery/Vertex 운영 기준 |
+| `talsu_inna_ai_modeling_plan.md` | FastAPI 모델링, feature/target, BigQuery schema, inference response, promotion |
+
+## 관리 / 지원 문서
+
+| 문서 | 역할 |
+|---|---|
 | `talsu_inna_document_development_plan.md` | 문서 동결 이후 OpenAPI/schema sync까지의 개발 계획 |
+| `talsu_inna_interaction_state_policy.md` | FE/UX interaction state, loading, skeleton, motion 지원 정책 |
+| `talsu_inna_strategy_report_sheet_wireframe.md` | 전략 근거 리포트 bottom sheet wireframe 지원 문서 |
+| `docs-suite-freeze-audit-report.json` | 문서 스위트 동기화 감사 결과 JSON 산출물 |
 
 ## Reference / Archive
 
 | 위치 | 내용 |
 |---|---|
-| `docs/reference/` | raw inventory, AI Python modeling v5 같은 원천 연구 자료 |
+| `docs/reference/` | raw inventory, AI Python modeling v5, 최종 리서치 원문판 같은 원천 연구 자료 |
 | `docs/archive/` | 이전 PRD/FSD/IA/v1/v2 계획서와 흡수 완료된 문서 |
 
 ## 운영 원칙

@@ -1,0 +1,347 @@
+{
+  "generatedAt": "2026-05-30",
+  "scope": "docs-only final SSOT synchronization audit after minor patch cleanup",
+  "constraintsObserved": [
+    "No code implementation changes",
+    "No build, test, npm, mvn, gradle, or pytest execution",
+    "No API/server execution",
+    "No secrets or credential values reported"
+  ],
+  "verdict": "PASS",
+  "previousVerdict": "PASS_WITH_MINOR_NOTES",
+  "freezeRecommendation": "DOCS_FREEZE_APPROVED",
+  "rationale": "The operating docs are aligned on the final SSOT decisions and no P0 operating-doc conflict was found. The previously identified minor freeze patches were applied: README role split, root metadata cleanup, superseded reference marker, and supporting-doc role assignment.",
+  "patchesApplied": [
+    {
+      "name": "Patch Set A - README Role Split",
+      "files": [
+        "docs/README.md"
+      ],
+      "result": "Operating docs are now separated from management/supporting docs. talsu_inna_document_development_plan.md is no longer listed as an operating doc."
+    },
+    {
+      "name": "Patch Set B - Root Metadata Cleanup",
+      "files": [
+        "docs/archive/deep-research-report._ai_v2md.md",
+        "docs/reference/deep-research-report_ai_final.md"
+      ],
+      "result": "Old/generated markdown was moved out of docs root. Windows Zone.Identifier sidecars were deleted."
+    },
+    {
+      "name": "Patch Set C - Reference Superseded Marker",
+      "files": [
+        "docs/reference/deep-research-report v2.md"
+      ],
+      "result": "Reference v2 report now starts with a SUPERSEDED / REFERENCE ONLY marker pointing to the current prefixed public ID + VARCHAR(40) policy."
+    },
+    {
+      "name": "Patch Set D - Extra Root Doc Role Assignment",
+      "files": [
+        "docs/README.md",
+        "docs/talsu_inna_interaction_state_policy.md",
+        "docs/talsu_inna_strategy_report_sheet_wireframe.md",
+        "docs/docs-suite-freeze-audit-report.json"
+      ],
+      "result": "Supporting docs and the audit JSON have explicit management/supporting roles in README."
+    }
+  ],
+  "docsInventory": [
+    {
+      "location": "docs/",
+      "file": "deep-research-report.md",
+      "role": "SSOT",
+      "status": "current"
+    },
+    {
+      "location": "docs/",
+      "file": "README.md",
+      "role": "Management Doc",
+      "status": "current index"
+    },
+    {
+      "location": "docs/",
+      "file": "talsu_inna_frontend_fsd.md",
+      "role": "Operating Doc",
+      "status": "current"
+    },
+    {
+      "location": "docs/",
+      "file": "talsu_inna_ia.md",
+      "role": "Operating Doc",
+      "status": "current"
+    },
+    {
+      "location": "docs/",
+      "file": "talsu_inna_frontend_data_schema_cache.md",
+      "role": "Operating Doc",
+      "status": "current"
+    },
+    {
+      "location": "docs/",
+      "file": "talsu_inna_api_contract.md",
+      "role": "Operating Doc",
+      "status": "current"
+    },
+    {
+      "location": "docs/",
+      "file": "talsu_inna_api_endpoints.md",
+      "role": "Operating Doc",
+      "status": "current"
+    },
+    {
+      "location": "docs/",
+      "file": "talsu_inna_erd.md",
+      "role": "Operating Doc",
+      "status": "current"
+    },
+    {
+      "location": "docs/",
+      "file": "talsu_inna_infra.md",
+      "role": "Operating Doc",
+      "status": "current"
+    },
+    {
+      "location": "docs/",
+      "file": "talsu_inna_ai_modeling_plan.md",
+      "role": "Operating Doc",
+      "status": "current"
+    },
+    {
+      "location": "docs/",
+      "file": "talsu_inna_document_development_plan.md",
+      "role": "Management Doc",
+      "status": "current"
+    },
+    {
+      "location": "docs/",
+      "file": "talsu_inna_interaction_state_policy.md",
+      "role": "Management Doc",
+      "status": "supporting FE/UX policy"
+    },
+    {
+      "location": "docs/",
+      "file": "talsu_inna_strategy_report_sheet_wireframe.md",
+      "role": "Management Doc",
+      "status": "supporting wireframe"
+    },
+    {
+      "location": "docs/",
+      "file": "docs-suite-freeze-audit-report.json",
+      "role": "Management Doc",
+      "status": "audit artifact"
+    },
+    {
+      "location": "docs/archive/",
+      "file": "deep-research-report._ai_v2md.md",
+      "role": "Archive",
+      "status": "moved from root"
+    },
+    {
+      "location": "docs/reference/",
+      "file": "deep-research-report v2.md",
+      "role": "Reference",
+      "status": "superseded marker added"
+    },
+    {
+      "location": "docs/reference/",
+      "file": "deep-research-report_ai_final.md",
+      "role": "Reference",
+      "status": "moved from root"
+    }
+  ],
+  "ssotSyncMatrix": [
+    {
+      "check": "deep-research-report.md is top-level SSOT",
+      "expected": "docs/deep-research-report.md is explicitly the top-level SSOT.",
+      "actualEvidence": [
+        "docs/README.md:3 - 최상위 SSOT: docs/deep-research-report.md",
+        "docs/README.md:36 - deep-research-report.md wins on conflicts"
+      ],
+      "passFail": "Pass"
+    },
+    {
+      "check": "README separates operating docs from management/supporting docs",
+      "expected": "Eight operating docs plus separate management/supporting docs.",
+      "actualEvidence": [
+        "docs/README.md:6-19 - eight operating docs",
+        "docs/README.md:21-29 - management/supporting docs"
+      ],
+      "passFail": "Pass"
+    },
+    {
+      "check": "archive/reference are not implementation criteria",
+      "expected": "Archive/reference docs are subordinate to SSOT and operating docs.",
+      "actualEvidence": [
+        "docs/README.md:31-40 - reference/archive roles and operating principles",
+        "docs/reference/deep-research-report v2.md:3-7 - superseded/reference-only marker"
+      ],
+      "passFail": "Pass"
+    }
+  ],
+  "coreDecisionSyncMatrix": [
+    {
+      "decision": "/api/v1 public API",
+      "verdict": "Pass",
+      "evidence": [
+        "docs/deep-research-report.md:96",
+        "docs/talsu_inna_api_contract.md:20",
+        "docs/talsu_inna_api_endpoints.md:28"
+      ]
+    },
+    {
+      "decision": "/api/chat legacy alias",
+      "verdict": "Pass",
+      "evidence": [
+        "docs/deep-research-report.md:96",
+        "docs/talsu_inna_api_contract.md:405-410",
+        "docs/talsu_inna_api_endpoints.md:59-64"
+      ]
+    },
+    {
+      "decision": "FastAPI /internal/decision/* internal-only",
+      "verdict": "Pass",
+      "evidence": [
+        "docs/deep-research-report.md:120-122",
+        "docs/talsu_inna_api_contract.md:26",
+        "docs/talsu_inna_api_endpoints.md:98-104"
+      ]
+    },
+    {
+      "decision": "Browser calls Spring Boot only",
+      "verdict": "Pass",
+      "evidence": [
+        "docs/talsu_inna_frontend_fsd.md:57",
+        "docs/talsu_inna_ia.md:50",
+        "docs/talsu_inna_infra.md:78-89"
+      ]
+    },
+    {
+      "decision": "prefixed public ID + VARCHAR(40)",
+      "verdict": "Pass",
+      "evidence": [
+        "docs/deep-research-report.md:42-44",
+        "docs/talsu_inna_api_contract.md:151-160",
+        "docs/talsu_inna_erd.md:14,23,47,91,112,130,153,175"
+      ]
+    },
+    {
+      "decision": "route_plans / route_plan_options",
+      "verdict": "Pass",
+      "evidence": [
+        "docs/deep-research-report.md:14-16,53-57",
+        "docs/talsu_inna_api_endpoints.md:40-41",
+        "docs/talsu_inna_erd.md:213,224-228"
+      ]
+    },
+    {
+      "decision": "decision_reports",
+      "verdict": "Pass",
+      "evidence": [
+        "docs/deep-research-report.md:67-73",
+        "docs/talsu_inna_api_endpoints.md:58,91-102",
+        "docs/talsu_inna_erd.md:130-142"
+      ]
+    },
+    {
+      "decision": "saved_reports immutable archive",
+      "verdict": "Pass",
+      "evidence": [
+        "docs/deep-research-report.md:22,92,206",
+        "docs/talsu_inna_api_endpoints.md:72-74,121-124",
+        "docs/talsu_inna_erd.md:153-162,177-180"
+      ]
+    },
+    {
+      "decision": "preview is not archive save",
+      "verdict": "Pass",
+      "evidence": [
+        "docs/deep-research-report.md:67-73,92",
+        "docs/talsu_inna_api_endpoints.md:40-41,58,72-74",
+        "docs/talsu_inna_frontend_data_schema_cache.md:125-126"
+      ]
+    },
+    {
+      "decision": "decision metadata retained",
+      "verdict": "Pass",
+      "evidence": [
+        "docs/deep-research-report.md:169-184,218-224",
+        "docs/talsu_inna_erd.md:136-142,162,177-180",
+        "docs/talsu_inna_ai_modeling_plan.md:193-204,248-252"
+      ]
+    },
+    {
+      "decision": "LLM is explanation layer",
+      "verdict": "Pass",
+      "evidence": [
+        "docs/deep-research-report.md:171-184",
+        "docs/talsu_inna_ai_modeling_plan.md:193-204"
+      ]
+    },
+    {
+      "decision": "FE activeTab + AI overlay",
+      "verdict": "Pass",
+      "evidence": [
+        "docs/deep-research-report.md:5,199",
+        "docs/talsu_inna_frontend_fsd.md:34,41,54-56",
+        "docs/talsu_inna_ia.md:12-14,70-74"
+      ]
+    },
+    {
+      "decision": "GCP project / frontend URL",
+      "verdict": "Pass",
+      "evidence": [
+        "docs/deep-research-report.md:23,31-36,243-250",
+        "docs/talsu_inna_infra.md:50,78-89,96-125",
+        "docs/talsu_inna_ai_modeling_plan.md:52-60"
+      ]
+    }
+  ],
+  "p0ConflictReport": [],
+  "remainingMinorNotes": [
+    "Reference-only historical CHAR(26) text remains inside docs/reference/deep-research-report v2.md, but it is now preceded by a superseded marker and is not an operating criterion.",
+    "docs/deep-research-report.json remains in docs root as a generated artifact; it should not outrank the markdown SSOT."
+  ],
+  "modelingNormalizationPatch": {
+    "direction": "APPROVED",
+    "referenceInsertion": "APPROVED",
+    "verbatimOperatingDocInsertion": "REJECTED",
+    "status": "APPLIED",
+    "normalizedInto": [
+      "docs/talsu_inna_ai_modeling_plan.md",
+      "docs/talsu_inna_api_contract.md"
+    ],
+    "keyDecisions": [
+      "FastAPI is an internal Decision Scorer, not a public AI chat endpoint.",
+      "Spring RouteService/provider adapters own candidate generation, OTP/GTFS/GTFS-RT/provider orchestration, route_plans, and route_plan_options.",
+      "FastAPI receives routePlanId, routeOptionId, selected route option, provider freshness, transfer slack, delay/crowding features, and user preference context for scoring.",
+      "Reference endpoints such as /v1/decision/itinerary, /healthz, /readyz, and /metrics are not canonical operating endpoints.",
+      "Canonical operating endpoints remain /api/v1/decision/route-report and /internal/decision/route-report.",
+      "P0 model strategy is rules + GBDT + calibration + fallback; sequence, graph, robust reranking, and capacity-aware assignment remain later-stage experiments.",
+      "LLM remains explanation-only and cannot generate decision scores."
+    ],
+    "evidence": [
+      "docs/talsu_inna_ai_modeling_plan.md:19 - reference endpoint/DTO examples are explicitly normalized to current SSOT names.",
+      "docs/talsu_inna_ai_modeling_plan.md:25 - FastAPI is an internal Decision Scorer and candidate generation is Spring-owned.",
+      "docs/talsu_inna_ai_modeling_plan.md:41-53 - reference research adoption matrix marks accepted, conditional, and rejected items.",
+      "docs/talsu_inna_ai_modeling_plan.md:199-213 - runtime ownership boundary is explicit.",
+      "docs/talsu_inna_api_contract.md:336 - Spring owns route provider orchestration and candidate generation.",
+      "docs/talsu_inna_api_contract.md:370-372 - FastAPI scoring responsibility and non-ownership boundaries are explicit."
+    ]
+  },
+  "summaryForChatGPT": {
+    "verdict": "PASS",
+    "keyEvidence": [
+      "docs/README.md now separates eight operating docs from management/supporting docs.",
+      "docs/reference/deep-research-report v2.md now has a SUPERSEDED / REFERENCE ONLY marker.",
+      "Old/generated root markdown was moved to docs/archive or docs/reference, and Zone.Identifier sidecars were deleted.",
+      "AI modeling reference research was normalized into AI Modeling Plan and API Contract without changing canonical endpoint or ownership boundaries.",
+      "Core decisions remain aligned across SSOT, API, ERD, FE, Infra, and AI docs."
+    ],
+    "remainingConflicts": [
+      "No P0 operating-doc conflict.",
+      "No freeze-blocking minor patch remains."
+    ],
+    "requiredPatchSets": [],
+    "freezeRecommendation": "DOCS_FREEZE_APPROVED"
+  }
+}

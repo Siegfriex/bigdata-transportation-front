@@ -35,7 +35,7 @@
 | `F2` | 교통 레이어/지도 인터랙션 | `visibleLayers`, SVG |
 | `F3` | 경로 후보 생성/선택 | mock route planner |
 | `F4` | 리포트 4종 | report sheet |
-| `F5` | AI chat overlay | `/api/chat` + client fallback |
+| `F5` | AI chat overlay | current `/api/chat` legacy alias + client fallback; target `/api/v1/decision/chat` |
 | `F6` | 기록/저장 리포트 | localStorage |
 | `F7` | 설정/선호값 | localStorage |
 | `F8` | Express/Vercel `/api/chat` | server boundary |
@@ -47,7 +47,7 @@
 | 최초 진입 | 온보딩 Step 1 -> Step 2 또는 비회원 체험 -> 지도 |
 | 경로 탐색 | 지도 탭 -> 프리셋 또는 출발/도착 변경 -> route planner 재계산 -> selected plan 갱신 |
 | 리포트 확인 | 지도 탭 -> 리포트 상세 -> report type 선택 -> report view 표시 |
-| AI 추천 | 지도 검색 card 또는 AI 원인 브리핑 -> AI overlay -> 메시지 전송 -> `/api/chat` 또는 fallback -> `ai_result` |
+| AI 추천 | 지도 검색 card 또는 AI 원인 브리핑 -> AI overlay -> 메시지 전송 -> current `/api/chat` legacy alias 또는 target `/api/v1/decision/chat` -> fallback -> `ai_result` |
 | 저장/복원 | 리포트 저장 -> 기록 탭 -> 날짜/리포트 선택 -> 지도 탭으로 복원 |
 | 설정 반영 | 설정 탭 -> preferences 변경 -> localStorage 저장 -> 루틴 동기화로 지도 출발/도착 반영 |
 
@@ -56,11 +56,23 @@
 | 플로우 | Target API | 저장 여부 |
 |---|---|---|
 | station lookup | `GET /api/v1/stations/search` | 저장 없음 |
-| route preview | `POST /api/v1/route-plans` | 저장 없음 |
-| decision preview | `POST /api/v1/decision/route-report` | 저장 없음 |
-| report save | `POST /api/v1/reports` | route snapshot + decision snapshot 저장 |
+| route preview | `POST /api/v1/route-plans` | `routePlanId`/options 생성. archive 저장은 아님 |
+| decision preview | `POST /api/v1/decision/route-report` | `decisionReportId`/evidence 생성. archive 저장은 아님 |
+| report save | `POST /api/v1/reports` | route/provider/decision/model/evidence snapshot 저장 |
 | decision chat | `POST /api/v1/decision/chat` | 기본 no-store, 필요 시 P1 session |
-| report archive | `GET /api/v1/reports`, `GET /api/v1/reports/{id}` | 저장 snapshot 조회 |
+| report archive | `GET /api/v1/reports`, `GET /api/v1/reports/{savedReportId}` | 저장 snapshot 조회 |
+
+## 4-2. QA Scenario Map
+
+| Scenario | Given | When | Then |
+|---|---|---|---|
+| Onboarding persistence | first visit | onboarding completed | next visit should skip onboarding via `talsu.onboarding.v1` |
+| Route preview no-archive | map has origin/destination | route preview requested | routePlanId/options exist but report archive count does not change |
+| Decision preview no-archive | routePlanId/options exist | decision preview requested | decisionReportId/evidence appears without saved report |
+| Save snapshot | decision preview exists | user saves report | archive contains report with route/decision snapshot |
+| Restore snapshot | saved report exists | user opens report | map/report state restores from snapshot, not current preview |
+| AI overlay context | map route selected | user opens AI overlay | overlay keeps current route/report context |
+| Tab preservation | AI result visible | user navigates archive/settings/map | map tab resets only by defined navigation rules |
 
 ## 5. URL Routing
 

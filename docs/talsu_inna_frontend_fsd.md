@@ -53,8 +53,8 @@
 |---|---|---|
 | `entities/station/mock/stations.ts` | Spring Boot station/area API 또는 map provider adapter | UI는 raw API를 직접 읽지 않고 entity adapter를 통과 |
 | `entities/route-plan/mock/routePlans.ts` | Spring Boot route-plan API + FastAPI decision score | 현재 `RoutePlan` view contract를 먼저 보존 |
-| `entities/report/mock/savedReports.ts` | Spring Boot report persistence | `SavedReport`는 DB 확정 schema가 아니라 frontend-derived draft |
-| `features/send-ai-chat/server/chatResponder.ts` heuristic fallback | FastAPI Decision API 또는 LLM orchestration | `/api/chat` response schema와 fallback 정책 유지 |
+| `entities/report/mock/savedReports.ts` | Spring Boot saved report archive | `SavedReport` UI model은 `saved_reports` immutable snapshot의 card/detail view로 adapter한다. |
+| `features/send-ai-chat/server/chatResponder.ts` heuristic fallback | FastAPI Decision API 또는 LLM orchestration | `/api/chat`은 `/api/v1/decision/chat` 전환 전 legacy alias로만 유지 |
 | widget 내부 리포트 문구/수치 | entity fixture 또는 API evidence | 다음 FE 작업에서 widget 하드코딩 축소 |
 
 ## 5. QA 기준
@@ -72,12 +72,24 @@
 | 기능 | Trigger | Target API | Acceptance Criteria |
 |---|---|---|---|
 | Station Search | 출발/도착 검색 또는 select | `GET /api/v1/stations/search` | FE는 Spring Boot만 호출하고, station DTO를 FE view model로 adapter한다. |
-| Route Preview | 출발/도착/선호/마감 시간 변경 | `POST /api/v1/route-plans` | preview는 저장하지 않고, route 후보와 selectedPlan만 갱신한다. |
-| Decision Preview | 리포트 상세 진입 또는 report type 변경 | `POST /api/v1/decision/route-report` | decision/evidence를 표시하되 DB write가 발생하지 않는다. |
+| Route Preview | 출발/도착/선호/마감 시간 변경 | `POST /api/v1/route-plans` | 서버는 `routePlanId`와 options를 만들고, FE는 route 후보와 selectedPlan을 갱신한다. saved report는 생성하지 않는다. |
+| Decision Preview | 리포트 상세 진입 또는 report type 변경 | `POST /api/v1/decision/route-report` | 서버는 `decisionReportId`와 model/evidence를 만들고, FE는 판단 결과를 표시한다. saved report는 생성하지 않는다. |
 | Decision Chat | AI overlay 메시지 전송 | `POST /api/v1/decision/chat` | chat은 지도 컨텍스트 overlay에서만 열리고, structured explanation을 렌더링한다. |
-| Report Save | 저장 버튼 | `POST /api/v1/reports` | 저장 시 route snapshot과 decision snapshot이 함께 생성된다. |
-| Archive Restore | 저장 리포트 선택 | `GET /api/v1/reports/{id}` | 저장 snapshot 기준으로 지도/리포트 상태를 복원한다. |
+| Report Save | 저장 버튼 | `POST /api/v1/reports` | 저장 시 route/provider/decision/model/evidence snapshot이 함께 생성된다. |
+| Archive Restore | 저장 리포트 선택 | `GET /api/v1/reports/{savedReportId}` | 저장 snapshot 기준으로 지도/리포트 상태를 복원한다. |
 | Preferences Edit | 설정 변경 | `PUT /api/v1/preferences` | P0 guest는 localStorage, P1 auth 이후 서버 sync를 수행한다. |
+
+## 5-2. Feature I-P-O-E
+
+| Feature | Input | Process | Output | Error/Fallback |
+|---|---|---|---|---|
+| Station Search | query, selected station | Spring station search -> FE adapter | station option list | empty result, local station mock fallback |
+| Route Preview | origin, destination, deadline, preferences | Spring route orchestration and route option persistence | routePlanId, route candidates | dynamic mock route fallback |
+| Decision Preview | routePlanId, selectedOptionId, report type, context | Spring -> FastAPI decision then decision report persistence | decisionReportId, probabilities, evidence, report recommendation | public baseline/mock fallback |
+| Decision Chat | user message, current route/report context | Spring -> FastAPI/LLM explanation | structured chat response | current `/api/chat` heuristic/client fallback |
+| Report Save | selected preview + decision | Spring validates and persists snapshot | saved report id/detail | duplicate save warning |
+| Archive Restore | saved report id | fetch snapshot and hydrate page state | map/report state restored | report not found -> archive refresh |
+| Preference Edit | form values | local update, P1 server sync | stored preferences | localStorage fallback |
 
 ## 6. 다음 프론트 작업 순서
 
@@ -95,7 +107,7 @@
 | 하단 IA | `map / archive / settings` activeTab 구조를 유지한다. URL router는 deep-link 요구가 생길 때 도입한다. |
 | AI chat | 독립 탭이 아니라 지도 컨텍스트 overlay로 유지한다. |
 | 공개 API 호출 | FE는 Spring Boot Core API만 호출한다. FastAPI는 internal Decision API로 숨긴다. |
-| preview/save | route preview와 decision preview는 ephemeral state이며, 저장 버튼을 누른 report만 snapshot으로 영속화한다. |
+| preview/save | route plan과 decision report는 서버 resource지만 archive가 아니다. 저장 버튼을 누른 saved report만 immutable snapshot archive다. |
 | legacy `/api/chat` | `/api/v1/decision/chat` 전환 전까지 임시 alias로만 본다. |
 
 ## 7. 상태 표시
