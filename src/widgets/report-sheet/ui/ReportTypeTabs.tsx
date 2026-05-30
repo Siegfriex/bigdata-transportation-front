@@ -20,20 +20,20 @@ const reportTypeOptions: ReportTypeOption[] = [
 
 export function ReportTypeTabs({ selectedReportType, onSelectReport }: ReportTypeTabsProps) {
   return (
-    <div className="flex border-b border-white/10 overflow-x-auto scrollbar-none">
+    <div className="flex overflow-x-auto rounded-xl border border-white/10 bg-black/20 p-1 scrollbar-none">
       {reportTypeOptions.map((reportType) => (
         <button
           key={reportType.id}
           onClick={() => onSelectReport(reportType.id, reportType.toastLabel)}
-          className={`flex-1 min-w-[70px] py-2 text-center text-xs font-bold transition-all relative shrink-0 ${
+          className={`control-base focus-ring relative min-w-[70px] flex-1 shrink-0 py-2 text-center text-xs font-bold ${
             selectedReportType === reportType.id
-              ? "text-[#0A84FF]"
+              ? "bg-[#0A84FF]/12 text-[#74B9FF]"
               : "text-white/50 hover:text-white"
           }`}
         >
           <span>{reportType.label}</span>
           {selectedReportType === reportType.id && (
-            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#0A84FF]" />
+            <div className="absolute bottom-1 left-1/2 h-0.5 w-6 -translate-x-1/2 rounded-full bg-[#0A84FF]" />
           )}
         </button>
       ))}

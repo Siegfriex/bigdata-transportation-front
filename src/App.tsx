@@ -5,6 +5,7 @@ import { AppRouter } from "./app/router";
 import { ToastOverlay } from "./shared/ui/toast";
 import { AiChatLayer } from "./widgets/ai-chat-panel";
 import { BottomNavigation } from "./widgets/bottom-navigation";
+import { ReportDetailPanel } from "./widgets/report-sheet";
 import InteractiveMap from "./widgets/transit-map-panel";
 import { TopAppBar } from "./widgets/top-app-bar";
 
@@ -16,7 +17,7 @@ export default function App() {
       <ToastOverlay message={app.toastMessage} />
 
       {/* Screen container: Styled like a high-density, glassmorphic premium physical phone chassis on desktop view! */}
-      <div className="w-full max-w-[412px] h-screen md:h-[844px] apple-glass rounded-none md:rounded-[44px] border-none md:border-[8px] md:border-[#1E1E1E]/80 shadow-[0_32px_64px_rgba(0,0,0,0.8)] relative flex flex-col overflow-hidden">
+      <div className="app-device apple-glass relative flex flex-col overflow-hidden">
         
         {/* Mock notch / camera indicator inside device */}
         <div className="hidden md:flex absolute top-0 left-1/2 -translate-x-1/2 w-[140px] h-7 bg-black rounded-b-3xl z-40 items-center justify-center shadow-lg">
@@ -39,6 +40,9 @@ export default function App() {
         </main>
 
         <AiChatLayer {...app.aiChatLayerProps} />
+        {app.showReportSheet && (
+          <ReportDetailPanel {...app.reportDetailPanelProps} />
+        )}
         <BottomNavigation {...app.bottomNavigationProps} />
 
       </div>

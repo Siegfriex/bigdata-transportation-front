@@ -19,16 +19,16 @@ export function RouteConditionCard({
   onChangeDeadlineTime,
 }: RouteConditionCardProps) {
   return (
-    <div className="apple-glass rounded-2xl border border-white/10 p-3 space-y-3 shadow-md relative pointer-events-auto">
+    <div className="surface-card stack-md relative p-3 pointer-events-auto">
       <div className="grid grid-cols-2 gap-2">
         <div className="space-y-1">
-          <label className="text-[9px] font-mono font-bold text-white/50 uppercase tracking-wider block">출발 정박사</label>
+          <label className="type-label block text-white/50">출발 정박사</label>
           <div className="relative">
             <select
               id="start-station-select"
               value={startStation}
               onChange={(event) => onChangeStartStation(event.target.value)}
-              className="w-full apple-glass-light border border-white/15 focus:border-[#0A84FF] rounded-xl py-2 pl-2 pr-6 text-xs text-white uppercase font-bold outline-none appearance-none"
+              className="focus-ring w-full appearance-none rounded-xl border border-white/15 bg-white/[0.07] py-2 pl-2 pr-6 text-xs font-bold text-white outline-none focus:border-[#0A84FF]"
             >
               {stationNames.map((name) => (
                 <option key={name} value={name}>{name}</option>
@@ -39,13 +39,13 @@ export function RouteConditionCard({
         </div>
 
         <div className="space-y-1">
-          <label className="text-[9px] font-mono font-bold text-white/50 uppercase tracking-wider block">목적 대피지</label>
+          <label className="type-label block text-white/50">목적 대피지</label>
           <div className="relative">
             <select
               id="end-station-select"
               value={endStation}
               onChange={(event) => onChangeEndStation(event.target.value)}
-              className="w-full apple-glass-light border border-white/15 focus:border-[#0A84FF] rounded-xl py-2 pl-2 pr-6 text-xs text-white uppercase font-bold outline-none appearance-none"
+              className="focus-ring w-full appearance-none rounded-xl border border-white/15 bg-white/[0.07] py-2 pl-2 pr-6 text-xs font-bold text-white outline-none focus:border-[#0A84FF]"
             >
               {stationNames.map((name) => (
                 <option key={name} value={name}>{name}</option>
@@ -66,7 +66,7 @@ export function RouteConditionCard({
           type="time"
           value={deadlineTime}
           onChange={(event) => onChangeDeadlineTime(event.target.value)}
-          className="apple-glass-light border border-white/10 text-xs font-mono font-bold rounded-lg px-2 py-0.5 text-white outline-none focus:border-[#0A84FF]"
+          className="focus-ring rounded-lg border border-white/10 bg-white/[0.07] px-2 py-0.5 font-mono text-xs font-bold text-white outline-none focus:border-[#0A84FF]"
         />
       </div>
     </div>

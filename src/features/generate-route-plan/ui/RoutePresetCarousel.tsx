@@ -1,3 +1,4 @@
+import { useRef, type PointerEvent } from "react";
 import type { ReportType } from "../../../entities/report";
 import { routePresets, type RoutePreset } from "../model/presets";
 
@@ -20,8 +21,44 @@ export function RoutePresetCarousel({
   selectedReportType,
   onSelectPreset,
 }: RoutePresetCarouselProps) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const dragStateRef = useRef({ isDragging: false, startX: 0, scrollLeft: 0, moved: false });
+
+  const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    const element = scrollRef.current;
+    if (!element) return;
+    dragStateRef.current = {
+      isDragging: true,
+      startX: event.clientX,
+      scrollLeft: element.scrollLeft,
+      moved: false,
+    };
+  };
+
+  const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
+    const element = scrollRef.current;
+    if (!element || !dragStateRef.current.isDragging) return;
+    const deltaX = event.clientX - dragStateRef.current.startX;
+    if (Math.abs(deltaX) > 4) dragStateRef.current.moved = true;
+    element.scrollLeft = dragStateRef.current.scrollLeft - deltaX;
+  };
+
+  const handlePointerUp = () => {
+    window.setTimeout(() => {
+      dragStateRef.current = { ...dragStateRef.current, isDragging: false, moved: false };
+    }, 0);
+  };
+
   return (
-    <div className="w-full overflow-x-auto scrollbar-none pb-2 flex gap-3 pointer-events-auto snap-x">
+    <div
+      ref={scrollRef}
+      data-testid="route-preset-carousel"
+      className="w-full overflow-x-auto scrollbar-none pb-2 flex gap-3 pointer-events-auto snap-x touch-pan-x overscroll-x-contain cursor-grab active:cursor-grabbing select-none"
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
+    >
       {routePresets.map((preset) => {
         const isActive =
           startStation === preset.start &&
@@ -31,8 +68,16 @@ export function RoutePresetCarousel({
         return (
           <button
             key={`${preset.start}-${preset.end}-${preset.report}`}
-            onClick={() => onSelectPreset(preset)}
-            className={`shrink-0 w-[180px] snap-center text-left p-3 rounded-[16px] border transition-all flex flex-col justify-between gap-1.5 relative overflow-hidden group ${
+            data-testid={`route-preset-${preset.report}`}
+            aria-pressed={isActive}
+            onClick={(event) => {
+              if (dragStateRef.current.moved) {
+                event.preventDefault();
+                return;
+              }
+              onSelectPreset(preset);
+            }}
+            className={`control-base focus-ring group relative flex w-[180px] shrink-0 snap-center flex-col justify-between gap-1.5 overflow-hidden rounded-[16px] border p-3 text-left ${
               isActive
                 ? "bg-[#0A84FF]/10 border-[#0A84FF]/50 shadow-[0_4px_16px_rgba(10,132,255,0.2)]"
                 : "apple-glass border-white/10 hover:border-white/20 hover:bg-white/5 active:scale-[0.98]"
@@ -40,7 +85,7 @@ export function RoutePresetCarousel({
           >
             {isActive && <div className="absolute inset-0 bg-gradient-to-br from-[#0A84FF]/10 to-transparent pointer-events-none" />}
             <div className="flex items-start justify-between w-full">
-              <span className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-md flex items-center gap-1 ${isActive ? "text-white bg-[#0A84FF]" : getUrgencyClassName(preset.urgency)}`}>
+              <span className={`type-caption flex items-center gap-1 rounded-md px-1.5 py-0.5 ${isActive ? "text-white bg-[#0A84FF]" : getUrgencyClassName(preset.urgency)}`}>
                 {preset.tag}
               </span>
               <span className={`text-[10px] font-sans font-bold flex items-center gap-1 ${isActive ? "text-[#0A84FF]" : "text-white/50"}`}>

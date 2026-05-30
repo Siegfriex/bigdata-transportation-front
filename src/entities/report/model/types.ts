@@ -4,6 +4,7 @@ export interface SavedReport {
   id: string;
   date: string;
   type: ReportType;
+  selectedPlanId?: string;
   from: string;
   to: string;
   status: "success" | "warning" | "danger";

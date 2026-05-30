@@ -26,6 +26,7 @@ export function useAiChatController({
 }: UseAiChatControllerOptions) {
   const [chatInput, setChatInput] = useState("");
   const [chatbotLoading, setChatbotLoading] = useState(false);
+  const [chatError, setChatError] = useState<string | null>(null);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>(initialChatMessages);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
@@ -46,6 +47,7 @@ export function useAiChatController({
 
       setChatMessages((prev) => [...prev, userMsg]);
       setChatInput("");
+      setChatError(null);
       setChatbotLoading(true);
 
       try {
@@ -70,6 +72,7 @@ export function useAiChatController({
         onApplyResponse(data);
         setChatbotLoading(false);
       } catch {
+        setChatError("실시간 AI 연결이 불안정해 로컬 안전 플랜으로 대체했습니다.");
         setTimeout(() => {
           const fallbackMsg = createFallbackChatMessage(text);
           setChatMessages((prev) => [...prev, fallbackMsg]);
@@ -83,6 +86,7 @@ export function useAiChatController({
 
   return {
     chatInput,
+    chatError,
     chatbotLoading,
     chatMessages,
     chatEndRef,

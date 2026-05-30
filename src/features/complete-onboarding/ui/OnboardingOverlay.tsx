@@ -38,11 +38,11 @@ export function OnboardingOverlay({
   onFinish,
 }: OnboardingOverlayProps) {
   return (
-    <div className="absolute inset-0 bg-black/40 backdrop-blur-3xl z-40 flex flex-col p-6 overflow-y-auto">
+    <div className="absolute inset-0 z-40 flex flex-col overflow-y-auto bg-black/55 p-6 backdrop-blur-3xl">
       {step === 1 ? (
         <div className="flex-1 flex flex-col justify-between py-8">
           <div className="space-y-4 text-center mt-12">
-            <div className="w-20 h-20 apple-glass-light rounded-[28px] border border-white/20 flex items-center justify-center mx-auto text-white shadow-xl">
+            <div className="surface-card mx-auto flex h-20 w-20 items-center justify-center rounded-[24px] text-white">
               <Compass className="w-10 h-10 animate-spin-slow" />
             </div>
             <h1 className="text-[28px] leading-tight font-semibold tracking-tight text-white mt-6">
@@ -54,8 +54,8 @@ export function OnboardingOverlay({
             </p>
           </div>
 
-          <div className="my-8 apple-glass p-5 rounded-[24px] shadow-lg space-y-4">
-            <div className="flex items-center justify-between text-[11px] font-medium text-white/50 tracking-wide uppercase">
+          <div className="surface-card stack-md my-8 p-5">
+            <div className="flex items-center justify-between text-[11px] font-medium text-white/50">
               <span>Status: Ready</span>
               <span>Transit MaaS</span>
             </div>
@@ -75,7 +75,7 @@ export function OnboardingOverlay({
             <button
               id="next-onboarding"
               onClick={onNext}
-              className="w-full py-4 bg-[#0A84FF] hover:bg-[#007AFF] text-white rounded-[20px] text-[15px] font-semibold transition-all active:scale-[0.98] shadow-lg flex items-center justify-center gap-2"
+              className="control-base focus-ring flex w-full items-center justify-center gap-2 rounded-[18px] bg-[#0A84FF] py-4 text-[15px] font-semibold text-white shadow-lg hover:bg-[#007AFF]"
             >
               <span>조건 설정 시작하기</span>
               <ArrowRight className="w-4 h-4" />
@@ -83,7 +83,7 @@ export function OnboardingOverlay({
             <button
               id="bypass-login"
               onClick={onBypass}
-              className="w-full py-3 bg-transparent text-white/50 hover:text-white rounded-[20px] text-[13px] font-medium transition-colors"
+              className="control-base focus-ring w-full rounded-[18px] bg-transparent py-3 text-[13px] font-medium text-white/50 hover:text-white"
             >
               비회원으로 바로 둘러보기
             </button>
@@ -105,7 +105,7 @@ export function OnboardingOverlay({
                     <button
                       key={option.value}
                       onClick={() => onChangePreferences((prev) => ({ ...prev, crowdSensitivity: option.value }))}
-                      className={`py-2 px-1 text-center rounded-xl text-[13px] font-medium transition-all duration-200 ${
+                      className={`control-base focus-ring rounded-xl px-1 py-2 text-center text-[13px] font-medium ${
                         preferences.crowdSensitivity === option.value
                           ? "bg-[#0A84FF] text-white shadow-md shadow-[#0A84FF]/20"
                           : "apple-glass-light text-white/70 hover:bg-white/10"
@@ -124,7 +124,7 @@ export function OnboardingOverlay({
                     <button
                       key={fee}
                       onClick={() => onChangePreferences((prev) => ({ ...prev, maxTaxiFee: fee }))}
-                      className={`py-2 px-1 text-center rounded-xl text-[13px] font-medium transition-all duration-200 ${
+                      className={`control-base focus-ring rounded-xl px-1 py-2 text-center text-[13px] font-medium ${
                         preferences.maxTaxiFee === fee
                           ? "bg-[#0A84FF] text-white shadow-md shadow-[#0A84FF]/20"
                           : "apple-glass-light text-white/70 hover:bg-white/10"
@@ -138,14 +138,14 @@ export function OnboardingOverlay({
 
               <div>
                 <label className="block text-[11px] font-medium text-white/50 tracking-wide mb-2">따릉이 자전거 연계</label>
-                <div className="flex items-center justify-between p-3 apple-glass-light rounded-xl">
+                <div className="flex items-center justify-between rounded-xl border border-white/15 bg-white/[0.07] p-3">
                   <div className="flex items-center gap-2">
                     <Bike className="w-4 h-4 text-[#0A84FF]" />
                     <span className="text-[13px] text-white">경로에 자전거 조합 포함</span>
                   </div>
                   <button
                     onClick={() => onChangePreferences((prev) => ({ ...prev, useBike: !prev.useBike }))}
-                    className={`w-[46px] h-[28px] rounded-full transition-all duration-300 relative ${
+                    className={`focus-ring relative h-[28px] w-[46px] rounded-full transition-all duration-300 ${
                       preferences.useBike ? "bg-[#0A84FF]" : "bg-white/10"
                     }`}
                   >
@@ -162,7 +162,7 @@ export function OnboardingOverlay({
                   type="text"
                   value={user.name}
                   onChange={(event) => onChangeUser((prev) => ({ ...prev, name: event.target.value }))}
-                  className="w-full apple-glass-light focus:bg-white/10 focus:border-white/30 rounded-xl py-3 px-4 text-[14px] text-white outline-none font-sans transition-all duration-200"
+                  className="focus-ring w-full rounded-xl border border-white/15 bg-white/[0.07] px-4 py-3 text-[14px] text-white outline-none transition-all duration-200 focus:bg-white/10"
                   placeholder="이름을 입력하세요"
                 />
               </div>
@@ -173,7 +173,7 @@ export function OnboardingOverlay({
             <button
               id="finish-onboarding"
               onClick={onFinish}
-              className="w-full py-4 bg-[#0A84FF] hover:bg-[#007AFF] transition-colors shadow-lg text-white rounded-[20px] text-[15px] font-semibold flex items-center justify-center gap-2"
+              className="control-base focus-ring flex w-full items-center justify-center gap-2 rounded-[18px] bg-[#0A84FF] py-4 text-[15px] font-semibold text-white shadow-lg hover:bg-[#007AFF]"
             >
               <CheckCircle2 className="w-5 h-5" />
               <span>개인 플랜 분석 시작</span>

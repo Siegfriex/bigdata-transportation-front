@@ -20,20 +20,20 @@ export function BoardingReportView({ startStation }: BoardingReportViewProps) {
 
       <div className="grid grid-cols-2 gap-2">
         <div className="apple-glass border border-white/10 p-2.5 rounded-xl text-center space-y-1">
-          <span className="text-[10px] text-white/50 font-mono block uppercase">{boardingComparison.currentBus.label}</span>
+          <span className="type-caption block text-white/50">{boardingComparison.currentBus.label}</span>
           <span className="text-sm font-black text-[#FF3B30] tracking-tight">{boardingComparison.currentBus.etaLabel}</span>
-          <span className="text-[10px] bg-[#FF3B30]/15 text-[#FF3B30] px-1.5 py-0.5 rounded-full inline-block font-mono">{boardingComparison.currentBus.seatStatus}</span>
+          <span className="type-caption inline-block rounded-full bg-[#FF3B30]/15 px-1.5 py-0.5 text-[#FF3B30]">{boardingComparison.currentBus.seatStatus}</span>
           <span className="text-[9px] text-white/50 block">{boardingComparison.currentBus.crowdStatus}</span>
         </div>
         <div className="apple-glass border border-[#0A84FF]/30 p-2.5 rounded-xl text-center space-y-1 shadow-[0_4px_12px_rgba(10,132,255,0.15)]">
-          <span className="text-[10px] text-[#0A84FF] font-mono block uppercase">{boardingComparison.nextBus.label}</span>
+          <span className="type-caption block text-[#0A84FF]">{boardingComparison.nextBus.label}</span>
           <span className="text-sm font-black text-[#0A84FF] tracking-tight">{boardingComparison.nextBus.etaLabel}</span>
-          <span className="text-[10px] bg-[#0A84FF]/15 text-[#0A84FF] px-1.5 py-0.5 rounded-full inline-block font-mono">{boardingComparison.nextBus.seatStatus}</span>
+          <span className="type-caption inline-block rounded-full bg-[#0A84FF]/15 px-1.5 py-0.5 text-[#0A84FF]">{boardingComparison.nextBus.seatStatus}</span>
           <span className="text-[9px] text-white/70 block">{boardingComparison.nextBus.crowdStatus}</span>
         </div>
       </div>
 
-      <div className="border-t border-white/15 pt-2 flex items-center justify-between text-[11px] text-white/70 font-mono">
+      <div className="type-caption flex items-center justify-between border-t border-white/15 pt-2 text-white/70">
         <span className="flex items-center gap-1">
           <ShieldCheck className="w-3.5 h-3.5 text-[#0A84FF]" />
           <span>{boardingComparison.confidenceLabel}</span>

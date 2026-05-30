@@ -17,24 +17,24 @@ export function RecoveryReportView() {
       <div className="apple-glass border border-white/10 p-3 rounded-xl space-y-2">
         <div className="flex items-center justify-between border-b border-white/15 pb-1.5">
           <span className="text-xs font-bold text-white">{recoveryPlan.title}</span>
-          <span className="text-xs font-mono font-black text-[#0A84FF]">{recoveryPlan.estimatedCostLabel}</span>
+          <span className="text-xs font-black text-[#0A84FF]">{recoveryPlan.estimatedCostLabel}</span>
         </div>
         <p className="text-[11px] text-white/70 leading-relaxed">
           {recoveryPlan.description}
         </p>
-        <div className="bg-[#0A84FF]/10 text-[#0A84FF] text-[10px] p-2 rounded-lg font-mono flex justify-between items-center">
+        <div className="type-caption flex items-center justify-between rounded-lg bg-[#0A84FF]/10 p-2 text-[#0A84FF]">
           <span>전구간 택시 대비 비용보전:</span>
           <strong>{recoveryPlan.savingLabel}</strong>
         </div>
       </div>
 
       <div className="space-y-1">
-        <span className="text-[10px] font-mono text-white/50 uppercase tracking-wider block">{recoveryPlan.waitingHubAreaLabel}</span>
+        <span className="type-label block text-white/50">{recoveryPlan.waitingHubAreaLabel}</span>
         <div className="grid grid-cols-2 gap-1.5 text-[10px]">
           {recoveryPlan.waitingHubs.map((hub) => (
             <div key={hub.name} className="apple-glass border border-white/10 p-2 rounded-lg flex items-center justify-between">
               <span className="text-white">{hub.name}</span>
-              <span className="text-[#0A84FF] font-mono">{hub.distanceLabel}</span>
+              <span className="type-metric text-[#0A84FF]">{hub.distanceLabel}</span>
             </div>
           ))}
         </div>

@@ -38,10 +38,10 @@ export function ArchiveCalendar({
   const savedReportDays = new Set(savedReports.map((report) => report.date));
 
   return (
-    <div className="flex-1 flex flex-col p-4 space-y-3 absolute inset-0 z-10 overflow-y-auto bg-black/80 backdrop-blur-3xl pointer-events-auto">
-      <div className="apple-glass border border-white/10 rounded-2xl p-3 flex justify-between items-center shrink-0">
+    <div className="absolute inset-0 z-10 flex flex-1 flex-col gap-3 overflow-y-auto bg-black/80 p-4 backdrop-blur-3xl pointer-events-auto">
+      <div className="surface-card flex shrink-0 items-center justify-between p-3">
         <div className="space-y-0.5">
-          <span className="text-[10px] font-mono text-white/50 uppercase">{archiveCalendarConfig.statsEyebrow}</span>
+          <span className="type-label text-white/50">{archiveCalendarConfig.statsEyebrow}</span>
           <div className="text-sm font-bold text-white">{archiveCalendarConfig.statsTitle}</div>
         </div>
         <div className="text-right">
@@ -49,10 +49,10 @@ export function ArchiveCalendar({
         </div>
       </div>
 
-      <div className="apple-glass border border-white/10 rounded-2xl p-3.5 space-y-3 shrink-0">
+      <div className="surface-card stack-md shrink-0 p-3.5">
         <div className="flex justify-between items-center border-b border-white/15 pb-2">
-          <span className="text-xs font-bold font-mono text-white">{archiveCalendarConfig.monthLabel} 통근캘린더</span>
-          <span className="text-[10px] text-[#0A84FF] font-mono">총 {savedReportDays.size}일 출근</span>
+          <span className="text-xs font-bold text-white">{archiveCalendarConfig.monthLabel} 통근캘린더</span>
+          <span className="type-caption text-[#0A84FF]">총 {savedReportDays.size}일 출근</span>
         </div>
 
         <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-mono text-white/50">
@@ -117,7 +117,7 @@ export function ArchiveCalendar({
 
       <div className="flex-1 space-y-2 overflow-y-auto pr-1">
         <div className="flex justify-between items-center">
-          <span className="text-[10px] font-mono text-white/50 uppercase tracking-widest block">보관된 최신 안전 리포트</span>
+          <span className="type-label block text-white/50">보관된 최신 안전 리포트</span>
           <button
             onClick={onClearReports}
             className="text-[10px] text-[#FF3B30] hover:underline flex items-center gap-1"
@@ -128,18 +128,19 @@ export function ArchiveCalendar({
         </div>
 
         {savedReports.length === 0 ? (
-          <div className="apple-glass/40 border border-white/10 p-8 text-center rounded-2xl">
-            <BookmarkCheck className="w-8 h-8 text-[#2D3135] mx-auto mb-2" />
-            <span className="text-xs text-white/50 font-mono block">보관된 안전 리포트가 없습니다.</span>
+          <div className="state-card">
+            <BookmarkCheck className="h-8 w-8 text-white/20" />
+            <span className="type-title text-white/72">보관된 안전 리포트가 없습니다</span>
+            <span className="type-caption max-w-[220px] text-white/45">마감도착, 생존 칸, 실패복구 리포트를 저장하면 이곳에서 다시 열 수 있습니다.</span>
           </div>
         ) : (
           savedReports.map((report) => (
             <div
               key={report.id}
-              className="apple-glass border border-white/10 rounded-xl p-3 space-y-2 relative"
+              className="surface-card stack-sm relative p-3"
             >
               <div className="flex justify-between items-center">
-                <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase ${getReportStatusClassName(report)}`}>
+                <span className={`type-label rounded-full px-2 py-0.5 ${getReportStatusClassName(report)}`}>
                   {getReportTypeLabel(report)}
                 </span>
                 <span className="text-[10px] font-mono text-white/50">{report.date}</span>
@@ -147,11 +148,11 @@ export function ArchiveCalendar({
 
               <p className="text-xs font-bold text-white">{report.summary}</p>
 
-              <div className="flex justify-between items-center text-[10px] font-mono text-white/50 border-t border-white/15 pt-2">
+              <div className="type-caption flex items-center justify-between border-t border-white/15 pt-2 text-white/50">
                 <span>출발-도착: {report.from} ↔ {report.to}</span>
                 <button
                   onClick={() => onRestoreReport(report)}
-                  className="text-[#0A84FF] flex items-center gap-1 hover:underline"
+                  className="control-base focus-ring flex items-center gap-1 text-[#74B9FF] hover:text-white"
                 >
                   <span>지도 이동</span>
                   <ChevronRight className="w-3 h-3" />

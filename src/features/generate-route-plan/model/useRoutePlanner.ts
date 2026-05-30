@@ -33,14 +33,6 @@ export function useRoutePlanner(preferences: UserPreferences) {
       }
       return calculatedPlans[0] || null;
     });
-
-    if (startStation === "사당역") {
-      setSelectedReportType("boarding");
-    } else if (startStation === "홍대입구역") {
-      setSelectedReportType("recovery");
-    } else {
-      setSelectedReportType("deadline");
-    }
   }, [endStation, getPlansForStations, startStation]);
 
   useEffect(() => {

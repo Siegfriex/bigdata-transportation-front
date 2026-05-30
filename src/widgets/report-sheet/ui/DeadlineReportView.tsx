@@ -43,10 +43,11 @@ export function DeadlineReportView({
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <span className="text-xs font-bold text-white">마감도착 후보군 비교 ({deadlineTime} 전 도착기준)</span>
-        <span className="text-[10px] bg-[#0A84FF]/10 text-[#0A84FF] px-2 py-0.5 rounded-full font-mono font-bold">도착확률 95%</span>
+      <div className="flex items-center justify-between gap-3">
+        <span className="type-title text-white">마감도착 후보군 비교</span>
+        <span className="type-label rounded-full bg-[#0A84FF]/10 px-2 py-1 text-[#74B9FF]">도착확률 95%</span>
       </div>
+      <p className="type-caption text-white/48">{deadlineTime} 전 도착 기준</p>
 
       <div className="space-y-2">
         {plans.map((plan) => {
@@ -65,16 +66,16 @@ export function DeadlineReportView({
               <div className="flex justify-between items-start mb-1.5">
                 <div className="flex items-center gap-1.5">
                   <span className={`w-2 h-2 rounded-full ${getRiskClassName(plan.risk)}`} />
-                  <span className="text-xs font-bold text-white">{plan.name}</span>
+                  <span className="type-body font-bold text-white">{plan.name}</span>
                 </div>
-                <span className="text-xs font-mono font-black text-[#0A84FF]">{plan.eta} 도착</span>
+                <span className="text-xs font-black text-[#74B9FF]">{plan.eta} 도착</span>
               </div>
 
-              <p className="text-[10px] text-white/70 leading-relaxed mb-2">
+              <p className="type-caption mb-2 text-white/62">
                 {plan.description}
               </p>
 
-              <div className="flex justify-between items-center text-[9px] font-mono text-white/50 border-t border-white/15 pt-2">
+              <div className="type-label flex justify-between items-center border-t border-white/15 pt-2 text-white/45">
                 <div className="flex gap-2">
                   <span>추가 요금: {plan.extraCost.toLocaleString()}원</span>
                   <span>지연위험: {getRiskLabel(plan.risk)}</span>
@@ -93,10 +94,10 @@ export function DeadlineReportView({
       {selectedPlan && (
         <div className="apple-glass-light border border-white/10 rounded-xl p-3 space-y-2">
           <div className="flex justify-between items-center">
-            <span className="text-[10px] font-bold text-white/50 uppercase">선택 이동 타임라인 (Timeline MAP-04)</span>
+            <span className="type-label text-white/45">선택 이동 타임라인</span>
             <button
               onClick={handleCopySummary}
-              className="apple-glass border border-white/10 hover:bg-[#202428] text-white/70 hover:text-white px-2 py-1 rounded flex items-center gap-1.5 text-[9px] font-bold transition-all active:scale-95"
+              className="type-caption apple-glass flex items-center gap-1.5 rounded border border-white/10 px-2 py-1 text-white/68 transition-all hover:bg-[#202428] hover:text-white active:scale-95"
             >
               <Copy className="w-2.5 h-2.5" />
               <span>경로 복사</span>
@@ -119,8 +120,8 @@ export function DeadlineReportView({
                 </div>
                 <div className="flex-1 pb-1">
                   <div className="flex justify-between items-start">
-                    <strong className="text-white text-[11px] leading-snug">{step.detail}</strong>
-                    <span className="text-white/70 font-mono shrink-0 text-[10px]">{step.duration}분</span>
+                    <strong className="type-caption text-white">{step.detail}</strong>
+                    <span className="type-metric shrink-0 text-white/70">{step.duration}분</span>
                   </div>
                 </div>
               </div>

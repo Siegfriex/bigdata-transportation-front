@@ -238,7 +238,7 @@ const InteractiveMap = React.memo(function InteractiveMap({
           <button
             id="toggle-subway"
             onClick={() => handleLayerClick("subway")}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-mono font-bold transition-all border w-full ${
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-all border w-full ${
               visibleLayers.subway
                 ? "bg-[#0A84FF] text-white border-[#0A84FF] shadow-[0_0_12px_rgba(10,132,255,0.4)]"
                 : isLayerDanger("subway")
@@ -273,7 +273,7 @@ const InteractiveMap = React.memo(function InteractiveMap({
           <button
             id="toggle-bus"
             onClick={() => handleLayerClick("bus")}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-mono font-bold transition-all border w-full ${
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-all border w-full ${
               visibleLayers.bus
                 ? "bg-[#0A84FF] text-white border-[#0A84FF] shadow-[0_0_12px_rgba(10,132,255,0.4)]"
                 : isLayerDanger("bus")
@@ -308,7 +308,7 @@ const InteractiveMap = React.memo(function InteractiveMap({
           <button
             id="toggle-bike"
             onClick={() => handleLayerClick("bike")}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-mono font-bold transition-all border w-full ${
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-all border w-full ${
               visibleLayers.bike
                 ? "bg-[#0A84FF] text-white border-[#0A84FF] shadow-[0_0_12px_rgba(10,132,255,0.4)]"
                 : isLayerDanger("bike")
@@ -343,7 +343,7 @@ const InteractiveMap = React.memo(function InteractiveMap({
           <button
             id="toggle-crowd"
             onClick={() => handleLayerClick("crowd")}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-mono font-bold transition-all border w-full ${
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-all border w-full ${
               visibleLayers.crowd
                 ? "bg-[#FF3B30] text-white border-[#FF3B30] shadow-[0_0_15px_rgba(255,59,48,0.4)]"
                 : isLayerDanger("crowd")
@@ -424,6 +424,7 @@ const InteractiveMap = React.memo(function InteractiveMap({
             {/* Colored Mode Indicator Route Line */}
             <motion.path
               key={`fg-${selectedPlan?.id || "default"}-${startStation}-${endStation}`}
+              data-testid="active-route-path"
               initial={{ pathLength: 0, opacity: 0 }}
               animate={{ pathLength: 1, opacity: 1 }}
               transition={{ duration: 0.9, ease: "easeInOut", delay: 0.1 }}

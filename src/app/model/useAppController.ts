@@ -10,6 +10,7 @@ import { DEFAULT_VISIBLE_LAYERS, type MapLayerState } from "../../features/toggl
 import type { TabId } from "../../shared/config";
 import { AiChatLayer } from "../../widgets/ai-chat-panel";
 import { BottomNavigation } from "../../widgets/bottom-navigation";
+import { ReportDetailPanel } from "../../widgets/report-sheet";
 import InteractiveMap from "../../widgets/transit-map-panel";
 import { TopAppBar } from "../../widgets/top-app-bar";
 
@@ -46,8 +47,11 @@ export function useAppController() {
   }, [routePlanner]);
 
   const triggerPreset = useCallback((preset: RoutePreset) => {
+    const nextPlans = routePlanner.getPlansForStations(preset.start, preset.end);
     routePlanner.applyPreset(preset);
-    showToast(`📍 '${preset.title}' 비상 시나리오가 로드되었습니다.`);
+    routePlanner.setSelectedPlan(nextPlans[0] ?? null);
+    setActiveTab("map");
+    showToast(`📍 '${preset.title}' 전략 근거를 열었습니다.`);
     setMapLayer("report_detail");
   }, [routePlanner, showToast]);
 
@@ -104,6 +108,7 @@ export function useAppController() {
       from: routePlanner.startStation,
       to: routePlanner.endStation,
       type: routePlanner.selectedReportType,
+      selectedPlanId: routePlanner.selectedPlan.id,
     });
     if (isExist) {
       showToast("이미 보관함에 물리 장착된 리포트입니다.");
@@ -161,34 +166,9 @@ export function useAppController() {
         mapLayer,
         startStation: routePlanner.startStation,
         endStation: routePlanner.endStation,
-        deadlineTime: routePlanner.deadlineTime,
         selectedReportType: routePlanner.selectedReportType,
-        plans: routePlanner.plans,
-        selectedPlan: routePlanner.selectedPlan,
-        carDetails: routePlanner.carDetails,
-        activeCarNo: routePlanner.activeCarNo,
         onSetMapLayer: setMapLayer,
         onSelectPreset: triggerPreset,
-        onChangeStartStation: routePlanner.setStartStation,
-        onChangeEndStation: routePlanner.setEndStation,
-        onChangeDeadlineTime: routePlanner.setDeadlineTime,
-        onSelectReport: (reportType: ReportType, label: string) => {
-          routePlanner.setSelectedReportType(reportType);
-          showToast(`📊 '${label}' 분석 보고서가 로딩되었습니다.`);
-        },
-        onSelectCar: (carNo: string) => {
-          routePlanner.setActiveCarNo(carNo);
-          showToast(`🚇 ${carNo}번 칸 상세 분석을 로드했습니다.`);
-        },
-        onSelectPlan: routePlanner.setSelectedPlan,
-        onCopySummary: showToast,
-        onSaveReport: handleSaveReport,
-        onAskAiBriefing: () => {
-          setActiveTab("map");
-          setMapLayer("ai_overlay");
-          aiChat.sendMessage(`${routePlanner.startStation}에서 ${routePlanner.endStation} 가는 지각처방 리포트 요약해줘`);
-          showToast("🤖 리포트 근거 조회를 위해 AI 챗봇이 개입합니다.");
-        },
       },
       archivePageProps: {
         savedReports,
@@ -199,10 +179,15 @@ export function useAppController() {
           showToast("보관함이 완전히 비워졌습니다.");
         },
         onRestoreReport: (report: SavedReport) => {
+          const restoredPlans = routePlanner.getPlansForStations(report.from, report.to);
           routePlanner.setStartStation(report.from);
           routePlanner.setEndStation(report.to);
           routePlanner.setSelectedReportType(report.type);
+          routePlanner.setSelectedPlan(
+            restoredPlans.find((plan) => plan.id === report.selectedPlanId) ?? restoredPlans[0] ?? null
+          );
           setActiveTab("map");
+          setMapLayer("report_detail");
           showToast("🗺️ 해당 저장 조건으로 메인 지도를 갱신했습니다.");
         },
       },
@@ -217,10 +202,47 @@ export function useAppController() {
         onShowToast: showToast,
       },
     },
+    showReportSheet: activeTab === "map" && mapLayer === "report_detail",
+    reportDetailPanelProps: {
+      selectedReportType: routePlanner.selectedReportType,
+      startStation: routePlanner.startStation,
+      endStation: routePlanner.endStation,
+      deadlineTime: routePlanner.deadlineTime,
+      plans: routePlanner.plans,
+      selectedPlan: routePlanner.selectedPlan,
+      carDetails: routePlanner.carDetails,
+      activeCarNo: routePlanner.activeCarNo,
+      onClose: () => setMapLayer("default"),
+      onChangeStartStation: routePlanner.setStartStation,
+      onChangeEndStation: routePlanner.setEndStation,
+      onChangeDeadlineTime: routePlanner.setDeadlineTime,
+      onSelectReport: (reportType: ReportType, label: string) => {
+        routePlanner.setSelectedReportType(reportType);
+        showToast(`📊 '${label}' 근거 보기로 전환했습니다.`);
+      },
+      onSelectCar: (carNo: string) => {
+        routePlanner.setActiveCarNo(carNo);
+        showToast(`🚇 ${carNo}번 칸 근거를 갱신했습니다.`);
+      },
+      onSelectPlan: (plan: typeof routePlanner.plans[number]) => {
+        routePlanner.setSelectedPlan(plan);
+        showToast(`경로가 '${plan.name.replace(/^추천:\\s?/, "")}' 기준으로 갱신되었습니다.`);
+      },
+      onSaveReport: () => {
+        handleSaveReport();
+        setMapLayer("report_detail");
+      },
+      onAskAiBriefing: () => {
+        setMapLayer("ai_overlay");
+        aiChat.sendMessage(`${routePlanner.startStation}에서 ${routePlanner.endStation} 가는 선택 전략의 근거를 요약해줘`);
+        showToast("🤖 선택 전략의 근거를 AI에게 질문합니다.");
+      },
+    } satisfies ComponentProps<typeof ReportDetailPanel>,
     aiChatLayerProps: {
       mapLayer,
       chatMessages: aiChat.chatMessages,
       chatInput: aiChat.chatInput,
+      chatError: aiChat.chatError,
       chatbotLoading: aiChat.chatbotLoading,
       suggestedPrompts: suggestedChatPrompts,
       plans: routePlanner.plans,
@@ -231,8 +253,7 @@ export function useAppController() {
       onSelectPlan: routePlanner.setSelectedPlan,
       onSaveTacticalReport: () => {
         handleSaveReport();
-        setActiveTab("archive");
-        setMapLayer("default");
+        setMapLayer("report_detail");
       },
       onShowReport: (reportType: ReportType) => {
         routePlanner.setSelectedReportType(reportType);

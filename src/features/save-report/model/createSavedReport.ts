@@ -10,10 +10,14 @@ const reportLabelMap: Record<ReportType, string> = {
 
 export function isDuplicateSavedReport(
   reports: SavedReport[],
-  input: { from: string; to: string; type: ReportType }
+  input: { from: string; to: string; type: ReportType; selectedPlanId?: string }
 ): boolean {
   return reports.some(
-    (report) => report.from === input.from && report.to === input.to && report.type === input.type
+    (report) =>
+      report.from === input.from &&
+      report.to === input.to &&
+      report.type === input.type &&
+      (!input.selectedPlanId || !report.selectedPlanId || report.selectedPlanId === input.selectedPlanId)
   );
 }
 
@@ -30,6 +34,7 @@ export function createSavedReport(input: {
     id: `rep-${now.getTime()}`,
     date: now.toISOString().split("T")[0],
     type: selectedReportType,
+    selectedPlanId: selectedPlan.id,
     from: startStation,
     to: endStation,
     status: selectedPlan.risk === "high" ? "danger" : selectedPlan.risk === "medium" ? "warning" : "success",
