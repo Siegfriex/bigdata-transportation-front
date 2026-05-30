@@ -36,6 +36,10 @@ export function ArchiveCalendar({
   onRestoreReport,
 }: ArchiveCalendarProps) {
   const savedReportDays = new Set(savedReports.map((report) => report.date));
+  const safeReports = savedReports.filter((report) => report.status === "success").length;
+  const safeArrivalRateLabel = savedReports.length > 0
+    ? `${Math.round((safeReports / savedReports.length) * 100)}%`
+    : "-";
 
   return (
     <div className="flex-1 flex flex-col p-4 space-y-3 absolute inset-0 z-10 overflow-y-auto bg-black/80 backdrop-blur-3xl pointer-events-auto">
@@ -45,7 +49,7 @@ export function ArchiveCalendar({
           <div className="text-sm font-bold text-white">{archiveCalendarConfig.statsTitle}</div>
         </div>
         <div className="text-right">
-          <span className="text-2xl font-black text-[#0A84FF] font-mono">{archiveCalendarConfig.safeArrivalRateLabel}</span>
+          <span className="text-2xl font-black text-[#0A84FF] font-mono">{safeArrivalRateLabel}</span>
         </div>
       </div>
 

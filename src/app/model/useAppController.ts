@@ -12,10 +12,10 @@ import { AiChatLayer } from "../../widgets/ai-chat-panel";
 import { BottomNavigation } from "../../widgets/bottom-navigation";
 import InteractiveMap from "../../widgets/transit-map-panel";
 import { TopAppBar } from "../../widgets/top-app-bar";
+import { useOnboardingState } from "./useOnboardingState";
 
 export function useAppController() {
-  const [showOnboarding, setShowOnboarding] = useState(true);
-  const [onboardingStep, setOnboardingStep] = useState(1);
+  const { showOnboarding, onboardingStep, setOnboardingStep, completeOnboarding, resetOnboarding } = useOnboardingState();
   const [user, setUser] = useState<{ name: string; isLoggedIn: boolean }>({
     name: "김도윤",
     isLoggedIn: false,
@@ -99,7 +99,10 @@ export function useAppController() {
   });
 
   const handleSaveReport = useCallback(() => {
-    if (!routePlanner.selectedPlan) return;
+    if (!routePlanner.selectedPlan) {
+      showToast("저장할 경로가 없습니다. 먼저 경로를 선택해 주세요.");
+      return false;
+    }
     const isExist = isDuplicateSavedReport(savedReports, {
       from: routePlanner.startStation,
       to: routePlanner.endStation,
@@ -107,7 +110,7 @@ export function useAppController() {
     });
     if (isExist) {
       showToast("이미 저장된 리포트입니다.");
-      return;
+      return false;
     }
 
     const newReport = createSavedReport({
@@ -119,6 +122,7 @@ export function useAppController() {
 
     setSavedReports((prev) => [newReport, ...prev]);
     showToast("통근 리포트를 저장했습니다.");
+    return true;
   }, [routePlanner, savedReports, setSavedReports, showToast]);
 
   return {
@@ -131,14 +135,14 @@ export function useAppController() {
       onNext: () => setOnboardingStep(2),
       onBypass: () => {
         setUser({ name: "비회원 체험자", isLoggedIn: false });
-        setShowOnboarding(false);
+        completeOnboarding();
         showToast("비회원 체험 모드로 진입했습니다.");
       },
       onChangeUser: setUser,
       onChangePreferences: setPreferences,
       onFinish: () => {
         setUser((prev) => ({ ...prev, isLoggedIn: true }));
-        setShowOnboarding(false);
+        completeOnboarding();
         showToast(`환영합니다, ${user.name}님! 설정이 성공 탑재되었습니다.`);
       },
     } satisfies ComponentProps<typeof OnboardingOverlay>,
@@ -153,7 +157,7 @@ export function useAppController() {
     topAppBarProps: {
       userName: user.name,
       showReset: !showOnboarding,
-      onReset: () => setShowOnboarding(true),
+      onReset: resetOnboarding,
     } satisfies ComponentProps<typeof TopAppBar>,
     routerProps: {
       activeTab,
@@ -230,9 +234,10 @@ export function useAppController() {
       onSetMapLayer: setMapLayer,
       onSelectPlan: routePlanner.setSelectedPlan,
       onSaveTacticalReport: () => {
-        handleSaveReport();
-        setActiveTab("archive");
-        setMapLayer("default");
+        if (handleSaveReport()) {
+          setActiveTab("archive");
+          setMapLayer("default");
+        }
       },
       onShowReport: (reportType: ReportType) => {
         routePlanner.setSelectedReportType(reportType);

@@ -35,6 +35,15 @@ function assertAppHostBoundary() {
   assert(!appSource.includes("activeTab ==="), "App.tsx should not branch on activeTab directly");
 }
 
+function assertOnboardingPersistenceBoundary() {
+  const appControllerSource = readRelative("src/app/model/useAppController.ts");
+  const onboardingStateSource = readRelative("src/app/model/useOnboardingState.ts");
+
+  assert(onboardingStateSource.includes("STORAGE_KEYS.onboarding"), "onboarding state should use STORAGE_KEYS.onboarding");
+  assert(appControllerSource.includes("completeOnboarding"), "app controller should complete onboarding through persistent state");
+  assert(appControllerSource.includes("resetOnboarding"), "app controller should reset onboarding through persistent state");
+}
+
 function assertPageCompositionBoundary() {
   const pageFiles = listFiles("src/pages");
   const forbiddenPathPattern = /\/(ui|model|api|mock|lib|config)\//;
@@ -103,6 +112,7 @@ async function assertAiChatFallbackContract() {
 
 async function main() {
   assertAppHostBoundary();
+  assertOnboardingPersistenceBoundary();
   assertPageCompositionBoundary();
   assertRouteAndReportContracts();
   await assertAiChatFallbackContract();
