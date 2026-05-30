@@ -58,6 +58,21 @@
   --loading-spinner-duration: 1s;
   --loading-shimmer-duration: 1.8s;
 
+  --z-map: 0;
+  --z-content: 10;
+  --z-page: 15;
+  --z-map-controls: 20;
+  --z-route-carousel: 25;
+  --z-top-bar: 30;
+  --z-bottom-nav: 35;
+  --z-device-chrome: 40;
+  --z-sheet: 50;
+  --z-sheet-action: 55;
+  --z-ai-overlay: 60;
+  --z-onboarding: 70;
+  --z-toast: 80;
+  --z-dev-overlay: 100;
+
   --talsu-primary: #06111F;
   --talsu-primary-soft: #101828;
   --talsu-surface: #FFFFFF;
@@ -214,6 +229,50 @@ body {
 .focus-ring:focus-visible {
   outline: none;
   box-shadow: var(--shadow-focus);
+}
+
+.z-layer-map {
+  z-index: var(--z-map);
+}
+
+.z-layer-content {
+  z-index: var(--z-content);
+}
+
+.z-layer-page {
+  z-index: var(--z-page);
+}
+
+.z-layer-top-bar {
+  z-index: var(--z-top-bar);
+}
+
+.z-layer-bottom-nav {
+  z-index: var(--z-bottom-nav);
+}
+
+.z-layer-device-chrome {
+  z-index: var(--z-device-chrome);
+}
+
+.z-layer-sheet {
+  z-index: var(--z-sheet);
+}
+
+.z-layer-sheet-action {
+  z-index: var(--z-sheet-action);
+}
+
+.z-layer-ai-overlay {
+  z-index: var(--z-ai-overlay);
+}
+
+.z-layer-onboarding {
+  z-index: var(--z-onboarding);
+}
+
+.z-layer-toast {
+  z-index: var(--z-toast);
 }
 
 .state-card {

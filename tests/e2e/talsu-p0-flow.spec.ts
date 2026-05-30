@@ -44,8 +44,11 @@ test.describe("탈수있나 v2 strategic report flow", () => {
     await evidenceToggle.click();
     await expect(evidenceToggle).toHaveAttribute("aria-expanded", "true");
     await expect(page.getByTestId("evidence-detail-section")).toBeVisible();
-    await expect(page.getByTestId("evidence-detail-section").locator("div")).toHaveCount(4);
-    await evidenceToggle.click();
+    await expect(page.getByTestId("evidence-item")).toHaveCount(5);
+    await expect(page.getByTestId("evidence-item-label").first()).toBeVisible();
+    await expect(page.getByTestId("evidence-item-value").first()).toBeVisible();
+    await expect(page.getByTestId("evidence-item-detail").first()).toBeVisible();
+    await page.getByTestId("evidence-toggle-button").click();
     await expect(page.getByTestId("evidence-detail-section")).toHaveCount(0);
   });
 

@@ -38,7 +38,7 @@ export function ArchiveCalendar({
   const savedReportDays = new Set(savedReports.map((report) => report.date));
 
   return (
-    <div className="absolute inset-0 z-10 flex flex-1 flex-col gap-3 overflow-y-auto bg-black/80 p-4 backdrop-blur-3xl pointer-events-auto">
+    <div className="z-layer-page absolute inset-0 flex flex-1 flex-col gap-3 overflow-y-auto bg-black/80 p-4 backdrop-blur-3xl pointer-events-auto">
       <div className="surface-card flex shrink-0 items-center justify-between p-3">
         <div className="space-y-0.5">
           <span className="type-label text-white/50">{archiveCalendarConfig.statsEyebrow}</span>
@@ -55,8 +55,12 @@ export function ArchiveCalendar({
           <span className="type-caption text-[#0A84FF]">총 {savedReportDays.size}일 출근</span>
         </div>
 
-        <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-mono text-white/50">
-          {archiveCalendarConfig.weekDays.map((day) => <span key={day}>{day}</span>)}
+        <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-white/58">
+          {archiveCalendarConfig.weekDays.map((day) => (
+            <span key={day} data-testid="archive-weekday-label" aria-label={`${day}요일`}>
+              {day}
+            </span>
+          ))}
         </div>
 
         <div className="grid grid-cols-7 gap-1.5 text-center text-xs font-mono">

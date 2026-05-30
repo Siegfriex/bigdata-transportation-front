@@ -2,12 +2,7 @@ export type MapLayerState =
   | "default"
   | "ai_overlay"
   | "ai_peek"
-  | "ai_result"
-  | "report_mini"
-  | "report_summary"
-  | "report_detail"
-  | "evidence"
-  | "map_peek";
+  | "report_detail";
 
 export type TransitLayer = "subway" | "bus" | "bike" | "crowd";
 

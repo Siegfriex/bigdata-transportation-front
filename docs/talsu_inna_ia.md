@@ -13,8 +13,9 @@
 | 1 | `TAB_ARCHIVE` | 기록 | `activeTab === "archive"`일 때 `ArchivePage` |
 | 1 | `TAB_SETTINGS` | 설정 | `activeTab === "settings"`일 때 `SettingsPage` |
 | Overlay | `OV_AI_CHAT` | AI chat overlay | `mapLayer === "ai_overlay" 또는 "ai_peek"` |
-| Overlay | `OV_AI_RESULT` | AI result card | `mapLayer === "ai_result"` |
-| Overlay | `OV_REPORT_DETAIL` | 리포트 상세 | `mapLayer === "report_detail"` |
+| Overlay | `OV_REPORT_DETAIL` | full strategic report | `mapLayer === "report_detail"` |
+
+현재 `MapLayerState`는 `default | report_detail | ai_overlay | ai_peek`만 허용한다. 과거 문서의 `ai_result`, `report_mini`, `report_summary`, `evidence`, `map_peek`는 현재 구현 기준 상태가 아니다.
 
 ## 2. 화면 ID
 
@@ -24,7 +25,7 @@
 | `SCR_ARCHIVE` | `src/pages/archive-page/index.tsx`, `ArchiveCalendar` | 저장 리포트 캘린더, 목록, 복원 |
 | `SCR_SETTINGS` | `src/pages/settings-page/index.tsx`, `SettingsForm` | 루틴 지점, 이동 조건, AI 스타일 |
 | `SCR_MAP_CANVAS` | `TransitMapPanel` | SVG map, 역 노드, 레이어, 선택 경로 |
-| `SCR_AI_CHAT` | `AiChatLayer` | 채팅 메시지, 추천 질문, 결과 반영 |
+| `SCR_AI_CHAT` | `AiChatLayer` | 현재 route/report/snapshot context 기반 근거 설명, skeleton, retry, close return |
 
 ## 3. 기능 ID
 
@@ -46,9 +47,9 @@
 |---|---|
 | 최초 진입 | 온보딩 Step 1 -> Step 2 또는 비회원 체험 -> 지도 |
 | 경로 탐색 | 지도 탭 -> 프리셋 또는 출발/도착 변경 -> route planner 재계산 -> selected plan 갱신 |
-| 리포트 확인 | 지도 탭 -> 리포트 상세 -> report type 선택 -> report view 표시 |
-| AI 추천 | 지도 검색 card 또는 AI 원인 브리핑 -> AI overlay -> 메시지 전송 -> current `/api/chat` legacy alias 또는 target `/api/v1/decision/chat` -> fallback -> `ai_result` |
-| 저장/복원 | 리포트 저장 -> 기록 탭 -> 날짜/리포트 선택 -> 지도 탭으로 복원 |
+| 리포트 확인 | 지도 탭 -> 경로 후보 카드 선택 -> full strategic report -> 4대 summary metric/evidence/strategy carousel 표시 |
+| AI 근거 설명 | full strategic report -> AI 근거 질문 -> `ai_overlay` -> current `/api/chat` legacy alias 또는 target `/api/v1/decision/chat` -> overlay 안에서 답변/실패 fallback -> 닫으면 `report_detail` 복귀 |
+| 저장/복원 | 리포트 저장 -> toast 유지 -> 기록 탭 -> 카드 상세 또는 지도 이동 -> 저장 snapshot 기준 지도/리포트 복원 |
 | 설정 반영 | 설정 탭 -> preferences 변경 -> localStorage 저장 -> 루틴 동기화로 지도 출발/도착 반영 |
 
 ## 4-1. Target Flow With `/api/v1`
@@ -66,13 +67,14 @@
 
 | Scenario | Given | When | Then |
 |---|---|---|---|
-| Onboarding persistence | first visit | onboarding completed | next visit should skip onboarding via `talsu.onboarding.v1` |
+| Full strategic report entry | route candidates visible | route card selected | `report_detail` opens with deadline/boarding/carriage/recovery summary |
 | Route preview no-archive | map has origin/destination | route preview requested | routePlanId/options exist but report archive count does not change |
 | Decision preview no-archive | routePlanId/options exist | decision preview requested | decisionReportId/evidence appears without saved report |
 | Save snapshot | decision preview exists | user saves report | archive contains report with route/decision snapshot |
 | Restore snapshot | saved report exists | user opens report | map/report state restores from snapshot, not current preview |
-| AI overlay context | map route selected | user opens AI overlay | overlay keeps current route/report context |
-| Tab preservation | AI result visible | user navigates archive/settings/map | map tab resets only by defined navigation rules |
+| AI overlay context | map route selected | user opens AI overlay | overlay keeps selected plan/strategy/report context and hides raw ids/enums |
+| AI failure | `/api/chat` delayed/failed/invalid | user asks evidence | skeleton/retry/fallback appears without resetting report context |
+| Tab preservation | report or AI overlay visible | user navigates archive/settings/map | map tab resets only by defined navigation rules |
 
 ## 5. URL Routing
 
@@ -82,6 +84,6 @@
 
 | 구분 | 표시 |
 |---|---|
-| 현재 코드와 동기화됨 | 하단 탭 3개, AI overlay, activeTab router, 화면/기능 ID |
+| 현재 코드와 동기화됨 | 하단 탭 3개, full strategic report, AI overlay, activeTab router, narrowed mapLayer states |
 | 계획성 | URL routing, deep link, auth gate, map provider route |
 | 미확정 | 관리자/PC IA, 알림 화면, 로그인/회원 화면 |

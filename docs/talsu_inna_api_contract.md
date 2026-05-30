@@ -126,6 +126,17 @@ Rules: `message`는 필수 non-empty string이며 2000자 이하. `context`는 o
 
 Rules: `textAnswer`는 필수 non-empty string. `suggestedReportType`은 `boarding|carriage|deadline|recovery|null`. 나머지는 optional이며 frontend는 누락 시 현재 route context 또는 default를 사용한다.
 
+User-facing copy rules:
+
+| 금지 | 이유 |
+|---|---|
+| raw id: `srpt_...`, `drpt_...`, `rpln_...`, `plan_a`, `strategy_1` | 사용자에게 의미 없는 내부 식별자 |
+| raw enum: `boarding`, `carriage`, `deadline`, `recovery` | 화면에는 `탑승가능성 리포트` 같은 사람용 label 사용 |
+| `반갑습니다`, `챗봇입니다`, `브리핑 종료` | 현재 전략 근거 설명 layer의 목적과 맞지 않음 |
+| emoji prefix, 제품 홍보성 자기소개 | 제품 톤과 QA 금지어 정책 위반 |
+
+`/api/chat` 또는 target `/api/v1/decision/chat` 실패는 decision failure가 아니다. FE는 기존 `selectedPlanId`, `selectedStrategyId`, `decisionReportId`, saved snapshot context를 유지하고 fallback/retry만 표시해야 한다.
+
 ### Error
 
 ```json
@@ -140,7 +151,7 @@ Rules: `textAnswer`는 필수 non-empty string. `suggestedReportType`은 `boardi
 |---|---|---|
 | Station | `StationNode` | station catalog, live context, map adapter |
 | Route plan | `RoutePlan` | route alternatives response |
-| Report | `SavedReport`, `ReportType` | report save/list/detail |
+| Report | `SavedReport`, `ReportType` | report save/list/detail, immutable snapshot restore |
 | Preferences | `UserPreferences` | user defaults and routing preferences |
 | Chat | `ChatMessage`, `AiChatResponse` | chat/session and decision action result |
 

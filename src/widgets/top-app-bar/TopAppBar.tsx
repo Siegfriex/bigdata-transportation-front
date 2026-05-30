@@ -8,7 +8,7 @@ interface TopAppBarProps {
 
 export function TopAppBar({ userName, showReset, onReset }: TopAppBarProps) {
   return (
-    <header className="absolute top-0 inset-x-0 z-20 flex shrink-0 select-none items-center justify-between border-b border-white/10 bg-black/32 px-4 py-3 backdrop-blur-2xl pointer-events-auto">
+    <header className="z-layer-top-bar absolute top-0 inset-x-0 flex shrink-0 select-none items-center justify-between border-b border-white/10 bg-black/32 px-4 py-3 backdrop-blur-2xl pointer-events-auto">
       <div className="flex items-center gap-2">
         <span className="type-brand flex items-center gap-1 text-[#0A84FF]">
           <span>탈수있나</span>

@@ -46,7 +46,7 @@ export function AiChatLayer({
   endStation,
   reportType,
   isRestoredSnapshot,
-  savedReportId,
+  savedReportId: _savedReportId,
   snapshotLabel,
   chatEndRef,
   onClose,
@@ -92,7 +92,7 @@ export function AiChatLayer({
   };
 
   return (
-    <div className="absolute inset-x-0 top-0 bottom-[64px] z-40 flex flex-col justify-end transition-all duration-300 pointer-events-none">
+    <div className="z-layer-ai-overlay absolute inset-x-0 top-0 bottom-[64px] flex flex-col justify-end transition-all duration-300 pointer-events-none">
       {(mapLayer === "ai_overlay" || mapLayer === "ai_peek") && (
         <>
           <div
@@ -125,7 +125,8 @@ export function AiChatLayer({
                 <div className="w-12 h-1.5 bg-white/25 rounded-full" />
               </div>
               <button
-                className="control-base focus-ring flex h-11 w-11 items-center justify-center rounded-xl text-white/58 hover:bg-white/[0.06] hover:text-white"
+                data-testid="ai-close-button"
+                className="grid h-11 w-11 place-items-center rounded-full text-white/70 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
                 onClick={(event) => {
                   event.stopPropagation();
                   onClose();

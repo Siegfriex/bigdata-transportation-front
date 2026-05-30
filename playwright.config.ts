@@ -22,6 +22,9 @@ export default defineConfig({
   },
   webServer: {
     command: "npm run dev",
+    env: {
+      DISABLE_HMR: "true",
+    },
     url: "http://127.0.0.1:3000",
     reuseExistingServer: true,
     timeout: 20_000,

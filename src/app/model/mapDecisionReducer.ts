@@ -2,11 +2,13 @@ import type { SavedReport } from "../../entities/report";
 import type { MapLayerState } from "../../features/toggle-map-layer";
 import type { TabId } from "../../shared/config";
 
+type AiReturnLayer = Extract<MapLayerState, "default" | "report_detail">;
+
 export type MapDecisionState = {
   activeTab: TabId;
   mapLayer: MapLayerState;
   restoredReport: SavedReport | null;
-  aiReturnLayer: MapLayerState;
+  aiReturnLayer: AiReturnLayer;
 };
 
 export type MapDecisionAction =
@@ -16,7 +18,7 @@ export type MapDecisionAction =
   | { type: "ROUTE_PRESET_OPENED" }
   | { type: "LIVE_CONTEXT_SELECTED" }
   | { type: "SAVED_REPORT_RESTORED"; report: SavedReport }
-  | { type: "AI_EVIDENCE_OPENED"; returnLayer: MapLayerState }
+  | { type: "AI_EVIDENCE_OPENED"; returnLayer: AiReturnLayer }
   | { type: "AI_EVIDENCE_CLOSED" }
   | { type: "REPORT_TYPE_SHOWN" };
 

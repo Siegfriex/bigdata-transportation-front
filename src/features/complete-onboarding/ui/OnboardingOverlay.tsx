@@ -39,7 +39,7 @@ export function OnboardingOverlay({
   onFinish,
 }: OnboardingOverlayProps) {
   return (
-    <div className="absolute inset-0 z-40 flex flex-col overflow-y-auto bg-black/55 p-6 backdrop-blur-3xl">
+    <div className="z-layer-onboarding absolute inset-0 flex flex-col overflow-y-auto bg-black/55 p-6 backdrop-blur-3xl">
       {step === 1 ? (
         <div className="flex-1 flex flex-col justify-between py-8">
           <div className="space-y-4 text-center mt-12">

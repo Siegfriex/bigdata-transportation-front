@@ -23,6 +23,8 @@
 | `talsu_inna_document_development_plan.md` | 문서 동결 이후 OpenAPI/schema sync까지의 개발 계획 |
 | `talsu_inna_interaction_state_policy.md` | FE/UX interaction state, loading, skeleton, motion 지원 정책 |
 | `talsu_inna_strategy_report_sheet_wireframe.md` | 전략 근거 리포트 bottom sheet wireframe 지원 문서 |
+| `visual_design_qa_report.md` | 전략리포트/AI/기록 화면의 시각 QA 결함과 P0 수정 근거 |
+| `visual_polish_result.md` | visual polish 적용 결과, screenshot 산출물, 검증 명령 기록 |
 | `docs-suite-freeze-audit-report.json` | 문서 스위트 동기화 감사 결과 JSON 산출물 |
 
 ## Reference / Archive
@@ -37,4 +39,5 @@
 1. `deep-research-report.md`와 운영 문서가 충돌하면 `deep-research-report.md`가 우선이다.
 2. 신규 API/DB/AI/Infra 결정은 먼저 운영 문서에 반영한 뒤 구현한다.
 3. `docs/archive/` 문서는 구현 기준으로 인용하지 않는다.
-4. Windows metadata 파일과 비정상 파일명은 docs root에 두지 않는다.
+4. `docs/reference/`는 원천 연구/인벤토리 보관소이며, 현재 구현 기준은 운영 문서에서만 읽는다.
+5. Windows metadata 파일과 비정상 파일명은 docs root에 두지 않는다.

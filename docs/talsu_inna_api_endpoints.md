@@ -23,6 +23,16 @@ Local dev에서는 `server.ts`가 Express로 `/api/chat`을 Vite middleware보�
 | Timeout | client `postJson` 기본 15000ms |
 | Fallback | server heuristic fallback, client fallback |
 
+Current copy/validation policy:
+
+| 항목 | 정책 |
+|---|---|
+| 응답 schema | `textAnswer` 필수. `suggestedReportType`은 `boarding|carriage|deadline|recovery|null`만 허용 |
+| 사용자 copy | 한국어 Markdown 설명. 현재 route/report evidence를 바로 설명 |
+| 금지 copy | emoji prefix, 챗봇 자기소개, 제품 홍보, `반갑습니다`, `브리핑 종료` |
+| 금지 raw 값 | `Plan A`, `plan_a`, raw enum `boarding/deadline/carriage/recovery`, `savedReportId`, `srpt_...`, `drpt_...` |
+| 실패 UI | timeout/500/invalid schema는 client fallback warning/retry로 처리하고 report context를 유지 |
+
 ## 3. 예정 Endpoint Draft
 
 아래는 현재 코드의 entity/state/mock에서 출발하되, 심층 리서치 결정에 따라 `/api/v1` 공개 API와 `/internal` AI API로 재정렬한 target endpoint다.
@@ -102,6 +112,7 @@ Local dev에서는 `server.ts`가 Express로 `/api/chat`을 Vite middleware보�
 | `POST /api/v1/reports` | creates immutable saved report with route/provider/decision/model/evidence snapshot |
 | `POST /api/v1/decision/chat` | returns structured explanation |
 | Legacy `POST /api/chat` | still returns current response until migration complete |
+| Legacy copy guard | no raw id/enum, no chatbot greeting, no emoji prefix |
 
 ## 7. Idempotency / Lock Policy
 
@@ -129,6 +140,6 @@ BigQuery/PubSub 적재 실패가 public API success를 되돌리면 안 된다. 
 
 | 구분 | 표시 |
 |---|---|
-| 현재 코드와 동기화됨 | `POST /api/chat`, local Express/Vercel Function split |
+| 현재 코드와 동기화됨 | `POST /api/chat`, local Express/Vercel Function split, AI copy guard, client fallback/retry QA |
 | 계획성 | station/route/report/preferences/decision/maps endpoints |
 | 미확정 | auth, pagination/filter detail, endpoint별 error code registry, rate limit |

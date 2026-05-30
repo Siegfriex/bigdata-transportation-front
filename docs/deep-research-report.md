@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-현재 탈수있나는 frontend draft 단계다. FE는 `activeTab` 기반 내부 라우팅(`map/archive/settings`), 지도 위 AI chat overlay, `localStorage` 기반 `talsu.preferences.v1`, `talsu.savedReports.v1`, `talsu.onboarding.v1`를 사용한다. 실제 구현 엔드포인트는 `POST /api/chat`뿐이며, DB는 아직 없다. 따라서 지금의 핵심 과제는 UI 재설계가 아니라 계약, 식별자, 트랜잭션 경계, 저장 모델의 조기 고정이다.
+현재 탈수있나는 frontend draft 단계다. FE는 `activeTab` 기반 내부 라우팅(`map/archive/settings`), full strategic report, 지도 위 AI chat overlay, `localStorage` 기반 `talsu.preferences.v1`, `talsu.savedReports.v1`를 사용한다. `talsu.onboarding.v1`는 key만 선언되어 있고 현재 온보딩 완료 상태에는 아직 연결되지 않았다. 실제 구현 엔드포인트는 `POST /api/chat`뿐이며, DB는 아직 없다. 따라서 지금의 핵심 과제는 UI 재설계가 아니라 계약, 식별자, 트랜잭션 경계, 저장 모델의 조기 고정이다.
 
 최종 권고는 다음과 같다.
 
@@ -30,7 +30,7 @@
 |---|---|
 | GCP project id | `bigdata-transportation` |
 | GCP project number | `583933438413` |
-| Frontend URL | `https://bigdata-transportation-front.vercel.app/` |
+| Frontend URL | 목표 후보: `https://bigdata-transportation-front.vercel.app/`. live URL은 Vercel 배포/health smoke 통과 후 확정 |
 | Public health path | `GET /api/v1/health` |
 | Internal Spring health | `/actuator/health`, `/actuator/health/liveness`, `/actuator/health/readiness` |
 | Internal FastAPI health | `GET /internal/health` |
@@ -240,7 +240,7 @@ Target infra:
 
 | Component | Target |
 |---|---|
-| FE | Vercel, `https://bigdata-transportation-front.vercel.app/` |
+| FE | Vercel. 목표 URL 후보는 `https://bigdata-transportation-front.vercel.app/`, live 여부는 smoke로 확정 |
 | Core API | Spring Boot on Cloud Run |
 | AI API | FastAPI on private/internal Cloud Run |
 | DB | Cloud SQL for MySQL 8.0 |

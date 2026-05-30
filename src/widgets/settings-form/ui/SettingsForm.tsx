@@ -27,7 +27,7 @@ export function SettingsForm({
   onShowToast,
 }: SettingsFormProps) {
   return (
-    <div className="absolute inset-0 z-10 flex-1 space-y-4 overflow-y-auto bg-black/80 p-4 backdrop-blur-3xl pointer-events-auto">
+    <div className="z-layer-page absolute inset-0 flex-1 space-y-4 overflow-y-auto bg-black/80 p-4 backdrop-blur-3xl pointer-events-auto">
       <div className="space-y-2.5">
         <span className="type-label block text-white/50">루틴 지점 입력</span>
         <div className="surface-card stack-md p-3.5">

@@ -48,6 +48,46 @@
 | 경로 재탐색 중 | 기존 결과 유지 + 상단 slim progress |
 | 저장/제출 | spinner 또는 progress + 명확한 처리 문구 |
 
+## 전략리포트 상태 정책
+
+- 경로 후보 카드 선택의 primary result는 compact modal이 아니라 full strategic report다.
+- 첫 화면에는 마감도착, 탑승가능성, 추천칸/생존칸, 복구전략 summary가 보여야 한다.
+- `근거보기`는 상세 근거를 expand/collapse하고 `aria-expanded`와 시각 상태가 함께 바뀌어야 한다.
+- 저장/AI CTA는 `report-action-bar` sticky 영역에 있고, bottom nav와 겹치지 않아야 한다.
+- report CTA와 icon-only close/send control은 모바일 기준 최소 44px hit target을 가진다.
+- 저장은 persistence action이다. 성공/중복/실패 toast만 허용하고 강제 navigation이나 새 report modal open을 하지 않는다.
+
+## AI Overlay 상태 정책
+
+- AI 근거 질문은 general chatbot home이 아니라 현재 전략의 설명 layer를 연다.
+- overlay copy에는 raw id/enum(`plan_a`, `boarding`, `srpt_...`)을 노출하지 않고 사람용 label을 사용한다.
+- 지연 상태는 말풍선 skeleton과 상태 문구를 표시한다.
+- timeout/500/invalid schema는 fallback warning과 retry CTA를 표시하되 기존 strategic report context를 변경하지 않는다.
+- repeated click은 overlay/message/request를 중복 생성하지 않는다.
+- close는 `ai-close-button`으로 식별 가능하고, 닫은 뒤 `report_detail` 또는 이전 `default` return layer로 복귀한다.
+
+## 저장 Snapshot 정책
+
+- 기록의 카드 primary action과 `지도 이동` action은 모두 saved snapshot context를 유지한다.
+- 복원 상태에서는 `snapshot-badge` 또는 저장 시점 label을 표시한다.
+- 복원 후 새 route card를 선택하면 live preview로 전환되고 기존 saved snapshot과 섞이지 않아야 한다.
+- 삭제되거나 손상된 saved report는 raw error/white screen이 아니라 not found 또는 목록 refresh 상태로 처리한다.
+
+## Layer / Z-Index 정책
+
+현재 z-index는 CSS custom property와 `z-layer-*` utility로 관리한다.
+
+| Layer | Token |
+|---|---|
+| map | `--z-map`, `z-layer-map` |
+| content/page | `--z-content`, `--z-page`, `z-layer-content`, `z-layer-page` |
+| top/bottom navigation | `--z-top-bar`, `--z-bottom-nav`, `z-layer-top-bar`, `z-layer-bottom-nav` |
+| sheet/action bar | `--z-sheet`, `--z-sheet-action`, `z-layer-sheet`, `z-layer-sheet-action` |
+| AI overlay | `--z-ai-overlay`, `z-layer-ai-overlay` |
+| onboarding/toast | `--z-onboarding`, `--z-toast`, `z-layer-onboarding`, `z-layer-toast` |
+
+임의 `z-[...]` 증가는 회귀 원인이 되기 쉬우므로 새 overlay는 token 추가 후 사용한다.
+
 ## 시스템 상태 라벨
 
 - live data unavailable

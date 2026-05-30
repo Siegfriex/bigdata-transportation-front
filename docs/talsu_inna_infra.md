@@ -47,7 +47,7 @@ Vercel Function은 POST 외 method에 405를 반환하고 `Cache-Control: no-sto
 | function | `api/chat.ts`, `maxDuration: 300` |
 | rewrites | non-API route to `/index.html` |
 
-현재 배포 시도 관련 주의: 이전 Vercel deploy는 로컬 lint/build/API smoke가 아니라 Vercel 계정 billing/scope 문제로 막혔다. 최종 SSOT의 frontend URL은 `https://bigdata-transportation-front.vercel.app/`이며, 배포 health는 별도 smoke로 검증한다.
+현재 배포 시도 관련 주의: 이전 Vercel deploy는 로컬 lint/build/API smoke가 아니라 Vercel 계정 billing/scope 문제로 막혔다. `https://bigdata-transportation-front.vercel.app/`는 목표 frontend URL 후보로만 다루며, 실제 운영 URL은 Vercel project 생성/배포/health smoke가 성공한 뒤 확정한다.
 
 ## 5. Local Dev / Smoke
 
@@ -55,6 +55,7 @@ Vercel Function은 POST 외 method에 405를 반환하고 `Cache-Control: no-sto
 |---|---|
 | type check | `npm run lint` |
 | full build | `npm run build` |
+| e2e regression | `npm run e2e` |
 | dev server | `npm run dev` |
 | chat smoke | `POST http://127.0.0.1:3000/api/chat` |
 
@@ -75,7 +76,7 @@ Google Maps 도입 시 browser key와 server key를 분리한다. browser key는
 
 | 영역 | 결정 |
 |---|---|
-| Front | Vercel static frontend. SSOT frontend URL은 `https://bigdata-transportation-front.vercel.app/` |
+| Front | Vercel static frontend. 목표 URL 후보는 `https://bigdata-transportation-front.vercel.app/`이며, live 여부는 smoke로 별도 검증 |
 | Core API | Spring Boot Cloud Run service |
 | AI API | FastAPI Cloud Run private/internal service |
 | GCP Project | `bigdata-transportation` (`583933438413`) |
@@ -187,7 +188,10 @@ Google Maps 도입 시 browser key와 server key를 분리한다. browser key는
 | Target | Command shape |
 |---|---|
 | FE build | `npm run build:client` |
+| FE lint/build gate | `npm run lint`, `npm run build` |
+| FE v2/v3 regression | `npm run e2e` |
 | Current local API | `POST http://127.0.0.1:3000/api/chat` |
+| Current API copy guard | `/api/chat` 응답에서 raw id/enum, emoji prefix, 챗봇 자기소개 금지 확인 |
 | Spring health | `GET $API_BASE_URL/api/v1/health` |
 | Route preview | `POST $API_BASE_URL/api/v1/route-plans` |
 | Decision preview | `POST $API_BASE_URL/api/v1/decision/route-report` |

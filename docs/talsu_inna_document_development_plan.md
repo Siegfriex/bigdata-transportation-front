@@ -32,6 +32,15 @@
 | `talsu_inna_infra.md` | Vercel/local/target infra | Cloud Run/Cloud SQL/Secret Manager/BigQuery/PubSub/Vertex deploy checklist와 env matrix 추가 |
 | `talsu_inna_ai_modeling_plan.md` | AI modeling 계획 | FastAPI request/response, feature schema, BigQuery schema, model promotion gate 추가 |
 
+현재 코드 실측으로 추가 반영된 문서 범위:
+
+| 범위 | 반영 기준 |
+|---|---|
+| FSD/IA | `mapDecisionReducer`, narrowed `MapLayerState`, full strategic report, AI return layer |
+| Data/cache | saved report snapshot 필드, `usePersistentState` fallback, AI raw id 금지 |
+| QA | v2 happy path + v3 deep QA, 54 e2e cases, visual polish screenshot matrix |
+| Infra | Vercel URL은 목표 후보로만 표기하고 live URL은 smoke 성공 후 확정 |
+
 ## 3. Phase Plan
 
 ### Phase D0. 문서 체계 동결
@@ -78,6 +87,21 @@
 - 백엔드 개발자는 어떤 endpoint부터 만들지 안다.
 - QA는 Phase 7 smoke 기준을 문서에서 바로 읽을 수 있다.
 
+### Phase D2.1. Frontend Measured-Code Sync
+
+목표: v2/v3 QA와 현재 frontend diff를 운영 문서에 반영해 문서가 구현보다 낙후되지 않게 한다.
+
+작업:
+- full strategic report의 entry, summary grid, evidence toggle, sticky action bar를 FSD/IA/QA에 반영한다.
+- `MapLayerState`를 `default | report_detail | ai_overlay | ai_peek`로 고정하고 과거 상태명을 제거한다.
+- AI evidence overlay의 context 유지, raw id/enum 금지, skeleton/retry/fallback 정책을 API/QA/interaction 문서에 반영한다.
+- saved report snapshot restore와 snapshot -> live preview 전환 정책을 data/IA/QA 문서에 반영한다.
+- Vercel URL은 smoke 완료 전 확정 live URL로 쓰지 않도록 infra 문구를 정정한다.
+
+완료 기준:
+- `docs/` 운영 문서가 현재 frontend code/test locator와 같은 상태명을 사용한다.
+- v3 e2e의 P0/P1 항목이 QA 문서에서 추적 가능하다.
+
 ### Phase D3. OpenAPI/Schema Sync
 
 목표: 문서와 실제 OpenAPI/schema drift를 줄인다.
@@ -115,7 +139,7 @@
 | DB | `route_plans`, `route_plan_options`, `decision_reports`, `saved_reports`를 분리한다. `saved_reports`는 immutable snapshot archive다. |
 | AI | LLM에게 판단을 맡기지 않는다. 모델/룰이 decision을 만들고 LLM은 설명한다. |
 | FE | React Router 도입보다 onboarding persistence와 API boundary 정리가 먼저다. |
-| Infra | frontend URL은 SSOT상 `https://bigdata-transportation-front.vercel.app/`로 기록하되, 실제 배포 health는 smoke check로 별도 검증한다. |
+| Infra | `https://bigdata-transportation-front.vercel.app/`는 목표 URL 후보로만 기록한다. 실제 live URL은 배포와 health smoke가 통과한 뒤 확정한다. |
 | Analytics | BigQuery는 ML/분석 저장소이지 OLTP source of truth가 아니다. |
 | Feedback | `requestId`, `routeOptionId`, served model/feature/calibration version을 빼면 label reconstruction이 불가능하므로 API 초기에 고정한다. |
 | Docs | 문서 삭제는 바로 하지 말고 archive/reference 이동 후 1회 리뷰한다. metadata 파일만 즉시 삭제 가능하다. |

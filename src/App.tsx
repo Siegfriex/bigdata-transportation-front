@@ -20,7 +20,7 @@ export default function App() {
       <div className="app-device apple-glass relative flex flex-col overflow-hidden">
         
         {/* Mock notch / camera indicator inside device */}
-        <div className="hidden md:flex absolute top-0 left-1/2 -translate-x-1/2 w-[140px] h-7 bg-black rounded-b-3xl z-40 items-center justify-center shadow-lg">
+        <div className="z-layer-device-chrome hidden md:flex absolute top-0 left-1/2 -translate-x-1/2 w-[140px] h-7 bg-black rounded-b-3xl items-center justify-center shadow-lg">
           <div className="w-3 h-3 rounded-full bg-[#111111] border border-[#222] mr-3 shadow-inner" />
           <div className="w-12 h-1.5 bg-[#444] rounded-full" />
         </div>
@@ -28,14 +28,14 @@ export default function App() {
         {app.showOnboarding && <OnboardingOverlay {...app.onboardingOverlayProps} />}
 
         {/* MAP LAYER (Z0) - Always Active & Full Screen */}
-        <div className="absolute inset-0 z-0 pointer-events-auto">
+        <div className="z-layer-map absolute inset-0 pointer-events-auto">
           <InteractiveMap {...app.transitMapProps} />
         </div>
 
         <TopAppBar {...app.topAppBarProps} />
 
         {/* Primary Screen Body Panel */}
-        <main className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden min-h-0 relative z-10 pt-[52px] pointer-events-none pb-[64px]">
+        <main className="z-layer-content flex-1 flex flex-col overflow-y-auto overflow-x-hidden min-h-0 relative pt-[52px] pointer-events-none pb-[64px]">
           <AppRouter {...app.routerProps} />
         </main>
 

@@ -14,7 +14,7 @@ const tabs: Array<{ id: TabId; label: string; icon: typeof Map }> = [
 
 export function BottomNavigation({ activeTab, onTabChange }: BottomNavigationProps) {
   return (
-    <nav data-testid="bottom-navigation" className="absolute inset-x-0 bottom-0 z-30 grid h-[64px] shrink-0 select-none grid-cols-3 border-t border-white/10 bg-black/45 p-1 backdrop-blur-2xl pointer-events-auto md:rounded-b-[36px]">
+    <nav data-testid="bottom-navigation" className="z-layer-bottom-nav absolute inset-x-0 bottom-0 grid h-[64px] shrink-0 select-none grid-cols-3 border-t border-white/10 bg-black/45 p-1 backdrop-blur-2xl pointer-events-auto md:rounded-b-[36px]">
       {tabs.map((tab) => {
         const Icon = tab.icon;
         const isActive = activeTab === tab.id;

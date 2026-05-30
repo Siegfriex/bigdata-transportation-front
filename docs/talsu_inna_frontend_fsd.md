@@ -14,8 +14,8 @@
 | 하단 탭 | 구현됨. `map`, `archive`, `settings` 3개 | `src/shared/config/routes.ts`, `src/widgets/bottom-navigation` |
 | 지도 | SVG mock map, 역 선택, 레이어 토글, 줌/팬 | `src/widgets/transit-map-panel` |
 | 경로 후보 | mock planner 기반 2~3개 후보 생성 | `src/entities/route-plan/mock/routePlans.ts`, `src/features/generate-route-plan` |
-| 리포트 | boarding/carriage/deadline/recovery 4종 | `src/widgets/report-sheet` |
-| AI chat | 하단 탭이 아니라 지도 컨텍스트 overlay | `src/widgets/ai-chat-panel`, `src/features/send-ai-chat` |
+| 리포트 | full strategic report 중심. 4대 summary metric, decision banner, evidence toggle, 전략 후보 carousel, sticky action bar | `src/widgets/report-sheet` |
+| AI chat | 하단 탭이 아니라 현재 전략 근거 설명 overlay. raw id/enum 노출 금지, skeleton/retry/fallback | `src/widgets/ai-chat-panel`, `src/features/send-ai-chat` |
 | 기록 | savedReports localStorage 기반 | `src/entities/report/model/store.ts` |
 | 설정 | preferences localStorage 기반 | `src/entities/user-preferences/model/store.ts` |
 | 서버 API | `POST /api/chat`만 구현 | `server.ts`, `api/chat.ts` |
@@ -40,12 +40,18 @@
 | `showOnboarding`, `onboardingStep`, `user` | `useAppController` | memory |
 | `activeTab` | `useAppController`, `AppRouter` | memory |
 | `mapLayer` | `useAppController`, `AiChatLayer`, `MapWorkspace` | memory |
+| `aiReturnLayer` | `mapDecisionReducer` | memory |
 | `startStation`, `endStation`, `plans`, `selectedPlan` | `useRoutePlanner` | memory |
 | `selectedReportType`, `deadlineTime`, `activeCarNo` | `useRoutePlanner` | memory |
+| `restoredReport` | `useAppController` | memory |
 | `preferences` | `useUserPreferencesStore` | `localStorage` |
 | `savedReports` | `useSavedReportsStore` | `localStorage` |
 | `chatMessages`, `chatInput`, `chatbotLoading` | `useAiChatController` | memory |
 | `visibleLayers` | `useAppController` | memory |
+
+`MapLayerState`의 현재 값은 `default | report_detail | ai_overlay | ai_peek`다. `ai_result`, `report_mini`, `report_summary`, `evidence`, `map_peek`는 현재 코드 기준 상태가 아니다.
+
+`mapDecisionReducer`는 탭 전환, report open/close, AI evidence open/close를 한 곳에서 처리한다. AI evidence overlay는 `aiReturnLayer`를 유지해 닫을 때 `report_detail` 또는 `default`로 되돌아간다.
 
 ## 4. Mock/API 전환 지점
 
@@ -66,6 +72,7 @@
 | API | `POST /api/chat` 200 fallback/Gemini 응답, invalid body 400 |
 | UI smoke | 온보딩, 탭 전환, 역 변경, 레이어 토글, 프리셋, 리포트 탭, 저장, 아카이브 복원, 설정 저장, AI overlay |
 | 보안 | AI markdown은 `renderSafeMarkdown` 경유. `dangerouslySetInnerHTML` 사용 금지 |
+| v2/v3 QA | `npm run e2e` 기준 full report happy path와 AI failure/raw id/snapshot/접근성 deep QA 통과 |
 
 ## 5-1. Target Feature Acceptance Criteria
 
@@ -86,19 +93,33 @@
 | Station Search | query, selected station | Spring station search -> FE adapter | station option list | empty result, local station mock fallback |
 | Route Preview | origin, destination, deadline, preferences | Spring route orchestration and route option persistence | routePlanId, route candidates | dynamic mock route fallback |
 | Decision Preview | routePlanId, selectedOptionId, report type, context | Spring -> FastAPI decision then decision report persistence | decisionReportId, probabilities, evidence, report recommendation | public baseline/mock fallback |
-| Decision Chat | user message, current route/report context | Spring -> FastAPI/LLM explanation | structured chat response | current `/api/chat` heuristic/client fallback |
+| Decision Chat | user message, current route/report/snapshot context | Spring -> FastAPI/LLM explanation | structured chat response with human labels | current `/api/chat` heuristic/client fallback |
 | Report Save | selected preview + decision | Spring validates and persists snapshot | saved report id/detail | duplicate save warning |
 | Archive Restore | saved report id | fetch snapshot and hydrate page state | map/report state restored | report not found -> archive refresh |
 | Preference Edit | form values | local update, P1 server sync | stored preferences | localStorage fallback |
 
+## 5-3. Current Strategic Report UX Contract
+
+| 영역 | 현재 기준 |
+|---|---|
+| Entry | 경로 후보/프리셋 카드 선택 시 full strategic report가 열린다. |
+| Summary | 첫 화면에 마감도착, 탑승가능성, 추천칸/생존칸, 복구전략 4대 metric이 보인다. |
+| Decision banner | `decision-banner`가 현재 경로 판단과 예상 도착을 먼저 요약한다. |
+| Evidence | `evidence-toggle-button`이 `evidence-detail-section`을 expand/collapse하고 evidence item label/value/detail을 표시한다. |
+| Strategy carousel | pointer drag/click threshold와 boundary swipe를 e2e로 검증한다. |
+| Action bar | `report-action-bar`는 sticky/safe-area/44px target으로 저장과 AI 질문을 유지한다. |
+| AI evidence | `ai-chat-overlay`는 현재 전략 또는 saved snapshot context를 설명하고 raw id/enum을 숨긴다. |
+| Archive restore | `selectedPlanSnapshot`, `selectedStrategyId`, `snapshotLabel`을 사용해 저장 당시 상태를 hydrate한다. |
+
 ## 6. 다음 프론트 작업 순서
 
 1. Phase 7 QA: lint/build/dev/API smoke와 주요 UI smoke를 반복 가능하게 정리한다.
-2. `showOnboarding`은 이미 선언된 `STORAGE_KEYS.onboarding`을 실제로 사용해 최초 진입 UX를 persistence한다.
-3. widget 내부 하드코딩 mock을 entity/feature fixture로 이동한다.
-4. FE network target은 Spring Boot Core API로 고정한다. Browser에서 FastAPI 또는 외부 교통 provider를 직접 호출하지 않는다.
-5. 실제 API 전환 전 `talsu_inna_api_contract.md`, `talsu_inna_api_endpoints.md`의 `/api/v1` request/response를 백엔드와 합의한다.
-6. React Query/Zod 도입 여부를 결정한 뒤 query key와 runtime schema 위치를 확장한다.
+2. v3 deep QA를 CI gate 후보로 올린다. 현재 로컬 기준은 `npm run e2e` 60개 통과다.
+3. `showOnboarding`은 이미 선언된 `STORAGE_KEYS.onboarding`을 실제로 사용해 최초 진입 UX를 persistence한다.
+4. widget 내부 하드코딩 mock을 entity/feature fixture로 이동한다.
+5. FE network target은 Spring Boot Core API로 고정한다. Browser에서 FastAPI 또는 외부 교통 provider를 직접 호출하지 않는다.
+6. 실제 API 전환 전 `talsu_inna_api_contract.md`, `talsu_inna_api_endpoints.md`의 `/api/v1` request/response를 백엔드와 합의한다.
+7. React Query/Zod 도입 여부를 결정한 뒤 query key와 runtime schema 위치를 확장한다.
 
 ## 6-1. 심층 리서치 반영 결정
 
@@ -114,6 +135,6 @@
 
 | 구분 | 표시 |
 |---|---|
-| 현재 코드와 동기화됨 | FSD 레이어, 현재 기능 범위, 상태 소유자, `/api/chat`, localStorage store |
+| 현재 코드와 동기화됨 | FSD 레이어, 현재 기능 범위, 상태 소유자, narrowed mapLayer, full strategic report, `/api/chat`, localStorage store, v3 QA |
 | 계획성 | 실제 교통 API, URL routing, React Query/Zod, 공통 UI primitive 확대 |
 | 미확정 | 인증 도입 시점, 운영 지도 SDK, 시각 회귀 자동화 |

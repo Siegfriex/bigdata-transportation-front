@@ -11,14 +11,14 @@
 | `STORAGE_KEYS.savedReports` | `talsu.savedReports.v1` | `useSavedReportsStore` |
 | `STORAGE_KEYS.onboarding` | `talsu.onboarding.v1` | 선언됨. 현재 미사용 |
 
-`usePersistentState`는 JSON parse 실패나 storage 접근 실패 시 initial value로 fallback한다. runtime schema 검증은 아직 없다.
+`usePersistentState`는 JSON parse 실패, `null`, initial value와 다른 최상위 shape, storage 접근 실패 시 initial value로 fallback한다. 세부 필드 runtime schema 검증은 아직 없다.
 
 ## 2. Entity Store
 
 | store | 위치 | 초기값 | 지속성 |
 |---|---|---|---|
 | user preferences | `src/entities/user-preferences/model/store.ts` | `getDefaultPreferences()` | localStorage |
-| saved reports | `src/entities/report/model/store.ts` | `getSavedReportsMock()` | localStorage |
+| saved reports | `src/entities/report/model/store.ts` | `[]` | localStorage |
 
 ## 3. 현재 Schema 위치
 
@@ -29,6 +29,8 @@
 | TypeScript entity types | `src/entities/*/model/types.ts` | compile-time view contract |
 
 현재 Zod는 도입되어 있지 않고, `schema.ts`는 수동 validator다.
+
+AI 응답 validator는 `textAnswer` 필수, `suggestedReportType` enum 검증, 선택 필드 타입 검증까지만 수행한다. 사용자 화면 copy 정책은 responder system instruction과 e2e 금지어 검증으로 보강한다.
 
 ## 4. Query Key / Cache 정책
 
@@ -59,6 +61,15 @@
 
 오류 shape는 현재 `{ error: string }`이다. 클라이언트 `HttpError`는 status와 payload를 보존하고, `error` 문자열이 있으면 message로 사용한다.
 
+AI copy는 다음을 사용자 화면에 그대로 노출하지 않아야 한다.
+
+| 금지 범주 | 예 |
+|---|---|
+| raw id | `srpt_...`, `drpt_...`, `rpln_...`, `plan_a`, `strategy_1` |
+| raw enum | `boarding`, `carriage`, `deadline`, `recovery` |
+| 챗봇 홈 copy | `반갑습니다`, `챗봇입니다`, `브리핑 종료` |
+| 과한 표현 | emoji prefix, 제품 홍보성 자기소개 |
+
 ## 7. Markdown Rendering Boundary
 
 AI 응답은 `src/shared/lib/markdown/renderSafeMarkdown.tsx`에서 React node로 렌더링한다. 지원 문법은 제한된 bold, inline code, bullet/numbered list, paragraph/line break다. HTML injection을 허용하지 않고 `dangerouslySetInnerHTML`를 사용하지 않는다.
@@ -69,9 +80,11 @@ AI 응답은 `src/shared/lib/markdown/renderSafeMarkdown.tsx`에서 React node�
 |---|---|
 | `StationNode` | `id`, `name`, `x`, `y`, `type`, `bikesAvailable`, `busesAvailable`, `crowdLevel` |
 | `RoutePlan` | `id`, `name`, `modes`, `eta`, `extraCost`, `risk`, `crowd`, `description`, `timeline`, `confidence` |
-| `SavedReport` | `id`, `date`, `type`, `from`, `to`, `status`, `summary`, `cost` |
+| `SavedReport` | `id`, `date`, `savedAt?`, `type`, `selectedPlanId?`, `selectedPlanSnapshot?`, `selectedStrategyId?`, `routePlanId?`, `decisionReportId?`, `from`, `to`, `status`, `summary`, `cost`, `snapshotLabel?` |
 | `UserPreferences` | `home`, `work`, `crowdSensitivity`, `maxTaxiFee`, `walkLimitMin`, `useBike`, `aiStyle`, `favoriteRoutes` |
 | `ChatMessage` | `id`, `sender`, `text`, `timestamp`, AI suggestion fields |
+
+`SavedReport.selectedPlanSnapshot`은 복원 시 현재 preview가 아니라 저장 당시 route/report snapshot을 우선 hydrate하기 위한 필드다. `savedReportId`는 상태 추적에는 유지하되 AI context summary 같은 사용자 copy에는 raw id로 표시하지 않는다.
 
 ## 9. 확장 계획
 
@@ -144,6 +157,6 @@ If FE does not know a field, it sends null or omits it according to server schem
 
 | 구분 | 표시 |
 |---|---|
-| 현재 코드와 동기화됨 | storage keys, stores, schema 위치, mock 위치, markdown 경계 |
+| 현재 코드와 동기화됨 | storage keys, stores, schema 위치, saved report snapshot 필드, AI copy 금지 정책, markdown 경계 |
 | 계획성 | React Query, Zod, server-state cache, entity adapter, feedback label metadata |
 | 미확정 | persistence migration versioning, FE runtime parser 도입 방식, savedReports schema validation |
