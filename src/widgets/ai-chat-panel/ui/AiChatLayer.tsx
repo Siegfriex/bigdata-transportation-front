@@ -80,7 +80,8 @@ export function AiChatLayer({
                         : "apple-glass border-white/10 text-white/60 hover:text-white hover:border-white/20"
                     }`}
                   >
-                    {plan.name} <span className="text-[#0A84FF] ml-1">{plan.eta}</span>
+                    <span className="block max-w-[160px] truncate">{plan.name}</span>
+                    <span className="text-[#0A84FF] ml-1">{plan.eta}</span>
                   </button>
                 ))}
               </div>
@@ -209,7 +210,7 @@ export function AiChatLayer({
                     <button
                       key={prompt}
                       onClick={() => onSendMessage(prompt)}
-                      className="text-left apple-glass hover:bg-white/10 border border-white/10 p-2 rounded-xl text-[10px] text-white/70 transition-colors truncate block"
+                      className="text-left apple-glass hover:bg-white/10 border border-white/10 p-2 rounded-xl text-[10px] leading-snug text-white/70 transition-colors min-h-[42px] line-clamp-2"
                     >
                       {prompt}
                     </button>
@@ -223,7 +224,7 @@ export function AiChatLayer({
                     value={chatInput}
                     onChange={(event) => onChangeChatInput(event.target.value)}
                     onKeyDown={(event) => event.key === "Enter" && onSendMessage(chatInput)}
-                    className="flex-1 apple-glass border border-white/10 focus:border-[#0A84FF] rounded-xl py-3 px-4 text-xs text-white outline-none font-sans"
+                    className="min-w-0 flex-1 apple-glass border border-white/10 focus:border-[#0A84FF] rounded-xl py-3 px-4 text-xs text-white outline-none font-sans"
                     placeholder="지각 예방에 관해 무엇이든 물어보세요..."
                   />
                   <button

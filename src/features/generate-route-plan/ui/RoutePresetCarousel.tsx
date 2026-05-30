@@ -32,7 +32,7 @@ export function RoutePresetCarousel({
           <button
             key={`${preset.start}-${preset.end}-${preset.report}`}
             onClick={() => onSelectPreset(preset)}
-            className={`shrink-0 w-[180px] snap-center text-left p-3 rounded-[16px] border transition-all flex flex-col justify-between gap-1.5 relative overflow-hidden group ${
+            className={`shrink-0 w-[176px] min-h-[112px] snap-center text-left p-3 rounded-[16px] border transition-all flex flex-col justify-between gap-1.5 relative overflow-hidden group ${
               isActive
                 ? "bg-[#0A84FF]/10 border-[#0A84FF]/50 shadow-[0_4px_16px_rgba(10,132,255,0.2)]"
                 : "apple-glass border-white/10 hover:border-white/20 hover:bg-white/5 active:scale-[0.98]"
@@ -40,10 +40,10 @@ export function RoutePresetCarousel({
           >
             {isActive && <div className="absolute inset-0 bg-gradient-to-br from-[#0A84FF]/10 to-transparent pointer-events-none" />}
             <div className="flex items-start justify-between w-full">
-              <span className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-md flex items-center gap-1 ${isActive ? "text-white bg-[#0A84FF]" : getUrgencyClassName(preset.urgency)}`}>
+              <span className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-md flex items-center gap-1 whitespace-nowrap ${isActive ? "text-white bg-[#0A84FF]" : getUrgencyClassName(preset.urgency)}`}>
                 {preset.tag}
               </span>
-              <span className={`text-[10px] font-sans font-bold flex items-center gap-1 ${isActive ? "text-[#0A84FF]" : "text-white/50"}`}>
+              <span className={`text-[10px] font-sans font-bold flex items-center gap-1 min-w-0 ${isActive ? "text-[#0A84FF]" : "text-white/50"}`}>
                 {preset.start.replace("역", "")} <span className="opacity-50">→</span> {preset.end.replace("역", "")}
               </span>
             </div>

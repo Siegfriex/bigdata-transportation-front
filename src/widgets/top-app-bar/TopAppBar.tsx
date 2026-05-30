@@ -27,7 +27,7 @@ export function TopAppBar({ userName, showReset, onReset }: TopAppBarProps) {
             onClick={onReset}
             className="text-[9px] font-mono text-white/50 border border-transparent hover:border-white/10 px-1.5 py-0.5 rounded transition-all"
           >
-            RESET
+            초기화
           </button>
         )}
       </div>

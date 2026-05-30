@@ -11,17 +11,17 @@ export function ReportActionBar({ onSaveReport, onAskAiBriefing }: ReportActionB
       <button
         id="save-report-action"
         onClick={onSaveReport}
-        className="py-2.5 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
+        className="py-2.5 bg-[#0A84FF] text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all active:scale-95"
       >
         <Bookmark className="w-3.5 h-3.5" />
         <span>보관함 저장</span>
       </button>
       <button
         onClick={onAskAiBriefing}
-        className="py-2.5 bg-[#0A84FF] text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all active:scale-95"
+        className="py-2.5 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
       >
         <Sparkles className="w-3.5 h-3.5" />
-        <span>AI 원인 브리핑</span>
+        <span>AI 요약</span>
       </button>
     </div>
   );

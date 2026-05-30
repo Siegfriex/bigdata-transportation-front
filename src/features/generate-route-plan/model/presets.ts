@@ -18,7 +18,7 @@ export const routePresets: RoutePreset[] = [
     start: "염창역",
     end: "여의도역",
     report: "carriage",
-    tag: "🔴 혼잡 특보",
+    tag: "혼잡 높음",
     urgency: "high",
   },
   {
@@ -27,16 +27,16 @@ export const routePresets: RoutePreset[] = [
     start: "사당역",
     end: "강남역",
     report: "boarding",
-    tag: "🟠 만차 임박",
+    tag: "만차 임박",
     urgency: "warn",
   },
   {
-    title: "막차 탈출 플랜",
+    title: "심야 귀가 대안",
     summary: "택시 할증구간 진입 전",
     start: "홍대입구역",
     end: "남양주시",
     report: "recovery",
-    tag: "🟡 심야 대안",
+    tag: "심야 대안",
     urgency: "medium",
   },
 ];

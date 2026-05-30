@@ -1,4 +1,4 @@
-import { Plus, Search, Sparkles } from "lucide-react";
+import { ClipboardList, Plus, Search, Sparkles } from "lucide-react";
 import type { ReportType } from "../../../entities/report";
 import type { CarDetail, RoutePlan } from "../../../entities/route-plan";
 import { RoutePresetCarousel, type RoutePreset } from "../../../features/generate-route-plan";
@@ -62,15 +62,39 @@ export function MapWorkspace({
       />
 
       {mapLayer === "default" && (
-        <div
-          className="apple-glass rounded-2xl border border-white/10 p-3 shadow-md relative pointer-events-auto flex items-center justify-between cursor-pointer active:scale-[0.98] transition-transform"
-          onClick={() => onSetMapLayer("ai_overlay")}
-        >
-          <div className="flex items-center gap-2">
-            <Search className="w-5 h-5 text-white/50" />
-            <span className="text-white/50 font-medium text-sm">어디까지 가나요? (AI에게 묻기)</span>
+        <div className="space-y-2 pointer-events-auto">
+          <div className="apple-glass rounded-2xl border border-white/10 p-3 shadow-md">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <span className="text-[10px] font-mono text-white/50 uppercase tracking-wider block">현재 경로</span>
+                <strong className="text-sm text-white block truncate">{startStation} → {endStation}</strong>
+                <span className="text-[11px] text-white/60 block truncate">
+                  {selectedPlan ? `${selectedPlan.name} · ${selectedPlan.eta} 도착` : "경로 후보를 계산 중입니다."}
+                </span>
+              </div>
+              <span className="text-[10px] bg-[#0A84FF]/10 text-[#0A84FF] px-2 py-1 rounded-lg font-mono shrink-0">
+                {deadlineTime} 전
+              </span>
+            </div>
+            <div className="grid grid-cols-2 gap-2 mt-3">
+              <button
+                data-testid="open-report-detail"
+                onClick={() => onSetMapLayer("report_detail")}
+                className="py-2.5 bg-[#0A84FF] text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-transform active:scale-[0.98]"
+              >
+                <ClipboardList className="w-3.5 h-3.5" />
+                <span>리포트 보기</span>
+              </button>
+              <button
+                data-testid="open-ai-chat"
+                onClick={() => onSetMapLayer("ai_overlay")}
+                className="py-2.5 apple-glass-light border border-white/15 text-white/80 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors hover:text-white"
+              >
+                <Search className="w-3.5 h-3.5" />
+                <span>AI 질문</span>
+              </button>
+            </div>
           </div>
-          <Sparkles className="w-5 h-5 text-[#0A84FF]" />
         </div>
       )}
 

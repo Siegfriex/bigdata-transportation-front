@@ -151,11 +151,11 @@ export function ArchiveCalendar({
 
               <p className="text-xs font-bold text-white">{report.summary}</p>
 
-              <div className="flex justify-between items-center text-[10px] font-mono text-white/50 border-t border-white/15 pt-2">
-                <span>출발-도착: {report.from} ↔ {report.to}</span>
+              <div className="flex justify-between items-center gap-2 text-[10px] font-mono text-white/50 border-t border-white/15 pt-2">
+                <span className="min-w-0 truncate">출발-도착: {report.from} ↔ {report.to}</span>
                 <button
                   onClick={() => onRestoreReport(report)}
-                  className="text-[#0A84FF] flex items-center gap-1 hover:underline"
+                  className="text-[#0A84FF] flex items-center gap-1 hover:underline shrink-0"
                 >
                   <span>지도 이동</span>
                   <ChevronRight className="w-3 h-3" />

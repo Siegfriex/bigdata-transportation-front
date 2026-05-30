@@ -70,12 +70,12 @@ export function SettingsForm({
         <span className="text-[10px] font-mono text-white/50 uppercase tracking-wider block">세부 이동 조건</span>
         <div className="apple-glass border border-white/10 rounded-2xl overflow-hidden divide-y divide-[#25282B]">
           <div className="p-3">
-            <label className="flex justify-between items-center text-xs text-white">
+            <label className="flex justify-between items-center gap-3 text-xs text-white">
               <span>택시 선탑승 최대 요금 상한</span>
               <select
                 value={preferences.maxTaxiFee}
                 onChange={(event) => onChangePreferences((prev) => ({ ...prev, maxTaxiFee: Number(event.target.value) }))}
-                className="apple-glass-light text-[#0A84FF] text-[11px] font-mono px-2 py-1 outline-none rounded border border-white/10"
+                className="max-w-[136px] apple-glass-light text-[#0A84FF] text-[11px] font-mono px-2 py-1 outline-none rounded border border-white/10"
               >
                 {taxiFeeOptions.map((fee) => (
                   <option key={fee} value={fee}>{fee === 0 ? "0원 (이용 안함)" : fee === 100000 ? "제한 없음" : `${fee.toLocaleString()}원`}</option>
@@ -84,12 +84,12 @@ export function SettingsForm({
             </label>
           </div>
           <div className="p-3">
-            <label className="flex justify-between items-center text-xs text-white">
+            <label className="flex justify-between items-center gap-3 text-xs text-white">
               <span>환승 시 도보 허용 시간</span>
               <select
                 value={preferences.walkLimitMin}
                 onChange={(event) => onChangePreferences((prev) => ({ ...prev, walkLimitMin: Number(event.target.value) }))}
-                className="apple-glass-light text-[#0A84FF] text-[11px] font-mono px-2 py-1 outline-none rounded border border-white/10"
+                className="max-w-[136px] apple-glass-light text-[#0A84FF] text-[11px] font-mono px-2 py-1 outline-none rounded border border-white/10"
               >
                 {walkLimitOptions.map((minutes) => (
                   <option key={minutes} value={minutes}>{minutes}분 이하</option>
@@ -98,7 +98,7 @@ export function SettingsForm({
             </label>
           </div>
           <div className="p-3">
-            <label className="flex justify-between items-center text-xs text-white">
+            <label className="flex justify-between items-center gap-3 text-xs text-white">
               <span>혼잡 회피 민감도</span>
               <select
                 value={preferences.crowdSensitivity}
@@ -107,7 +107,7 @@ export function SettingsForm({
                     onChangePreferences((prev) => ({ ...prev, crowdSensitivity: event.target.value }));
                   }
                 }}
-                className="apple-glass-light text-[#0A84FF] text-[11px] px-2 py-1 outline-none rounded border border-white/10"
+                className="max-w-[136px] apple-glass-light text-[#0A84FF] text-[11px] px-2 py-1 outline-none rounded border border-white/10"
               >
                 <option value="low">낮음 (경로 우선)</option>
                 <option value="normal">보통</option>

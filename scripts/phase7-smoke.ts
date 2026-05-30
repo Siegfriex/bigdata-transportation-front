@@ -33,6 +33,10 @@ function assertAppHostBoundary() {
   assert(lineCount <= 150, `src/App.tsx should stay under 150 lines, found ${lineCount}`);
   assert(appSource.includes("<AppRouter {...app.routerProps} />"), "App.tsx should host AppRouter");
   assert(!appSource.includes("activeTab ==="), "App.tsx should not branch on activeTab directly");
+
+  const mapWorkspaceSource = readRelative("src/widgets/map-workspace/ui/MapWorkspace.tsx");
+  assert(mapWorkspaceSource.includes('data-testid="open-report-detail"'), "default map screen should expose report entry CTA");
+  assert(mapWorkspaceSource.includes('data-testid="open-ai-chat"'), "default map screen should expose AI chat CTA");
 }
 
 function assertOnboardingPersistenceBoundary() {
