@@ -415,6 +415,7 @@
 | F5 | 추천 질문, 직접 입력, 서버 fallback, 로컬 fallback |
 | F6 | 저장 목록, 날짜별 표시, 모두 지우기, 지도 이동 |
 | F7 | 루틴 동기화, 택시비/도보/혼잡/따릉이/AI 스타일 변경 |
+| Phase 7 smoke | `npm run smoke:phase7` | `App.tsx` host boundary, page composition boundary, route/report contract, AI fallback validation |
 | F8 | `npm run dev`, `/api/chat`, `npm run build` |
 
 ## 15. 부록 링크

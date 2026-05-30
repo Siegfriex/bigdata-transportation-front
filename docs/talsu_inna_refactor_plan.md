@@ -185,7 +185,7 @@
 | 워크트리 | `.gitignore`, `.env.local` 변경은 별도 로컬 변경으로 유지한다. Phase 6 변경과 분리한다. |
 | 병렬 작업 충돌 | `.env.example`, `README.md`, `server.ts`, Vercel 코드 파일은 이미 원격 반영되었고 다음 UI refactor에서는 건드리지 않는다. |
 | 다음 코드 터치 범위 | `src/app/**`, `src/features/*/model`, `src/entities/*/model/store`, `src/widgets/**`, `docs/*` |
-| 검증 | Phase 7에서 `npm run lint`, `npm run build`, dev/API smoke, UI smoke를 반복한다. 1차 hardcoding cleanup 후 `npm run lint`, `npm run build` 통과. |
+| 검증 | Phase 7에서 `npm run lint`, `npm run build`, dev/API smoke, UI smoke를 반복한다. 1차 hardcoding cleanup 후 `npm run lint`, `npm run build` 통과. 2차로 `npm run smoke:phase7`을 추가해 App/page 구조, route/report contract, AI fallback contract를 자동 점검한다. dev server HTTP 200과 `/api/chat` fallback JSON은 curl smoke 통과. `agent-browser` CLI는 현재 PATH에 없어 브라우저 자동 검증은 미수행. |
 
 ## 12. 완료 정의
 
