@@ -140,7 +140,7 @@ npm run lint
 | `GEMINI_MODEL` | 선택 | 기본값 `gemini-2.5-flash` |
 | `APP_URL` | 선택 | 안정적인 canonical URL이 필요할 때만 사용 |
 
-자세한 Vercel Functions/환경 계획은 [docs/talsu_inna_vercel_functions_env.md](docs/talsu_inna_vercel_functions_env.md)를 참고하세요.
+자세한 Vercel Functions/환경 계획은 [docs/talsu_inna_infra.md](docs/talsu_inna_infra.md)를 참고하세요.
 
 ---
 
@@ -169,7 +169,7 @@ Feature-Sliced Design(FSD) 기준으로 점진 분리 중입니다.
 .
 ├── api/
 │   └── chat.ts                         # Vercel Function /api/chat
-├── docs/                               # PRD, FSD, refactor plan, Vercel env docs
+├── docs/                               # 운영 문서, FSD, API/Infra/QA docs
 ├── src/
 │   ├── app/
 │   │   ├── layouts/                    # AppShell 등 앱 레이아웃
@@ -232,12 +232,12 @@ Feature-Sliced Design(FSD) 기준으로 점진 분리 중입니다.
 
 | 문서 | 설명 |
 |---|---|
-| [docs/talsu_inna_fsd_current.md](docs/talsu_inna_fsd_current.md) | 현재 구현 사실 기준 기능 명세 |
-| [docs/talsu_inna_refactor_plan.md](docs/talsu_inna_refactor_plan.md) | 단계별 FSD 리팩토링 실행 계획 |
-| [docs/talsu_inna_architecture_rules.md](docs/talsu_inna_architecture_rules.md) | FSD 레이어/상태/API/하드코딩 규칙 |
-| [docs/talsu_inna_vercel_functions_env.md](docs/talsu_inna_vercel_functions_env.md) | Vercel Functions와 환경 변수 계획 |
-| [docs/talsu_inna_prd.md](docs/talsu_inna_prd.md) | 제품 요구사항 문서 |
-| [docs/talsu_inna_data_policy_mapping_v1.md](docs/talsu_inna_data_policy_mapping_v1.md) | 공공데이터/정책 매핑 |
+| [docs/README.md](docs/README.md) | 운영 문서 인덱스와 archive/reference 사용 원칙 |
+| [docs/talsu_inna_frontend_fsd.md](docs/talsu_inna_frontend_fsd.md) | 현재 프론트 FSD, 기능 범위, QA, API 전환 기준 |
+| [docs/talsu_inna_ia.md](docs/talsu_inna_ia.md) | `map / archive / settings` IA와 지도 기반 AI overlay |
+| [docs/talsu_inna_frontend_data_schema_cache.md](docs/talsu_inna_frontend_data_schema_cache.md) | localStorage, mock, schema, cache, DTO migration map |
+| [docs/talsu_inna_api_contract.md](docs/talsu_inna_api_contract.md) | FE/Spring Boot/FastAPI 계약과 DTO 방향 |
+| [docs/talsu_inna_infra.md](docs/talsu_inna_infra.md) | Vercel/GCP/Google Maps 운영 기준 |
 
 ---
 
@@ -245,7 +245,8 @@ Feature-Sliced Design(FSD) 기준으로 점진 분리 중입니다.
 
 ### 완료 또는 1차 완료
 
-- [x] mock 지도 및 레이어 UI
+- [x] Google Maps JS renderer와 SVG fallback 지도 UI
+- [x] mock station lat/lng 기반 marker, route polyline, layer toggle
 - [x] route-plan/report/station/user-preferences/chat-message entity 타입 분리
 - [x] route preset carousel feature 분리
 - [x] report save rule feature 분리
@@ -276,7 +277,7 @@ Feature-Sliced Design(FSD) 기준으로 점진 분리 중입니다.
 
 - [ ] archive/report/settings 내부 mock 수치와 fixture 위치 정리
 - [ ] 실제 공공데이터 adapter 설계 및 API proxy 추가
-- [ ] 시각 회귀 또는 smoke test 자동화
+- [ ] Google Maps key 유무별 smoke와 시각 회귀를 CI gate로 고정
 - [ ] Vercel Preview `/api/chat` smoke script 추가
 
 ---
@@ -286,11 +287,11 @@ Feature-Sliced Design(FSD) 기준으로 점진 분리 중입니다.
 | 영역 | 제약 |
 |---|---|
 | 공공데이터 | 실제 live API 연동 없음 |
-| 지도 | 실제 지도 SDK/GPS 없음, SVG mock 기반 |
+| 지도 | Google Maps JS renderer는 browser key가 있을 때만 동작. key 없음/로드 실패 시 SVG fallback. GPS와 live transit provider 연동은 없음 |
 | 인증 | 실계정 로그인 없음 |
 | 저장 | 서버 DB 없음, localStorage 기반 |
 | AI 렌더링 | `renderSafeMarkdown` 기반 React node 렌더링으로 HTML 문자열 삽입 제거 |
-| 테스트 | 자동화된 E2E/시각 회귀 없음 |
+| 테스트 | Playwright E2E와 Phase 7 smoke script는 존재. 배포 CI gate 고정은 남은 과제 |
 
 ---
 

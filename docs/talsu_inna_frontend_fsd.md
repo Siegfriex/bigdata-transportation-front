@@ -2,23 +2,24 @@
 
 > 목적: 현재 React 프론트엔드 구현을 기준으로 FSD 레이어, 화면, 상태, mock/API 전환 지점, QA 기준, 다음 작업 순서를 한 문서에서 이어갈 수 있게 고정한다.
 > SSOT: `docs/deep-research-report.md`
-> 기준: 2026-05-30 로컬 코드. `docs/archive/talsu_inna_fsd_current.md`, `docs/archive/talsu_inna_architecture_rules.md`, `docs/archive/talsu_inna_refactor_plan.md`의 살아있는 내용을 통합했다.
+> 기준: 2026-05-31 `qa-policy` 브랜치 로컬 코드. `docs/archive/talsu_inna_fsd_current.md`, `docs/archive/talsu_inna_architecture_rules.md`, `docs/archive/talsu_inna_refactor_plan.md`의 살아있는 내용을 통합했다.
 
 ## 1. 현재 기능 범위
 
-현재 앱은 React 19 + Vite 6 + Tailwind v4 기반 모바일 웹 SPA다. 실제 교통/계정/DB 연동은 없고, `/api/chat`만 서버 경계를 가진다. 지도, 경로, 리포트, 기록, 설정은 frontend mock/entity/localStorage 상태에서 동작한다.
+현재 앱은 React 19 + Vite 6 + Tailwind v4 기반 모바일 웹 SPA다. 실제 교통/계정/DB 연동은 없고, `/api/chat`만 서버 경계를 가진다. 지도는 Google Maps JavaScript API 키가 있으면 Google renderer를 사용하고, 키가 없거나 로드 실패 시 SVG fallback으로 동작한다. 경로, 리포트, 기록, 설정은 frontend mock/entity/localStorage 상태에서 동작한다.
 
 | 기능 | 현재 상태 | 기준 코드 |
 |---|---|---|
 | 앱 셸/온보딩 | 구현됨. 온보딩 완료/비회원 진입은 memory state | `src/App.tsx`, `src/features/complete-onboarding` |
 | 하단 탭 | 구현됨. `map`, `archive`, `settings` 3개 | `src/shared/config/routes.ts`, `src/widgets/bottom-navigation` |
-| 지도 | SVG mock map, 역 선택, 레이어 토글, 줌/팬 | `src/widgets/transit-map-panel` |
+| 지도 | Google Maps JS renderer + SVG fallback. local station lat/lng 기반 marker, route polyline, 역 선택, 레이어 토글, bounds fit | `src/widgets/transit-map-panel` |
 | 경로 후보 | mock planner 기반 2~3개 후보 생성 | `src/entities/route-plan/mock/routePlans.ts`, `src/features/generate-route-plan` |
 | 리포트 | full strategic report 중심. 4대 summary metric, decision banner, evidence toggle, 전략 후보 carousel, sticky action bar | `src/widgets/report-sheet` |
 | AI chat | 하단 탭이 아니라 현재 전략 근거 설명 overlay. raw id/enum 노출 금지, skeleton/retry/fallback | `src/widgets/ai-chat-panel`, `src/features/send-ai-chat` |
 | 기록 | savedReports localStorage 기반 | `src/entities/report/model/store.ts` |
 | 설정 | preferences localStorage 기반 | `src/entities/user-preferences/model/store.ts` |
 | 서버 API | `POST /api/chat`만 구현 | `server.ts`, `api/chat.ts` |
+| 지도 환경변수 | browser key 기반 Google Maps JS 선택 렌더링. 키 없음/로드 실패 시 SVG fallback | `.env.example`, `src/widgets/transit-map-panel/model/googleMapsLoader.ts` |
 
 ## 2. FSD 레이어 구조
 
@@ -31,7 +32,7 @@
 | `entities` | station, route-plan, report, user-preferences, chat-message 타입/mock/store | React page layout |
 | `shared` | http client, storage/query key, markdown renderer, persistent hook, shared UI/config | 제품 도메인 타입 |
 
-현재 `src/App.tsx`는 host 역할이고, 상태 조립은 `src/app/model/useAppController.ts`가 담당한다. `src/app/router/AppRouter.tsx`는 URL router가 아니라 `activeTab` 기반 내부 route boundary다.
+현재 `src/App.tsx`는 host 역할이고, 상태 조립은 `src/app/model/useAppController.ts`가 담당한다. `src/app/router/AppRouter.tsx`는 URL router가 아니라 `activeTab` 기반 내부 route boundary다. `widgets/transit-map-panel`은 public entry에서 `InteractiveMap`을 내보내고, 내부에서 `GoogleTransitMap`과 `SvgTransitMapFallback`을 환경/로드 상태에 따라 선택한다.
 
 ## 3. 현재 화면/상태
 
@@ -48,6 +49,7 @@
 | `savedReports` | `useSavedReportsStore` | `localStorage` |
 | `chatMessages`, `chatInput`, `chatbotLoading` | `useAiChatController` | memory |
 | `visibleLayers` | `useAppController` | memory |
+| `googleMapFailed` | `InteractiveMap` | memory |
 
 `MapLayerState`의 현재 값은 `default | report_detail | ai_overlay | ai_peek`다. `ai_result`, `report_mini`, `report_summary`, `evidence`, `map_peek`는 현재 코드 기준 상태가 아니다.
 
@@ -61,6 +63,8 @@
 | `entities/route-plan/mock/routePlans.ts` | Spring Boot route-plan API + FastAPI decision score | 현재 `RoutePlan` view contract를 먼저 보존 |
 | `entities/report/mock/savedReports.ts` | Spring Boot saved report archive | `SavedReport` UI model은 `saved_reports` immutable snapshot의 card/detail view로 adapter한다. |
 | `features/send-ai-chat/server/chatResponder.ts` heuristic fallback | FastAPI Decision API 또는 LLM orchestration | `/api/chat`은 `/api/v1/decision/chat` 전환 전 legacy alias로만 유지 |
+| `GoogleTransitMap`의 Google Maps JS renderer | Spring Boot map/provider adapter 또는 server-side route geometry | browser key는 Maps JS 렌더링용으로만 사용한다. Places/Routes/Distance 같은 provider API는 FE가 직접 호출하지 않는다. |
+| `SvgTransitMapFallback` | Google Maps 로드 실패/키 미설정 fallback | fallback은 P0 데모 경로로 유지하되, 운영 기준 데이터는 provider/API adapter에서 만든 view model로 통일한다. |
 | widget 내부 리포트 문구/수치 | entity fixture 또는 API evidence | 다음 FE 작업에서 widget 하드코딩 축소 |
 
 ## 5. QA 기준
@@ -70,6 +74,7 @@
 | 구조 | `pages/*/index.tsx`만 유지, page에서 fetch/mock/schema/storage key 직접 선언 금지 |
 | 빌드 | `npm run lint`, `npm run build` 통과 |
 | API | `POST /api/chat` 200 fallback/Gemini 응답, invalid body 400 |
+| 지도 | Google Maps key 없음 또는 load error 시 SVG fallback, key 있음 시 `google-transit-map` 렌더링과 station marker/select/polyline/bounds fit 확인 |
 | UI smoke | 온보딩, 탭 전환, 역 변경, 레이어 토글, 프리셋, 리포트 탭, 저장, 아카이브 복원, 설정 저장, AI overlay |
 | 보안 | AI markdown은 `renderSafeMarkdown` 경유. `dangerouslySetInnerHTML` 사용 금지 |
 | v2/v3 QA | `npm run e2e` 기준 full report happy path와 AI failure/raw id/snapshot/접근성 deep QA 통과 |
@@ -90,7 +95,7 @@
 
 | Feature | Input | Process | Output | Error/Fallback |
 |---|---|---|---|---|
-| Station Search | query, selected station | Spring station search -> FE adapter | station option list | empty result, local station mock fallback |
+| Station Search | query, selected station | Spring station search -> FE adapter. 현재는 local station mock의 name/lat/lng/x/y를 사용 | station option list | empty result, local station mock fallback |
 | Route Preview | origin, destination, deadline, preferences | Spring route orchestration and route option persistence | routePlanId, route candidates | dynamic mock route fallback |
 | Decision Preview | routePlanId, selectedOptionId, report type, context | Spring -> FastAPI decision then decision report persistence | decisionReportId, probabilities, evidence, report recommendation | public baseline/mock fallback |
 | Decision Chat | user message, current route/report/snapshot context | Spring -> FastAPI/LLM explanation | structured chat response with human labels | current `/api/chat` heuristic/client fallback |
@@ -113,13 +118,14 @@
 
 ## 6. 다음 프론트 작업 순서
 
-1. Phase 7 QA: lint/build/dev/API smoke와 주요 UI smoke를 반복 가능하게 정리한다.
-2. v3 deep QA를 CI gate 후보로 올린다. 현재 로컬 기준은 `npm run e2e` 60개 통과다.
-3. `showOnboarding`은 이미 선언된 `STORAGE_KEYS.onboarding`을 실제로 사용해 최초 진입 UX를 persistence한다.
-4. widget 내부 하드코딩 mock을 entity/feature fixture로 이동한다.
-5. FE network target은 Spring Boot Core API로 고정한다. Browser에서 FastAPI 또는 외부 교통 provider를 직접 호출하지 않는다.
-6. 실제 API 전환 전 `talsu_inna_api_contract.md`, `talsu_inna_api_endpoints.md`의 `/api/v1` request/response를 백엔드와 합의한다.
-7. React Query/Zod 도입 여부를 결정한 뒤 query key와 runtime schema 위치를 확장한다.
+1. Phase 7 QA: `npm run lint`, `npm run build`, `npm run smoke:phase7`, `npm run e2e`를 release gate로 고정한다.
+2. Google Maps key 유무별 smoke를 분리한다. key 없음은 SVG fallback, key 있음은 `google-transit-map`과 marker/polyline 상호작용을 검증한다.
+3. `GoogleTransitMap`의 InfoWindow HTML 문자열 생성은 station/provider 데이터가 외부 입력으로 바뀌기 전에 escaping 또는 React-rendered DOM 생성으로 바꾼다.
+4. `showOnboarding`은 이미 선언된 `STORAGE_KEYS.onboarding`을 실제로 사용해 최초 진입 UX를 persistence한다.
+5. widget 내부 하드코딩 mock을 entity/feature fixture로 이동한다.
+6. FE network target은 Spring Boot Core API로 고정한다. Browser에서 FastAPI 또는 외부 교통 provider REST API를 직접 호출하지 않는다.
+7. 실제 API 전환 전 `talsu_inna_api_contract.md`, `talsu_inna_api_endpoints.md`의 `/api/v1` request/response를 백엔드와 합의한다.
+8. React Query/Zod 도입 여부를 결정한 뒤 query key와 runtime schema 위치를 확장한다.
 
 ## 6-1. 심층 리서치 반영 결정
 
@@ -127,6 +133,7 @@
 |---|---|
 | 하단 IA | `map / archive / settings` activeTab 구조를 유지한다. URL router는 deep-link 요구가 생길 때 도입한다. |
 | AI chat | 독립 탭이 아니라 지도 컨텍스트 overlay로 유지한다. |
+| 지도 렌더링 | Google Maps JS는 browser renderer로만 허용한다. 교통 판단/경로 생성/provider REST 호출은 Spring Boot 경계 뒤로 둔다. |
 | 공개 API 호출 | FE는 Spring Boot Core API만 호출한다. FastAPI는 internal Decision API로 숨긴다. |
 | preview/save | route plan과 decision report는 서버 resource지만 archive가 아니다. 저장 버튼을 누른 saved report만 immutable snapshot archive다. |
 | legacy `/api/chat` | `/api/v1/decision/chat` 전환 전까지 임시 alias로만 본다. |
@@ -135,6 +142,6 @@
 
 | 구분 | 표시 |
 |---|---|
-| 현재 코드와 동기화됨 | FSD 레이어, 현재 기능 범위, 상태 소유자, narrowed mapLayer, full strategic report, `/api/chat`, localStorage store, v3 QA |
-| 계획성 | 실제 교통 API, URL routing, React Query/Zod, 공통 UI primitive 확대 |
-| 미확정 | 인증 도입 시점, 운영 지도 SDK, 시각 회귀 자동화 |
+| 현재 코드와 동기화됨 | FSD 레이어, 현재 기능 범위, 상태 소유자, narrowed mapLayer, Google Maps JS + SVG fallback, full strategic report, `/api/chat`, localStorage store, v3 QA |
+| 계획성 | 실제 교통 API/provider adapter, URL routing, React Query/Zod, 공통 UI primitive 확대 |
+| 미확정 | 인증 도입 시점, Google Maps key 운영 정책의 배포 환경별 세부값, 시각 회귀 CI gate |
