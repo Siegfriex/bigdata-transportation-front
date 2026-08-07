@@ -1,2 +1,2 @@
-export { HttpError, HttpTimeoutError, postJson, requestJson } from "./http-client";
-export type { HttpRequestOptions } from "./http-client";
+export { HttpError, request } from './httpClient'
+export type { HttpMethod, HttpRequestOptions, ResponseMode } from './httpClient'

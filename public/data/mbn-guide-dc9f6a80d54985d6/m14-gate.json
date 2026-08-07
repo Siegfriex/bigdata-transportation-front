@@ -1,0 +1,12 @@
+{
+  "releaseId": "mbn-guide-dc9f6a80d54985d6",
+  "validationStatus": "PASS_WITH_WARNINGS",
+  "promotionVerdict": "FRONTEND_READY",
+  "schemaErrors": 0,
+  "duplicateIds": 0,
+  "brokenFK": 0,
+  "invalidCoordinates": 0,
+  "manifestMismatch": 0,
+  "hashMismatch": 0,
+  "secretLeak": 0
+}

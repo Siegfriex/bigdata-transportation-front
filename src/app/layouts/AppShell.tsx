@@ -1,15 +1,16 @@
-import type { ReactNode } from "react";
-import { cn } from "../../shared/lib/cn";
+import type { PropsWithChildren } from 'react'
+import { useI18n } from '../../shared/i18n'
+import { PrimaryNavigation } from '../../widgets/app-chrome'
 
-interface AppShellProps {
-  children: ReactNode;
-  className?: string;
-}
-
-export function AppShell({ children, className }: AppShellProps) {
+export function AppShell({ children }: PropsWithChildren) {
+  const { t } = useI18n()
   return (
-    <div className={cn("min-h-screen bg-black apple-mesh-bg text-[#FFFFFF] font-sans antialiased flex items-center justify-center p-0 md:p-6 lg:p-12 overflow-x-hidden", className)}>
-      {children}
+    <div className="app-shell">
+      <a className="skip-link" href="#main-content">
+        {t('a11y.skipToMain')}
+      </a>
+      <div className="app-shell__content">{children}</div>
+      <PrimaryNavigation />
     </div>
-  );
+  )
 }

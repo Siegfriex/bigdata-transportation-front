@@ -1,0 +1,34 @@
+/* LIVE detail spatial contract: p4yJxHEYlrNiitXrWAwbbK / 130:2174. */
+.live-detail-page { gap: 0; padding-top: 0; }
+.figma-live-detail-page { width: min(100%, var(--layout-mobile-max)); padding-inline: 0; background: #f6f6f6; }
+
+.live-detail { display: grid; gap: 1.25rem; padding-bottom: 1.25rem; }
+.live-detail__stage { position: relative; min-height: min(100dvh, 54.625rem); overflow: hidden; background: #525252; color: #fff; }
+.live-detail .media-frame { min-height: min(100dvh, 54.625rem); border: 0; border-radius: 0; background: #525252; color: #fff; }
+.live-detail .media-frame__content { align-self: center; padding: 2rem; background: transparent; color: #d9d9d9; text-align: center; }
+.live-detail--live .media-frame { box-shadow: none; }
+.live-detail--upcoming .media-frame,
+.live-detail--replay .media-frame,
+.live-detail--ended .media-frame { background: var(--primitive-gray-600); }
+.live-detail--ended .media-frame { opacity: .88; }
+.live-detail__media-note { max-width: 18rem; color: var(--color-text-muted); font-size: .875rem; line-height: 1.5; }
+.live-detail__stage::before, .live-detail__stage::after { position: absolute; z-index: 1; right: 0; left: 0; height: 11.25rem; content: ''; pointer-events: none; }
+.live-detail__stage::before { top: 0; background: linear-gradient(#1a1a1a99, transparent); }
+.live-detail__stage::after { bottom: 0; background: linear-gradient(transparent, #1a1a1acc); }
+.live-detail__stage-top, .live-detail__stage-bottom { position: absolute; z-index: 2; right: 1rem; left: 1rem; display: flex; align-items: center; gap: .5rem; }
+.live-detail__stage-top { top: 1rem; }.live-detail__stage-top p { flex: 1; margin: 0; font-size: .8125rem; font-weight: 800; }.live-detail__stage-top span { border-radius: .25rem; padding: .375rem .5rem; background: #292929; font-size: .625rem; font-weight: 800; }
+.live-detail__close { width: 2.25rem; min-width: 2.25rem; min-height: 2.25rem; border-radius: 50%; padding: 0; color: #fff; font-size: 1.5rem; }.live-detail__stage-bottom { bottom: 1.5rem; justify-content: space-between; }.live-detail__stage-bottom p { max-width: 13rem; margin: 0; color: #e6e6e6; font-size: .6875rem; line-height: 1.4; }.live-detail__stage-bottom .ui-button { border: 0; border-radius: 1.125rem; background: #fff; color: #262626; font-size: .6875rem; }
+
+.live-detail__header { display: grid; gap: .625rem; max-width: 44rem; padding-inline: 1.25rem; }
+.live-detail__header .eyebrow, .live-detail__host, .live-detail__schedule, .live-detail__summary, .live-detail__provenance { margin: 0; }
+.live-detail__header h1 { margin: 0; font-size: clamp(1.35rem, 6vw, 1.75rem); line-height: 1.2; letter-spacing: -.05em; text-wrap: balance; }
+.live-detail__host { font-weight: 750; }
+.live-detail__schedule, .live-detail__provenance { color: var(--color-text-muted); font-size: .8125rem; }
+.live-detail__summary { max-width: 38rem; color: var(--color-text); font-size: clamp(1rem, 2.8vw, 1.1875rem); line-height: 1.65; }
+.live-detail__section { display: grid; gap: .75rem; margin-inline: 1.25rem; padding-top: 1rem; border-top: 1px solid #ebebeb; }
+.live-detail__section > h2 { margin: 0; font-size: 1.125rem; letter-spacing: -.02em; }
+.live-detail__section .ui-button { justify-self: start; }
+
+@media (max-width: 22rem) {
+  .live-detail__header h1 { font-size: clamp(1.85rem, 10vw, 2.25rem); }
+}

@@ -1,0 +1,1 @@
+export { MagazineFeed } from './MagazineFeed'

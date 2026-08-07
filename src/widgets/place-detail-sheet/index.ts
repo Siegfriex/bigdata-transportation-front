@@ -1,0 +1,1 @@
+export { PlaceDetailContent } from './PlaceDetailContent'

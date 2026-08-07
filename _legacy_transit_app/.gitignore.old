@@ -1,0 +1,13 @@
+node_modules/
+build/
+dist/
+coverage/
+.vite/
+.vercel/
+.DS_Store
+*.log
+.env*
+!.env.example
+local.env*
+*:Zone.Identifier
+.env.local*
