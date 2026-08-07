@@ -166,10 +166,10 @@ export function useSavedPageModel(locale: Locale, unavailableDescription: string
   return { ...state, items: state.data?.resolved ?? [] }
 }
 
-export function useSearchPageModel(locale: Locale) {
+export function useSearchPageModel(locale: Locale, initialQuery = '') {
   const repository = useProjectionRepository()
-  const [query, setQuery] = useState('')
-  const [submittedQuery, setSubmittedQuery] = useState('')
+  const [query, setQuery] = useState(initialQuery)
+  const [submittedQuery, setSubmittedQuery] = useState(initialQuery)
   const load = useCallback(() => repository.listPlaces(), [repository])
   const state = useLoadable(load, [load])
   const results = useMemo(() => {

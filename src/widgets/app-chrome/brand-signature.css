@@ -1,0 +1,48 @@
+.brand-signature {
+  display: inline-flex;
+  min-width: 0;
+  min-height: 1.75rem;
+  align-items: center;
+  gap: .5rem;
+  color: var(--color-brand-ink);
+  text-decoration: none;
+}
+
+.brand-signature__logo {
+  display: block;
+  width: clamp(7.25rem, 30vw, 10.5rem);
+  height: auto;
+  max-height: 1.8rem;
+  object-fit: contain;
+  object-position: left center;
+}
+
+.brand-signature__endorsement {
+  flex: 0 0 auto;
+  padding-left: .5rem;
+  border-left: 1px solid var(--color-brand-divider);
+  color: var(--color-text-muted);
+  font-size: .625rem;
+  font-weight: 750;
+  letter-spacing: .08em;
+  line-height: 1;
+}
+
+.brand-signature:hover .brand-signature__logo { filter: saturate(1.12); }
+.brand-signature:active { opacity: .78; }
+
+.brand-signature--overlay {
+  padding: .3125rem .625rem;
+  border: 1px solid color-mix(in srgb, var(--color-brand-divider) 74%, transparent);
+  border-radius: var(--primitive-radius-full);
+  background: color-mix(in srgb, var(--color-surface-raised) 88%, transparent);
+  box-shadow: var(--shadow-surface);
+}
+
+@media (max-width: 22rem) {
+  .brand-signature__endorsement { display: none; }
+}
+
+@media (forced-colors: active) {
+  .brand-signature { border: 1px solid CanvasText; }
+}

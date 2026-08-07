@@ -7,7 +7,8 @@ import { UtilityNavigation } from '../../widgets/app-chrome'
 
 export function SearchPage() {
   const { locale, t } = useI18n()
-  const searchModel = useSearchPageModel(locale)
+  const initialQuery = new URLSearchParams(window.location.search).get('q') ?? ''
+  const searchModel = useSearchPageModel(locale, initialQuery)
   return <main id="main-content" className="product-page">
     <UtilityNavigation />
     <header className="surface-header"><p className="eyebrow">SEARCH</p><h1>{t('search.title')}</h1><p>{t('search.description')}</p></header>

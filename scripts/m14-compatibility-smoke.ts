@@ -8,7 +8,7 @@ const m14GatePath = process.env.MBN_GUIDE_M14_GATE_PATH ?? resolve(process.cwd()
 
 const manifest = JSON.parse(await readFile(resolve(releaseRoot, 'manifest.json'), 'utf8')) as { files: Array<{ path: string }> }
 const files = Object.fromEntries(await Promise.all(manifest.files.map(async ({ path }) => [path, new Uint8Array(await readFile(resolve(releaseRoot, path)))])))
-const result = await createPyM14CompatibilityAdapter({ manifest, m14Gate: JSON.parse(await readFile(m14GatePath, 'utf8')), files })
+const result = await createPyM14CompatibilityAdapter({ manifest, m14Gate: JSON.parse(await readFile(m14GatePath, 'utf8')), files, expectedReleaseId: 'mbn-guide-dc9f6a80d54985d6' })
 
 const places = await result.repository.listPlaces()
 const articles = await result.repository.listArticles()

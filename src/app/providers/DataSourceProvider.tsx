@@ -16,12 +16,12 @@ function configuredMode(): SourceMode {
   return import.meta.env.VITE_MBN_GUIDE_DATA_SOURCE === 'release' ? 'release' : 'fixture'
 }
 
-export async function createProjectionSource(input: { mode: SourceMode; syntheticRelease?: boolean; m14ReleaseBaseUrl?: string; m14GateUrl?: string }): Promise<{ repository: ProjectionRepository; diagnostic: ProjectionDiagnostics }> {
+export async function createProjectionSource(input: { mode: SourceMode; syntheticRelease?: boolean; m14ReleaseBaseUrl?: string; m14GateUrl?: string; m14ReleaseId?: string }): Promise<{ repository: ProjectionRepository; diagnostic: ProjectionDiagnostics }> {
   const mode = input.mode
   if (mode === 'fixture') return { repository: fixtureProjectionAdapter, diagnostic: { mode, source: 'fixture', releaseId: fixtureProjectionAdapter.releaseId, validation: 'COMPATIBLE' } }
-  if (input.m14ReleaseBaseUrl && input.m14GateUrl) {
-    const result = await loadPyM14Release({ releaseBaseUrl: input.m14ReleaseBaseUrl, m14GateUrl: input.m14GateUrl })
-    const composed = createM14CapabilityProjection(result, fixtureProjectionAdapter)
+  if (input.m14ReleaseBaseUrl && input.m14GateUrl && input.m14ReleaseId) {
+    const result = await loadPyM14Release({ releaseBaseUrl: input.m14ReleaseBaseUrl, m14GateUrl: input.m14GateUrl, expectedReleaseId: input.m14ReleaseId })
+    const composed = createM14CapabilityProjection(result)
     return { repository: composed.repository, diagnostic: { mode, source: 'release', releaseId: result.releaseId, validation: 'COMPATIBLE_WITH_WARNINGS', capabilities: composed.capabilities } }
   }
   if (!input.syntheticRelease) throw new Error('RELEASE_DESCRIPTOR_REQUIRED')
@@ -37,6 +37,7 @@ async function bootstrapRepository() {
     syntheticRelease: import.meta.env.DEV && import.meta.env.VITE_MBN_GUIDE_SYNTHETIC_RELEASE === 'true',
     m14ReleaseBaseUrl: import.meta.env.VITE_MBN_GUIDE_M14_RELEASE_BASE_URL,
     m14GateUrl: import.meta.env.VITE_MBN_GUIDE_M14_GATE_URL,
+    m14ReleaseId: import.meta.env.VITE_MBN_GUIDE_M14_RELEASE_ID,
   })
 }
 

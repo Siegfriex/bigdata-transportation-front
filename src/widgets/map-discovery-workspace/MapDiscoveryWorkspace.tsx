@@ -95,7 +95,7 @@ export function MapDiscoveryWorkspace(props: MapDiscoveryWorkspaceProps) {
   const [draftQuery, setDraftQuery] = useState(searchQuery)
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [isSortOpen, setIsSortOpen] = useState(false)
-  const [sortLabel, setSortLabel] = useState<string>('기본순')
+  const [sortMode, setSortMode] = useState<'default' | 'name'>('default')
   const [draftCategory, setDraftCategory] = useState(selectedCategory)
   const cardRefs = useRef(new Map<string, HTMLElement>())
 
@@ -129,6 +129,10 @@ export function MapDiscoveryWorkspace(props: MapDiscoveryWorkspaceProps) {
     const nearbyIds = new Set(nearby.map((place) => place.id))
     return [...nearby, ...searchablePlaces.filter((place) => !nearbyIds.has(place.id))]
   }, [nearbyPlaceIds, searchablePlaces, selectedPlaceId])
+  const displayedPlaces = useMemo(() => sortMode === 'name'
+    ? [...orderedPlaces].sort((left, right) => toPlaceViewModel(left, locale).title.localeCompare(toPlaceViewModel(right, locale).title, locale === 'ko' ? 'ko-KR' : 'en'))
+    : orderedPlaces, [locale, orderedPlaces, sortMode])
+  const hasLocaleFallback = useMemo(() => searchablePlaces.some((place) => toPlaceViewModel(place, locale).fallbackUsed), [locale, searchablePlaces])
 
   const selectPlace = (place: Place) => {
     onGuideStateChange({ selectedPlaceId: place.id })
@@ -198,6 +202,7 @@ export function MapDiscoveryWorkspace(props: MapDiscoveryWorkspaceProps) {
     </div>
 
     {areaSelectionEnabled ? <p className="guide-area-context" aria-live="polite"><span>{t('guide.area')}</span><strong>{selectedArea === 'riverside' ? t('guide.area.riverside') : t('guide.area.seoul-central')}</strong></p> : null}
+    {hasLocaleFallback ? <StatusNotice state="UNAVAILABLE" title={t('locale.fallbackTitle')}>{t('locale.fallbackDescription')}</StatusNotice> : null}
     <div className="guide-category-row" data-testid="guide-category-row" aria-label={t('guide.filters')}>
       {categoryOrder.map((category) => <Chip key={category} selected={selectedCategory === category} onClick={() => onSelectCategory(category)}>{categoryLabel(category, t)}</Chip>)}
     </div>
@@ -220,13 +225,13 @@ export function MapDiscoveryWorkspace(props: MapDiscoveryWorkspaceProps) {
 
     {searchablePlaces.length === 0 ? <section className="guide-empty-recovery"><EmptyState title={t('guide.noMatches')} description={t('guide.noMatchesDescription')} /><Button variant="secondary" onClick={resetSearch}>{t('guide.reset')}</Button></section> : <section className="guide-discovery-tray" data-testid="guide-discovery-tray" aria-label={t('guide.trayLabel')}>
       <header><span className="guide-discovery-tray__handle" aria-hidden="true" /><p aria-live="polite">{resultCountLabel}</p><Button data-testid="guide-list-toggle" variant="ghost" size="sm" aria-expanded={sheetMode === 'full'} onClick={() => onGuideStateChange({ sheet: 'full' })}><Icon name="list" />{t('guide.openList')}</Button></header>
-        <div className="guide-discovery-tray__rail">{orderedPlaces.map((place) => previewCard(place))}</div>
+        <div className="guide-discovery-tray__rail">{displayedPlaces.map((place) => previewCard(place))}</div>
     </section>}
 
     <BottomSheet isOpen={!suppressOverlays && sheetMode === 'full'} onClose={() => onGuideStateChange({ sheet: 'peek' })} title={t('guide.listTitle')} closeLabel={t('common.close')}>
       <div className="guide-full-list" data-testid="guide-sheet">
-        <header><p>{resultCountLabel}</p><div className="guide-full-list__actions"><Button variant="secondary" size="sm" aria-haspopup="dialog" onClick={() => setIsSortOpen(true)}>정렬 · {sortLabel}</Button><Button variant="secondary" size="sm" onClick={() => onGuideStateChange({ sheet: 'peek' })}>{t('guide.showMap')}</Button></div></header>
-        {orderedPlaces.map((place) => previewCard(place, true))}
+        <header><p>{resultCountLabel}</p><div className="guide-full-list__actions"><Button variant="secondary" size="sm" aria-haspopup="dialog" onClick={() => setIsSortOpen(true)}>정렬 · {sortMode === 'name' ? '이름순' : '기본순'}</Button><Button variant="secondary" size="sm" onClick={() => onGuideStateChange({ sheet: 'peek' })}>{t('guide.showMap')}</Button></div></header>
+        {displayedPlaces.map((place) => previewCard(place, true))}
       </div>
     </BottomSheet>
 
@@ -239,7 +244,7 @@ export function MapDiscoveryWorkspace(props: MapDiscoveryWorkspaceProps) {
 
     <BottomSheet isOpen={!suppressOverlays && isSortOpen} onClose={() => setIsSortOpen(false)} title="정렬" closeLabel={t('common.close')}>
       <div className="guide-sort-sheet" role="listbox" aria-label="정렬 옵션">
-        {[{ label: '기본순', description: '현재 공개된 순서' }, { label: '이름순', description: '가나다순' }].map(({ label, description }) => <button key={label} type="button" role="option" aria-selected={sortLabel === label} onClick={() => { setSortLabel(label); setIsSortOpen(false) }}><span><strong>{label}</strong><small>{description}</small></span>{sortLabel === label ? <b aria-hidden="true">✓</b> : null}</button>)}
+        {[{ mode: 'default' as const, label: '기본순', description: '현재 공개된 순서' }, { mode: 'name' as const, label: '이름순', description: '가나다순' }].map(({ mode, label, description }) => <button key={mode} type="button" role="option" aria-selected={sortMode === mode} onClick={() => { setSortMode(mode); setIsSortOpen(false) }}><span><strong>{label}</strong><small>{description}</small></span>{sortMode === mode ? <b aria-hidden="true">✓</b> : null}</button>)}
         <p>실제 거리·인기 정렬은 연결된 데이터가 제공될 때만 표시됩니다.</p>
       </div>
     </BottomSheet>

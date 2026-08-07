@@ -40,7 +40,7 @@ export function AppRouter() {
   const pathname = path.split('?')[0] ?? '/'
 
   if (pathname === '/guide') {
-    return <GuidePage />
+    return <GuidePage key={path} />
   }
   if (pathname.startsWith('/place/')) {
     const placeId = decodeRouteId(pathname.slice('/place/'.length))
@@ -49,21 +49,21 @@ export function AppRouter() {
     return placeId ? guideBackground ? <><GuidePage locationOverride={guideBackground} /><PlacePage key={placeId} placeId={placeId} presentation="modal" /></> : <PlacePage key={placeId} placeId={placeId} /> : <RouteStatePage routeName="Unknown place" />
   }
   if (pathname === '/discover') {
-    return <DiscoverPage />
+    return <DiscoverPage key={path} />
   }
   if (pathname.startsWith('/story/')) {
     const storyId = decodeRouteId(pathname.slice('/story/'.length))
     return storyId ? <StoryPage key={storyId} storyId={storyId} /> : <RouteStatePage routeName="Unknown Story" />
   }
   if (pathname === '/live') {
-    return <LivePage />
+    return <LivePage key={path} />
   }
   if (pathname.startsWith('/live/')) {
     const sessionId = decodeRouteId(pathname.slice('/live/'.length))
     return sessionId ? <LiveDetailPage key={sessionId} sessionId={sessionId} /> : <RouteStatePage routeName="Unknown session" />
   }
   if (pathname === '/search') {
-    return <SearchPage />
+    return <SearchPage key={path} />
   }
   if (pathname === '/saved') {
     return <SavedPage />
